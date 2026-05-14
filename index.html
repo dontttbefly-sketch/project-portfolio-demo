@@ -1,0 +1,1315 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080a12">
+  <meta
+    name="description"
+    content="空杯的独立开发作品集，收录星图目标管理、真实宇宙 3D 探索、霓虹破壁、Shopify 主题和自动化 skill。"
+  >
+  <title>空杯 · 独立开发作品集</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #080a12;
+      --bg-soft: #10131f;
+      --panel: rgba(18, 23, 38, 0.78);
+      --panel-strong: rgba(25, 31, 48, 0.92);
+      --line: rgba(255, 255, 255, 0.12);
+      --line-strong: rgba(255, 255, 255, 0.22);
+      --text: #f7fbff;
+      --muted: #b4c0d4;
+      --subtle: #7e8aa2;
+      --cyan: #67e8f9;
+      --green: #7dd3a8;
+      --violet: #b49cff;
+      --amber: #ffd166;
+      --rose: #fb7185;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+      --radius: 8px;
+      --max: 1180px;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--bg);
+    }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 16%, rgba(103, 232, 249, 0.16), transparent 26%),
+        radial-gradient(circle at 88% 8%, rgba(251, 113, 133, 0.13), transparent 22%),
+        radial-gradient(circle at 58% 84%, rgba(125, 211, 168, 0.12), transparent 28%),
+        linear-gradient(135deg, #080a12 0%, #111020 45%, #0b1017 100%);
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .starfield {
+      position: fixed;
+      inset: 0;
+      z-index: -3;
+      width: 100%;
+      height: 100%;
+      opacity: 0.78;
+    }
+
+    .page-glow {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255, 255, 255, 0.026) 1px, transparent 1px);
+      background-size: 88px 88px;
+      mask-image: radial-gradient(circle at 50% 28%, black, transparent 72%);
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(8, 10, 18, 0.78);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+      width: min(var(--max), calc(100% - 36px));
+      min-height: 68px;
+      margin: 0 auto;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .brand-mark {
+      position: relative;
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(103, 232, 249, 0.55);
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 58% 42%, rgba(255, 209, 102, 0.95) 0 3px, transparent 4px),
+        radial-gradient(circle, rgba(103, 232, 249, 0.14), rgba(180, 156, 255, 0.08));
+      box-shadow: 0 0 30px rgba(103, 232, 249, 0.25);
+    }
+
+    .brand-mark::before,
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      inset: 7px 2px;
+      border: 1px solid rgba(125, 211, 168, 0.55);
+      border-radius: 50%;
+      transform: rotate(-22deg);
+    }
+
+    .brand-mark::after {
+      inset: 12px 5px;
+      border-color: rgba(251, 113, 133, 0.4);
+      transform: rotate(32deg);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .nav-links a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 0 12px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 14px;
+      transition: color 180ms ease, border-color 180ms ease, background 180ms ease;
+    }
+
+    .nav-links a:hover,
+    .nav-links a:focus-visible {
+      color: var(--text);
+      border-color: var(--line);
+      background: rgba(255, 255, 255, 0.06);
+      outline: none;
+    }
+
+    main {
+      width: min(var(--max), calc(100% - 36px));
+      margin: 0 auto;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.72fr);
+      gap: 40px;
+      align-items: center;
+      min-height: calc(100vh - 68px);
+      padding: 64px 0 44px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 34px;
+      padding: 0 14px;
+      border: 1px solid rgba(103, 232, 249, 0.22);
+      border-radius: 999px;
+      color: #d9fbff;
+      background: rgba(103, 232, 249, 0.08);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 0 rgba(125, 211, 168, 0.55);
+      animation: pulse 2.4s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(125, 211, 168, 0.5); }
+      70% { box-shadow: 0 0 0 12px rgba(125, 211, 168, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(125, 211, 168, 0); }
+    }
+
+    h1 {
+      max-width: 830px;
+      margin: 22px 0 18px;
+      font-size: 64px;
+      line-height: 1.04;
+      letter-spacing: 0;
+    }
+
+    .gradient-text {
+      background: linear-gradient(100deg, #f7fbff 0%, #67e8f9 38%, #ffd166 68%, #fb7185 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .lead {
+      max-width: 760px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 19px;
+      line-height: 1.85;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 0 18px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.06);
+      font-weight: 800;
+      transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
+    }
+
+    .button:hover,
+    .button:focus-visible {
+      transform: translateY(-2px);
+      border-color: rgba(103, 232, 249, 0.54);
+      background: rgba(103, 232, 249, 0.12);
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.25);
+      outline: none;
+    }
+
+    .button.primary {
+      border-color: rgba(103, 232, 249, 0.42);
+      color: #061019;
+      background: linear-gradient(135deg, #67e8f9, #7dd3a8);
+      box-shadow: 0 16px 46px rgba(103, 232, 249, 0.18);
+    }
+
+    .hero-panel {
+      position: relative;
+      min-height: 520px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
+        rgba(8, 10, 18, 0.48);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-panel::before {
+      content: "";
+      position: absolute;
+      inset: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      opacity: 0.86;
+    }
+
+    .orbit {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      border: 1px solid rgba(103, 232, 249, 0.18);
+      border-radius: 50%;
+      transform: translate(-50%, -50%) rotate(var(--tilt));
+      animation: orbit 18s linear infinite;
+    }
+
+    .orbit.one {
+      width: 76%;
+      height: 32%;
+      --tilt: -18deg;
+      animation-duration: 22s;
+    }
+
+    .orbit.two {
+      width: 64%;
+      height: 64%;
+      --tilt: 24deg;
+      border-color: rgba(255, 209, 102, 0.17);
+      animation-duration: 28s;
+      animation-direction: reverse;
+    }
+
+    .orbit.three {
+      width: 92%;
+      height: 52%;
+      --tilt: 56deg;
+      border-color: rgba(251, 113, 133, 0.15);
+      animation-duration: 34s;
+    }
+
+    @keyframes orbit {
+      from { transform: translate(-50%, -50%) rotate(var(--tilt)); }
+      to { transform: translate(-50%, -50%) rotate(calc(var(--tilt) + 360deg)); }
+    }
+
+    .planet {
+      position: absolute;
+      border-radius: 50%;
+      box-shadow: 0 0 34px currentColor;
+    }
+
+    .planet.main {
+      left: 50%;
+      top: 50%;
+      width: 112px;
+      height: 112px;
+      color: rgba(103, 232, 249, 0.5);
+      background:
+        radial-gradient(circle at 34% 28%, #ffffff, #67e8f9 22%, #2563eb 56%, #0f172a 100%);
+      transform: translate(-50%, -50%);
+    }
+
+    .planet.green {
+      left: 22%;
+      top: 24%;
+      width: 18px;
+      height: 18px;
+      color: rgba(125, 211, 168, 0.7);
+      background: var(--green);
+    }
+
+    .planet.amber {
+      right: 18%;
+      top: 33%;
+      width: 14px;
+      height: 14px;
+      color: rgba(255, 209, 102, 0.7);
+      background: var(--amber);
+    }
+
+    .planet.rose {
+      left: 32%;
+      bottom: 22%;
+      width: 12px;
+      height: 12px;
+      color: rgba(251, 113, 133, 0.7);
+      background: var(--rose);
+    }
+
+    .mission-card {
+      position: absolute;
+      left: 24px;
+      right: 24px;
+      bottom: 24px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(9, 12, 22, 0.72);
+      backdrop-filter: blur(18px);
+    }
+
+    .mission-card h2 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+
+    .mission-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin: 18px 0 0;
+    }
+
+    .stat {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.045);
+    }
+
+    .stat strong {
+      display: block;
+      color: var(--text);
+      font-size: 23px;
+      line-height: 1;
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 8px;
+      color: var(--subtle);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .section {
+      padding: 70px 0;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .section-kicker {
+      margin: 0 0 10px;
+      color: var(--green);
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 36px;
+      line-height: 1.18;
+      letter-spacing: 0;
+    }
+
+    .section-copy {
+      max-width: 460px;
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .filter {
+      min-height: 38px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 800;
+      transition: background 180ms ease, color 180ms ease, border-color 180ms ease;
+    }
+
+    .filter:hover,
+    .filter:focus-visible,
+    .filter.active {
+      color: var(--text);
+      border-color: rgba(103, 232, 249, 0.45);
+      background: rgba(103, 232, 249, 0.12);
+      outline: none;
+    }
+
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .project-card {
+      display: flex;
+      flex-direction: column;
+      min-height: 560px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--panel);
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.22);
+      transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+    }
+
+    .project-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255, 255, 255, 0.24);
+      background: var(--panel-strong);
+    }
+
+    .project-visual {
+      position: relative;
+      min-height: 178px;
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(135deg, rgba(103, 232, 249, 0.12), rgba(251, 113, 133, 0.1));
+    }
+
+    .visual-orbit,
+    .visual-lines,
+    .visual-blocks,
+    .visual-shop,
+    .visual-doc,
+    .visual-archive {
+      position: absolute;
+      inset: 0;
+    }
+
+    .visual-orbit::before,
+    .visual-orbit::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      border-radius: 50%;
+      transform: translate(-50%, -50%) rotate(-18deg);
+    }
+
+    .visual-orbit::before {
+      width: 76%;
+      height: 34%;
+    }
+
+    .visual-orbit::after {
+      width: 48%;
+      height: 68%;
+      border-color: rgba(125, 211, 168, 0.34);
+      transform: translate(-50%, -50%) rotate(28deg);
+    }
+
+    .visual-center {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 38% 28%, #fff, var(--cyan), #312e81);
+      box-shadow: 0 0 40px rgba(103, 232, 249, 0.5);
+      transform: translate(-50%, -50%);
+    }
+
+    .visual-lines {
+      background:
+        linear-gradient(30deg, transparent 20%, rgba(103, 232, 249, 0.22) 21%, transparent 22%),
+        linear-gradient(150deg, transparent 35%, rgba(255, 209, 102, 0.2) 36%, transparent 37%),
+        radial-gradient(circle at 26% 38%, rgba(103, 232, 249, 0.7) 0 3px, transparent 4px),
+        radial-gradient(circle at 62% 48%, rgba(251, 113, 133, 0.7) 0 3px, transparent 4px),
+        radial-gradient(circle at 78% 30%, rgba(125, 211, 168, 0.75) 0 3px, transparent 4px);
+    }
+
+    .visual-blocks {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 7px;
+      padding: 26px;
+      align-content: center;
+      background: radial-gradient(circle at 50% 80%, rgba(251, 113, 133, 0.2), transparent 42%);
+    }
+
+    .visual-blocks span {
+      min-height: 20px;
+      border-radius: 3px;
+      background: linear-gradient(135deg, rgba(103, 232, 249, 0.8), rgba(180, 156, 255, 0.58));
+      box-shadow: 0 0 18px rgba(103, 232, 249, 0.18);
+    }
+
+    .visual-blocks span:nth-child(3n) {
+      background: linear-gradient(135deg, rgba(255, 209, 102, 0.85), rgba(251, 113, 133, 0.62));
+    }
+
+    .visual-blocks span:nth-child(5n) {
+      background: linear-gradient(135deg, rgba(125, 211, 168, 0.82), rgba(103, 232, 249, 0.55));
+    }
+
+    .visual-shop {
+      padding: 24px;
+      background:
+        linear-gradient(135deg, rgba(244, 239, 230, 0.14), rgba(107, 74, 56, 0.2)),
+        radial-gradient(circle at 78% 22%, rgba(255, 209, 102, 0.24), transparent 30%);
+    }
+
+    .visual-shop::before {
+      content: "";
+      display: block;
+      height: 58px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .visual-shop::after {
+      content: "";
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      height: 72px;
+      margin-top: 14px;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.16) 0 30%, transparent 30% 35%, rgba(255, 255, 255, 0.1) 35% 65%, transparent 65% 70%, rgba(255, 255, 255, 0.14) 70% 100%);
+      border-radius: 6px;
+    }
+
+    .visual-doc {
+      padding: 26px;
+      background: linear-gradient(135deg, rgba(125, 211, 168, 0.16), rgba(103, 232, 249, 0.08));
+    }
+
+    .visual-doc::before,
+    .visual-doc::after {
+      content: "";
+      display: block;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .visual-doc::before {
+      width: 62%;
+      height: 22px;
+      margin-bottom: 16px;
+    }
+
+    .visual-doc::after {
+      height: 92px;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.12) 0 12px, transparent 12px 23px),
+        linear-gradient(90deg, rgba(255, 209, 102, 0.32) 0 4px, transparent 4px);
+      background-size: 100% 23px, 100% 100%;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .visual-archive {
+      padding: 22px;
+      background:
+        radial-gradient(circle at 20% 22%, rgba(103, 232, 249, 0.22), transparent 25%),
+        radial-gradient(circle at 80% 62%, rgba(251, 113, 133, 0.18), transparent 28%);
+    }
+
+    .visual-archive::before {
+      content: "";
+      display: block;
+      height: 132px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 6px;
+      background:
+        linear-gradient(90deg, rgba(103, 232, 249, 0.15) 0 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255, 255, 255, 0.09) 0 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+
+    .project-body {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      padding: 22px;
+    }
+
+    .project-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 0 9px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      color: #d7e3f8;
+      background: rgba(255, 255, 255, 0.055);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .project-card h3 {
+      margin: 0 0 12px;
+      font-size: 23px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .project-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .project-points {
+      display: grid;
+      gap: 9px;
+      margin: 18px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .project-points li {
+      position: relative;
+      padding-left: 18px;
+      color: #d5def0;
+      line-height: 1.55;
+      font-size: 14px;
+    }
+
+    .project-points li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 9px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 12px rgba(103, 232, 249, 0.55);
+    }
+
+    .card-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: auto;
+      padding-top: 22px;
+    }
+
+    .card-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 38px;
+      padding: 0 13px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.055);
+      font-size: 14px;
+      font-weight: 900;
+      transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
+    }
+
+    .card-link:hover,
+    .card-link:focus-visible {
+      transform: translateY(-1px);
+      border-color: rgba(103, 232, 249, 0.45);
+      background: rgba(103, 232, 249, 0.11);
+      outline: none;
+    }
+
+    .card-link.live {
+      color: #061019;
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--cyan), var(--green));
+    }
+
+    .direction-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .direction-card {
+      min-height: 180px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.055);
+    }
+
+    .direction-card strong {
+      display: block;
+      margin-bottom: 12px;
+      font-size: 18px;
+    }
+
+    .direction-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .stack span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 38px;
+      padding: 0 14px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      color: #eef6ff;
+      background: rgba(255, 255, 255, 0.06);
+      font-weight: 850;
+    }
+
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      width: min(var(--max), calc(100% - 36px));
+      margin: 0 auto;
+      padding: 34px 0 54px;
+      color: var(--subtle);
+      border-top: 1px solid var(--line);
+    }
+
+    .footer a {
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    @media (max-width: 1020px) {
+      .hero {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+
+      .hero-panel {
+        min-height: 420px;
+      }
+
+      .project-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .direction-grid,
+      .stats-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .nav {
+        width: min(var(--max), calc(100% - 24px));
+        min-height: 62px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      main {
+        width: min(var(--max), calc(100% - 24px));
+      }
+
+      .footer {
+        width: min(var(--max), calc(100% - 24px));
+      }
+
+      .hero {
+        padding: 46px 0 30px;
+      }
+
+      h1 {
+        font-size: 42px;
+        line-height: 1.08;
+      }
+
+      .lead {
+        font-size: 17px;
+        line-height: 1.76;
+      }
+
+      .hero-panel {
+        min-height: 390px;
+      }
+
+      .mission-card {
+        left: 14px;
+        right: 14px;
+        bottom: 14px;
+      }
+
+      .section {
+        padding: 48px 0;
+      }
+
+      .section-header {
+        display: block;
+      }
+
+      .section-copy {
+        margin-top: 12px;
+      }
+
+      .section-title {
+        font-size: 30px;
+      }
+
+      .project-grid,
+      .direction-grid,
+      .stats-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .project-card {
+        min-height: auto;
+      }
+
+      .footer {
+        display: block;
+      }
+
+      .footer p {
+        margin: 0 0 14px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas class="starfield" id="starfield" aria-hidden="true"></canvas>
+  <div class="page-glow" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <nav class="nav" aria-label="主导航">
+      <a class="brand" href="#">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>空杯作品集</span>
+      </a>
+      <div class="nav-links">
+        <a href="#projects">精选项目</a>
+        <a href="#directions">创作方向</a>
+        <a href="#stack">技术栈</a>
+        <a href="https://github.com/dontttbefly-sketch" target="_blank" rel="noreferrer">GitHub</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div>
+        <div class="eyebrow"><span class="pulse" aria-hidden="true"></span>独立开发 · 创意前端 · 游戏化工具</div>
+        <h1 id="hero-title">把零散想法，做成能被打开的<span class="gradient-text">小宇宙</span></h1>
+        <p class="lead">
+          我是空杯，正在把个人成长工具、3D 可视化、游戏原型、Shopify 主题和自动化 skill
+          整理成一套可访问的作品集。这里收录的不只是代码，也包括产品表达、交互体验和持续迭代的痕迹。
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="#projects">查看精选项目</a>
+          <a class="button" href="https://github.com/dontttbefly-sketch/project-portfolio-demo" target="_blank" rel="noreferrer">打开仓库</a>
+        </div>
+        <div class="stats-strip" aria-label="作品集概览">
+          <div class="stat"><strong>6</strong><span>精选项目入口</span></div>
+          <div class="stat"><strong>4</strong><span>可直接访问的静态演示</span></div>
+          <div class="stat"><strong>8+</strong><span>主要技术栈</span></div>
+          <div class="stat"><strong>1</strong><span>持续更新的作品星图</span></div>
+        </div>
+      </div>
+
+      <aside class="hero-panel" aria-label="星图概念卡片">
+        <span class="orbit one" aria-hidden="true"></span>
+        <span class="orbit two" aria-hidden="true"></span>
+        <span class="orbit three" aria-hidden="true"></span>
+        <span class="planet main" aria-hidden="true"></span>
+        <span class="planet green" aria-hidden="true"></span>
+        <span class="planet amber" aria-hidden="true"></span>
+        <span class="planet rose" aria-hidden="true"></span>
+        <div class="mission-card">
+          <h2>当前航线</h2>
+          <p>用可运行的作品验证想法：目标工具负责长期推进，交互可视化负责解释复杂事物，游戏原型负责探索反馈和循环，自动化 skill 负责让流程更省力。</p>
+        </div>
+      </aside>
+    </section>
+
+    <section class="section" id="projects" aria-labelledby="projects-title">
+      <div class="section-header">
+        <div>
+          <p class="section-kicker">Featured Projects</p>
+          <h2 class="section-title" id="projects-title">精选项目</h2>
+        </div>
+        <p class="section-copy">
+          这些项目覆盖成长工具、真实数据可视化、小游戏、商业主题和自动化工作流。能静态访问的项目已提供在线预览。
+        </p>
+      </div>
+
+      <div class="filters" role="list" aria-label="项目分类筛选">
+        <button class="filter active" type="button" data-filter="all">全部</button>
+        <button class="filter" type="button" data-filter="growth">成长工具</button>
+        <button class="filter" type="button" data-filter="visual">交互可视化</button>
+        <button class="filter" type="button" data-filter="game">游戏原型</button>
+        <button class="filter" type="button" data-filter="commerce">电商主题</button>
+        <button class="filter" type="button" data-filter="automation">自动化 skill</button>
+      </div>
+
+      <div class="project-grid">
+        <article class="project-card" data-category="growth visual">
+          <div class="project-visual">
+            <div class="visual-orbit" aria-hidden="true"></div>
+            <div class="visual-center" aria-hidden="true"></div>
+          </div>
+          <div class="project-body">
+            <div class="project-meta">
+              <span class="tag">成长工具</span>
+              <span class="tag">React</span>
+              <span class="tag">SwiftUI</span>
+            </div>
+            <h3>星图目标管理</h3>
+            <p>以宇宙星图为创意的目标规划工具，把目标、routine、复盘和进度追踪组织成可持续点亮的成长路径。</p>
+            <ul class="project-points">
+              <li>Web/PWA、macOS、iOS 多端方向</li>
+              <li>用恒星和轨道表达长期目标与日常 routine</li>
+              <li>强调复盘、进度追踪和视觉化反馈</li>
+            </ul>
+            <div class="card-actions">
+              <a class="card-link" href="https://github.com/dontttbefly-sketch/Xingtu-Targets" target="_blank" rel="noreferrer">查看源码</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="project-card" data-category="visual">
+          <div class="project-visual">
+            <div class="visual-lines" aria-hidden="true"></div>
+          </div>
+          <div class="project-body">
+            <div class="project-meta">
+              <span class="tag">3D 可视化</span>
+              <span class="tag">Three.js</span>
+              <span class="tag">TypeScript</span>
+            </div>
+            <h3>真实宇宙 3D 探索</h3>
+            <p>沉浸式宇宙学习网页，用真实天文资料、程序化星场和图层控制解释太阳、银河系与可观测宇宙的尺度关系。</p>
+            <ul class="project-points">
+              <li>全屏 WebGL 场景、搜索、图层和相机预设</li>
+              <li>用“实测 / 模型 / 艺术近似”标注可信边界</li>
+              <li>覆盖核心数据、坐标换算和视觉质量测试</li>
+            </ul>
+            <div class="card-actions">
+              <a class="card-link" href="https://github.com/dontttbefly-sketch/milky-way-3d-explorer" target="_blank" rel="noreferrer">查看源码</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="project-card" data-category="game">
+          <div class="project-visual">
+            <div class="visual-blocks" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+          <div class="project-body">
+            <div class="project-meta">
+              <span class="tag">游戏原型</span>
+              <span class="tag">Canvas</span>
+              <span class="tag">Web Audio</span>
+            </div>
+            <h3>霓虹破壁</h3>
+            <p>单文件 HTML 打砖块小游戏，把经典打砖块、肉鸽构筑和霓虹街机反馈结合在 12 关连续挑战里。</p>
+            <ul class="project-points">
+              <li>零依赖，打开 HTML 即可游玩</li>
+              <li>协议卡、BOSS 节点、特殊砖块和主动技能</li>
+              <li>多球、激光、重击、支援等 build 联动</li>
+            </ul>
+            <div class="card-actions">
+              <a class="card-link live" href="./打砖块/打砖块.html">在线预览</a>
+              <a class="card-link" href="https://github.com/dontttbefly-sketch/brick-breaker" target="_blank" rel="noreferrer">查看源码</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="project-card" data-category="commerce">
+          <div class="project-visual">
+            <div class="visual-shop" aria-hidden="true"></div>
+          </div>
+          <div class="project-body">
+            <div class="project-meta">
+              <span class="tag">电商主题</span>
+              <span class="tag">Shopify</span>
+              <span class="tag">HTML/CSS</span>
+            </div>
+            <h3>NEST &amp; DEN Shopify 主题</h3>
+            <p>面向北美宠物用品品牌的 Quiet Luxury 风格独立站，包含 Shopify Liquid 主题和无构建静态预览。</p>
+            <ul class="project-points">
+              <li>覆盖首页、集合页、PDP、购物车、About 和 404</li>
+              <li>围绕品牌色、字体和转化信任元素组织页面</li>
+              <li>静态预览便于先验证视觉，再迁移到 Shopify</li>
+            </ul>
+            <div class="card-actions">
+              <a class="card-link live" href="./宠物用品-电商独立站/preview/index.html">在线预览</a>
+              <a class="card-link" href="https://github.com/dontttbefly-sketch/nest-and-den-shopify-theme" target="_blank" rel="noreferrer">查看源码</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="project-card" data-category="automation growth">
+          <div class="project-visual">
+            <div class="visual-doc" aria-hidden="true"></div>
+          </div>
+          <div class="project-body">
+            <div class="project-meta">
+              <span class="tag">自动化 skill</span>
+              <span class="tag">Lark CLI</span>
+              <span class="tag">STAR 周报</span>
+            </div>
+            <h3>飞书 STAR 周报 Skill</h3>
+            <p>可复用的 Codex skill，用 lark-cli 从飞书 / Lark 群聊消息中整理个人周产出，并生成结构化 STAR 周报。</p>
+            <ul class="project-points">
+              <li>按发送人和时间窗口检索消息</li>
+              <li>保留产出链接并生成可插入文档的结构</li>
+              <li>公开仓库已脱敏，不包含真实内部资源</li>
+            </ul>
+            <div class="card-actions">
+              <a class="card-link" href="https://github.com/dontttbefly-sketch/skill-feishu-weekly-star-report" target="_blank" rel="noreferrer">查看源码</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="project-card" data-category="visual game commerce growth">
+          <div class="project-visual">
+            <div class="visual-archive" aria-hidden="true"></div>
+          </div>
+          <div class="project-body">
+            <div class="project-meta">
+              <span class="tag">作品集仓库</span>
+              <span class="tag">Web</span>
+              <span class="tag">Godot</span>
+            </div>
+            <h3>独立开发项目作品集</h3>
+            <p>整理个人技术实践和项目成果的总入口，收纳 Web 应用、3D 可视化、互动游戏、Shopify 主题和 Godot 原型。</p>
+            <ul class="project-points">
+              <li>包含个人成长工作台、回声深渊、宇宙模拟网页等目录</li>
+              <li>用于展示项目策划、前端实现和工程组织能力</li>
+              <li>这个页面就是作品集站点的首页</li>
+            </ul>
+            <div class="card-actions">
+              <a class="card-link live" href="./回声深渊/index.html">体验回声深渊</a>
+              <a class="card-link" href="https://github.com/dontttbefly-sketch/project-portfolio-demo" target="_blank" rel="noreferrer">查看源码</a>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="directions" aria-labelledby="directions-title">
+      <div class="section-header">
+        <div>
+          <p class="section-kicker">Directions</p>
+          <h2 class="section-title" id="directions-title">创作方向</h2>
+        </div>
+        <p class="section-copy">这些方向会持续汇入作品集，让它从项目清单慢慢长成一个更完整的个人开发星图。</p>
+      </div>
+      <div class="direction-grid">
+        <div class="direction-card">
+          <strong>成长工具</strong>
+          <p>把目标、任务、routine、复盘和周报变成更有结构的长期系统。</p>
+        </div>
+        <div class="direction-card">
+          <strong>交互可视化</strong>
+          <p>用 3D、图层、搜索和尺度解释，把复杂事物变成可探索的界面。</p>
+        </div>
+        <div class="direction-card">
+          <strong>游戏化体验</strong>
+          <p>关注核心循环、反馈手感、关卡节奏和能形成策略的构筑选择。</p>
+        </div>
+        <div class="direction-card">
+          <strong>独立站与自动化</strong>
+          <p>一边练习商业页面表达，一边把重复工作沉淀成可复用的工具。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="stack" aria-labelledby="stack-title">
+      <div class="section-header">
+        <div>
+          <p class="section-kicker">Stack</p>
+          <h2 class="section-title" id="stack-title">技术栈与工具</h2>
+        </div>
+        <p class="section-copy">当前作品主要围绕现代前端、WebGL、原生小游戏、SwiftUI、Godot 和 Lark 自动化展开。</p>
+      </div>
+      <div class="stack" aria-label="技术栈">
+        <span>React</span>
+        <span>TypeScript</span>
+        <span>Vite</span>
+        <span>Three.js</span>
+        <span>Canvas</span>
+        <span>Web Audio API</span>
+        <span>SwiftUI</span>
+        <span>Godot</span>
+        <span>GDScript</span>
+        <span>Shopify Liquid</span>
+        <span>HTML / CSS / JS</span>
+        <span>Lark CLI</span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>© 空杯 · 持续更新中的独立开发作品集</p>
+    <a href="https://github.com/dontttbefly-sketch" target="_blank" rel="noreferrer">GitHub: dontttbefly-sketch</a>
+  </footer>
+
+  <script>
+    const canvas = document.getElementById("starfield");
+    const ctx = canvas.getContext("2d");
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let width = 0;
+    let height = 0;
+    let stars = [];
+
+    function resize() {
+      const scale = Math.min(window.devicePixelRatio || 1, 2);
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = Math.floor(width * scale);
+      canvas.height = Math.floor(height * scale);
+      canvas.style.width = width + "px";
+      canvas.style.height = height + "px";
+      ctx.setTransform(scale, 0, 0, scale, 0, 0);
+      createStars();
+    }
+
+    function createStars() {
+      const count = Math.min(180, Math.max(80, Math.floor((width * height) / 11000)));
+      stars = Array.from({ length: count }, (_, index) => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        r: Math.random() * 1.45 + 0.25,
+        a: Math.random() * 0.7 + 0.2,
+        speed: Math.random() * 0.18 + 0.04,
+        hue: index % 7 === 0 ? 44 : index % 5 === 0 ? 160 : 188
+      }));
+    }
+
+    function draw(time = 0) {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = "rgba(8, 10, 18, 0.5)";
+      ctx.fillRect(0, 0, width, height);
+
+      for (const star of stars) {
+        const shimmer = reduceMotion ? 0 : Math.sin(time * 0.001 * star.speed + star.x) * 0.24;
+        ctx.beginPath();
+        ctx.fillStyle = `hsla(${star.hue}, 92%, 74%, ${Math.max(0.1, star.a + shimmer)})`;
+        ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.lineWidth = 1;
+      for (let i = 0; i < stars.length; i += 9) {
+        const a = stars[i];
+        const b = stars[(i + 17) % stars.length];
+        const distance = Math.hypot(a.x - b.x, a.y - b.y);
+        if (distance < 210) {
+          ctx.strokeStyle = `rgba(103, 232, 249, ${0.12 * (1 - distance / 210)})`;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+
+      if (!reduceMotion) {
+        requestAnimationFrame(draw);
+      }
+    }
+
+    const filters = Array.from(document.querySelectorAll(".filter"));
+    const cards = Array.from(document.querySelectorAll(".project-card"));
+
+    filters.forEach((button) => {
+      button.addEventListener("click", () => {
+        const target = button.dataset.filter;
+        filters.forEach((item) => item.classList.toggle("active", item === button));
+        cards.forEach((card) => {
+          const visible = target === "all" || card.dataset.category.split(" ").includes(target);
+          card.style.display = visible ? "" : "none";
+        });
+      });
+    });
+
+    window.addEventListener("resize", resize, { passive: true });
+    resize();
+    draw();
+  </script>
+</body>
+</html>
