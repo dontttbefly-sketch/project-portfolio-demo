@@ -1,0 +1,17 @@
+{
+  "sections": {
+    "banner": {
+      "type": "collection-banner",
+      "settings": {
+        "eyebrow": "The Daily",
+        "heading": "For Cats",
+        "body": "Beds, bowls, towers, and toys made of considered materials — for the quietest member of the household."
+      }
+    },
+    "main": {
+      "type": "main-collection",
+      "settings": {}
+    }
+  },
+  "order": ["banner", "main"]
+}

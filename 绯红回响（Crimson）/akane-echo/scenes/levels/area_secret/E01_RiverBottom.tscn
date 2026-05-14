@@ -1,0 +1,41 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/RoomBase.gd" id="1_base"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/RoomDoor.tscn" id="2_door"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/SpawnPoint.tscn" id="3_spawn"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/AreaMonologueTrigger.tscn" id="4_amt"]
+
+[node name="E01_RiverBottom" type="Node3D"]
+script = ExtResource("1_base")
+room_id = "E-01"
+room_width = 16.0
+room_depth = 14.0
+door_north = true
+door_south = true
+has_rain = false
+floor_color = Color(0.30, 0.32, 0.42, 1)
+wall_color = Color(0.05, 0.05, 0.10, 1)
+
+[node name="DoorToHub" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 7.0)
+target_scene = "res://scenes/levels/hub/Hub.tscn"
+target_spawn_id = "default"
+
+[node name="DoorToE02" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -7.0)
+target_scene = "res://scenes/levels/area_secret/E02_BoneCorridor.tscn"
+target_spawn_id = "from_E01"
+
+[node name="SpawnFromHub" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
+spawn_id = "from_hub"
+
+[node name="SpawnFromE02" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)
+spawn_id = "from_E02"
+
+[node name="EntryMonologue" parent="." instance=ExtResource("4_amt")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+trigger_id = "enter_secret"
+monologue_text = "「这里没有雨。也没有钟声。\n这是一切开始之前的地方。」"
+hold_seconds = 5.0

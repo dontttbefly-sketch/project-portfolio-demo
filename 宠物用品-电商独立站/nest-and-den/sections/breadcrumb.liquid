@@ -1,0 +1,19 @@
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="{{ routes.root_url }}">Home</a>
+  <span class="breadcrumb__sep">/</span>
+  {%- if template contains 'product' -%}
+    {%- if collection -%}
+      <a href="{{ collection.url }}">{{ collection.title }}</a>
+      <span class="breadcrumb__sep">/</span>
+    {%- endif -%}
+    <span>{{ product.title }}</span>
+  {%- elsif template contains 'collection' -%}
+    <span>{{ collection.title }}</span>
+  {%- else -%}
+    <span>{{ page_title }}</span>
+  {%- endif -%}
+</nav>
+
+{% schema %}
+{ "name": "Breadcrumb", "settings": [] }
+{% endschema %}

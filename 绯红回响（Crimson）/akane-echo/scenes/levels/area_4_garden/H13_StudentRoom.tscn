@@ -1,0 +1,46 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/RoomBase.gd" id="1_base"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/RoomDoor.tscn" id="2_door"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/SpawnPoint.tscn" id="3_spawn"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/EchoShard.tscn" id="4_shard"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/HighlightShard.tscn" id="5_hs"]
+
+[node name="H13_StudentRoom" type="Node3D"]
+script = ExtResource("1_base")
+room_id = "H-13"
+room_width = 14.0
+room_depth = 14.0
+door_north = true
+door_south = true
+has_rain = false
+floor_color = Color(0.95, 0.93, 0.90, 1)
+wall_color = Color(0.78, 0.74, 0.70, 1)
+
+[node name="DoorToH12" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 7.0)
+target_scene = "res://scenes/levels/area_4_garden/H12_EternalMirror.tscn"
+target_spawn_id = "from_H13"
+
+[node name="DoorToH14" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -7.0)
+target_scene = "res://scenes/levels/area_4_garden/H14_FlowerSwarm.tscn"
+target_spawn_id = "from_H13"
+
+[node name="SpawnFromH12" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
+spawn_id = "from_H12"
+
+[node name="SpawnFromH14" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)
+spawn_id = "from_H14"
+
+[node name="Shard1" parent="." instance=ExtResource("4_shard")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+shard_id = "H13_truth_shard"
+fragment_text = "她不是被遗忘的人。是不肯被记起的那个。"
+
+[node name="HighlightShard" parent="." instance=ExtResource("5_hs")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, -3)
+shard_id = "highlight_garden"
+fragment_text = "白栀花的香味，是她想留下的最后一件事。"

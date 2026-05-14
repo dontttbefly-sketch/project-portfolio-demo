@@ -1,0 +1,24 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/debug_panel.gd" id="1_dbg"]
+
+[node name="DebugPanel" type="CanvasLayer"]
+layer = 100
+script = ExtResource("1_dbg")
+
+[node name="Background" type="ColorRect" parent="."]
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 530.0
+offset_bottom = 470.0
+color = Color(0, 0, 0, 0.65)
+
+[node name="Label" type="Label" parent="."]
+offset_left = 24.0
+offset_top = 22.0
+offset_right = 520.0
+offset_bottom = 462.0
+theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_font_sizes/font_size = 14
+text = "[调试面板  F1 切换]
+等待主角..."

@@ -1,0 +1,98 @@
+[
+  {
+    "asset_id": "UI_Title_01",
+    "path": "res://assets/generated/ui/title_wangchuan_first_pass.png",
+    "batch": "first_pass_replacement",
+    "red_rule": "Only #C8102E as saturated accent."
+  },
+  {
+    "asset_id": "ENM_Generic_white_01",
+    "path": "res://assets/generated/enemies/enemy_white_first_pass.png",
+    "batch": "first_pass_replacement",
+    "red_rule": "Only #C8102E as saturated accent."
+  },
+  {
+    "asset_id": "ELT_Generic_faded_01",
+    "path": "res://assets/generated/enemies/enemy_elite_first_pass.png",
+    "batch": "first_pass_replacement",
+    "red_rule": "Only #C8102E as saturated accent."
+  },
+  {
+    "asset_id": "BOS_Generic_umbrella_01",
+    "path": "res://assets/generated/bosses/boss_faded_umbrella_first_pass.png",
+    "batch": "first_pass_replacement",
+    "red_rule": "Only #C8102E as saturated accent."
+  },
+  {
+    "asset_id": "YNG_REF_side_01",
+    "path": "res://assets/generated/characters/yong_first_pass.png",
+    "batch": "first_pass_replacement",
+    "red_rule": "Only #C8102E as saturated accent."
+  },
+  {
+    "asset_id": "PRP_EchoStele_01",
+    "path": "res://assets/generated/props/echo_stele_first_pass.png",
+    "batch": "first_pass_replacement",
+    "red_rule": "Only #C8102E as saturated accent."
+  },
+  {
+    "asset_id": "PRP_Forge_01",
+    "path": "res://assets/generated/props/crimson_forge_first_pass.png",
+    "batch": "first_pass_replacement",
+    "red_rule": "Only #C8102E as saturated accent."
+  },
+  {
+    "asset_id": "PRP_RedUmbrella_01",
+    "path": "res://assets/generated/props/red_umbrella_first_pass.png",
+    "batch": "first_pass_replacement",
+    "red_rule": "Only #C8102E as saturated accent."
+  },
+  {
+    "asset_id": "PRP_Boat_01",
+    "path": "res://assets/generated/props/ferry_boat_first_pass.png",
+    "batch": "first_pass_replacement",
+    "red_rule": "Only #C8102E as saturated accent."
+  },
+  {
+    "asset_id": "PRP_GrapplePoint_01",
+    "path": "res://assets/generated/props/grapple_point_first_pass.png",
+    "batch": "first_pass_replacement",
+    "red_rule": "Only #C8102E as saturated accent."
+  },
+  {
+    "asset_id": "PRP_SanctumPortal_01",
+    "path": "res://assets/generated/props/sanctum_portal_first_pass.png",
+    "batch": "first_pass_replacement",
+    "red_rule": "Only #C8102E as saturated accent."
+  },
+  {
+    "asset_id": "PRP_EchoTrace_01",
+    "path": "res://assets/generated/props/echo_trace_first_pass.png",
+    "batch": "first_pass_replacement",
+    "red_rule": "Only #C8102E as saturated accent."
+  },
+  {
+    "asset_id": "PRP_EchoShard_01",
+    "path": "res://assets/generated/props/echo_shard_first_pass.png",
+    "batch": "first_pass_replacement",
+    "red_rule": "Only #C8102E as saturated accent."
+  },
+  {
+    "asset_id": "ENV_Floor_01",
+    "path": "res://assets/generated/environment/floor_wet_stone_first_pass.png",
+    "batch": "first_pass_replacement",
+    "red_rule": "Only #C8102E as saturated accent."
+  },
+  {
+    "asset_id": "ENV_Wall_01",
+    "path": "res://assets/generated/environment/wall_gray_wash_first_pass.png",
+    "batch": "first_pass_replacement",
+    "red_rule": "Only #C8102E as saturated accent."
+  },
+  {
+    "asset_id": "ENV_FadedWall_01",
+    "path": "res://assets/generated/environment/faded_wall_first_pass.png",
+    "batch": "first_pass_replacement",
+    "red_rule": "Only #C8102E as saturated accent."
+  }
+]

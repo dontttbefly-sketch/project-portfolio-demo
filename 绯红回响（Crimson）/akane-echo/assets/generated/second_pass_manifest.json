@@ -1,0 +1,237 @@
+[
+  {
+    "asset_id": "AKN_ACT_idle",
+    "path": "res://assets/generated/characters/akane_actions/akane_idle_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "AKN_ACT_walk",
+    "path": "res://assets/generated/characters/akane_actions/akane_walk_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "AKN_ACT_jump",
+    "path": "res://assets/generated/characters/akane_actions/akane_jump_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "AKN_ACT_fall",
+    "path": "res://assets/generated/characters/akane_actions/akane_fall_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "AKN_ACT_land",
+    "path": "res://assets/generated/characters/akane_actions/akane_land_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "AKN_ACT_atk1",
+    "path": "res://assets/generated/characters/akane_actions/akane_atk1_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "AKN_ACT_atk2",
+    "path": "res://assets/generated/characters/akane_actions/akane_atk2_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "AKN_ACT_atk3",
+    "path": "res://assets/generated/characters/akane_actions/akane_atk3_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "AKN_ACT_charge",
+    "path": "res://assets/generated/characters/akane_actions/akane_charge_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "AKN_ACT_dash_slash",
+    "path": "res://assets/generated/characters/akane_actions/akane_dash_slash_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "AKN_ACT_shadowdash",
+    "path": "res://assets/generated/characters/akane_actions/akane_shadowdash_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "AKN_ACT_thread",
+    "path": "res://assets/generated/characters/akane_actions/akane_thread_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "AKN_ACT_parry",
+    "path": "res://assets/generated/characters/akane_actions/akane_parry_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "AKN_ACT_timecut",
+    "path": "res://assets/generated/characters/akane_actions/akane_timecut_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "AKN_ACT_echo",
+    "path": "res://assets/generated/characters/akane_actions/akane_echo_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "AKN_ACT_hit",
+    "path": "res://assets/generated/characters/akane_actions/akane_hit_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "AKN_ACT_death",
+    "path": "res://assets/generated/characters/akane_actions/akane_death_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "AKN_ACT_read",
+    "path": "res://assets/generated/characters/akane_actions/akane_read_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "ENM_wanderer",
+    "path": "res://assets/generated/enemies/enemy_wanderer_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "ENM_crying_crow",
+    "path": "res://assets/generated/enemies/enemy_crying_crow_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "ENM_umbrella_carrier",
+    "path": "res://assets/generated/enemies/enemy_umbrella_carrier_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "ENM_fisher_shadow",
+    "path": "res://assets/generated/enemies/enemy_fisher_shadow_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "ENM_page_flipper",
+    "path": "res://assets/generated/enemies/enemy_page_flipper_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "ENM_reciter",
+    "path": "res://assets/generated/enemies/enemy_reciter_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "ENM_wave_whisperer",
+    "path": "res://assets/generated/enemies/enemy_wave_whisperer_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "ENM_flower_bearer",
+    "path": "res://assets/generated/enemies/enemy_flower_bearer_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "ENM_mirror_walker",
+    "path": "res://assets/generated/enemies/enemy_mirror_walker_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "ENM_garden_guardian",
+    "path": "res://assets/generated/enemies/enemy_garden_guardian_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "ENM_ember",
+    "path": "res://assets/generated/enemies/enemy_ember_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "ENM_rusty_bell_ringer",
+    "path": "res://assets/generated/enemies/enemy_rusty_bell_ringer_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "ENM_test_dummy",
+    "path": "res://assets/generated/enemies/enemy_test_dummy_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "ELT_umbrella_breaker",
+    "path": "res://assets/generated/enemies/elite_umbrella_breaker_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "ELT_book_burner",
+    "path": "res://assets/generated/enemies/elite_book_burner_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "ELT_bell_guard",
+    "path": "res://assets/generated/enemies/elite_bell_guard_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "ELT_eternal_mirror",
+    "path": "res://assets/generated/enemies/elite_eternal_mirror_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "BOS_umbrella",
+    "path": "res://assets/generated/bosses/boss_umbrella_man_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "BOS_unwritten",
+    "path": "res://assets/generated/bosses/boss_unwritten_one_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "BOS_lighthouse",
+    "path": "res://assets/generated/bosses/boss_lighthouse_keeper_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "BOS_sword_maiden",
+    "path": "res://assets/generated/bosses/boss_sword_maiden_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "BOS_first_yong",
+    "path": "res://assets/generated/bosses/boss_first_yong_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "BOS_original_yong",
+    "path": "res://assets/generated/bosses/boss_original_yong_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "MAP_hub",
+    "path": "res://assets/generated/environment/maps/map_hub_key_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "MAP_forest",
+    "path": "res://assets/generated/environment/maps/map_forest_key_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "MAP_library",
+    "path": "res://assets/generated/environment/maps/map_library_key_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "MAP_sea",
+    "path": "res://assets/generated/environment/maps/map_sea_key_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "MAP_garden",
+    "path": "res://assets/generated/environment/maps/map_garden_key_second_pass.png",
+    "batch": "second_pass_complete"
+  },
+  {
+    "asset_id": "MAP_secret",
+    "path": "res://assets/generated/environment/maps/map_secret_key_second_pass.png",
+    "batch": "second_pass_complete"
+  }
+]

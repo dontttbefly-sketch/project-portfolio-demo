@@ -1,0 +1,26 @@
+{%- comment -%}
+  Renders a price block.
+  Accepts: product (preferred) OR price (number) + compare_at_price (number) + currency
+{%- endcomment -%}
+{%- liquid
+  if product
+    assign target_price = product.price
+    assign target_compare = product.compare_at_price
+    assign target_min = product.price_min
+    assign target_max = product.price_max
+    assign price_varies = product.price_varies
+  else
+    assign target_price = price
+    assign target_compare = compare_at_price
+  endif
+-%}
+<span class="price">
+  {%- if target_compare and target_compare > target_price -%}
+    <s class="price__compare">{{ target_compare | money }}</s>
+  {%- endif -%}
+  {%- if price_varies -%}
+    <span class="price__amount">{{ 'products.product.from' | t }} {{ target_min | money }}</span>
+  {%- else -%}
+    <span class="price__amount">{{ target_price | money }}</span>
+  {%- endif -%}
+</span>

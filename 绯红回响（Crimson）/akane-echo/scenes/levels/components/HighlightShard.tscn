@@ -1,0 +1,35 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/EchoShard.gd" id="1_shard"]
+[ext_resource type="Texture2D" path="res://assets/generated/props/echo_shard_first_pass.png" id="2_tex"]
+
+[sub_resource type="BoxShape3D" id="shape_shard"]
+size = Vector3(1.5, 2.0, 1.5)
+
+[node name="HighlightShard" type="Area3D"]
+collision_layer = 0
+collision_mask = 2
+monitoring = true
+script = ExtResource("1_shard")
+
+[node name="Sprite" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+pixel_size = 0.08
+billboard = 1
+shaded = false
+texture_filter = 0
+texture = ExtResource("2_tex")
+modulate = Color(1, 1, 1, 1)
+
+[node name="Glow" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+pixel_size = 0.18
+billboard = 1
+shaded = false
+texture_filter = 0
+texture = ExtResource("2_tex")
+modulate = Color(1, 1, 1, 0.4)
+
+[node name="Shape" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+shape = SubResource("shape_shard")

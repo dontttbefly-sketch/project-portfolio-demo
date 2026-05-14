@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#F4EFE6">
+  <title>Your Cart — Nest &amp; Den</title>
+  <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="assets/fonts.css">
+  <link rel="stylesheet" href="assets/theme.css">
+  <script>document.documentElement.classList.replace('no-js','js');</script>
+  <script src="assets/theme.js" defer></script>
+</head>
+
+<body class="template-cart">
+  <a class="skip-link" href="#MainContent">Skip to content</a>
+
+  <div class="announcement" role="region">Complimentary U.S. shipping on orders over $75 · 60-day returns</div>
+
+  <header class="site-header" data-scrolled="false">
+    <div class="container header-inner">
+      <nav class="header-nav" aria-label="Primary">
+        <a href="collection.html">Cats</a>
+        <a href="collection.html">Dogs</a>
+        <a href="collection.html">The Daily</a>
+        <a href="#">Journal</a>
+        <a href="about.html">About</a>
+      </nav>
+      <button class="header-burger" type="button" data-nav-toggle aria-label="Open menu">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.4" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round"/></svg>
+      </button>
+      <a class="header-logo" href="index.html">Nest &amp; Den</a>
+      <div class="header-utils">
+        <a href="#" aria-label="Search"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.4" fill="none"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5" stroke-linecap="round"/></svg><span class="hide-on-mobile">Search</span></a>
+        <a class="util-account" href="#" aria-label="Account"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.4" fill="none"><circle cx="12" cy="8.5" r="3.5"/><path d="M4.5 20c1.5-3.5 4.5-5.5 7.5-5.5s6 2 7.5 5.5"/></svg><span class="hide-on-mobile">Account</span></a>
+        <a href="cart.html" aria-label="Cart"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.4" fill="none"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z" stroke-linejoin="round"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke-linecap="round"/></svg><span class="hide-on-mobile">Cart</span><span class="cart-count">(2)</span></a>
+      </div>
+    </div>
+  </header>
+
+  <aside class="mobile-nav" data-open="false" aria-hidden="true">
+    <button class="mobile-nav__close" type="button" data-nav-close aria-label="Close menu">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.4" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg>
+    </button>
+    <nav>
+      <a href="collection.html">Cats</a><a href="collection.html">Dogs</a><a href="collection.html">The Daily</a><a href="#">Journal</a><a href="about.html">About</a>
+    </nav>
+  </aside>
+
+  <main id="MainContent" role="main" tabindex="-1">
+    <section class="section">
+      <div class="container" style="max-width: 980px">
+        <header style="margin-bottom: 48px">
+          <span class="eyebrow">Your Cart</span>
+          <h1 style="margin-top: 8px">2 items</h1>
+        </header>
+
+        <form>
+          <ul style="border-top:1px solid var(--linen); margin:0; padding:0; list-style:none">
+            <li style="display:grid; grid-template-columns: 120px 1fr auto; gap:24px; padding:24px 0; border-bottom:1px solid var(--linen);">
+              <a href="product.html"><img src="https://images.unsplash.com/photo-1583511655826-05700d52f4d9?auto=format&fit=crop&w=240&q=80" alt="The Daily Bed"></a>
+              <div>
+                <h4 style="margin-bottom: 8px">The Daily Bed</h4>
+                <p style="color: var(--ink-soft); font-size: 0.875rem; margin-bottom: 12px">Bone · Medium</p>
+                <div class="qty" style="width: 120px">
+                  <button type="button" data-qty-dec aria-label="Decrease">−</button>
+                  <input type="number" value="1" min="0" aria-label="Quantity">
+                  <button type="button" data-qty-inc aria-label="Increase">+</button>
+                </div>
+              </div>
+              <div style="text-align:right; font-weight:500">$148.00</div>
+            </li>
+            <li style="display:grid; grid-template-columns: 120px 1fr auto; gap:24px; padding:24px 0; border-bottom:1px solid var(--linen);">
+              <a href="product.html"><img src="https://images.unsplash.com/photo-1602522953585-ba17a47f6cdf?auto=format&fit=crop&w=240&q=80" alt="The Daily Bowl"></a>
+              <div>
+                <h4 style="margin-bottom: 8px">The Daily Bowl</h4>
+                <p style="color: var(--ink-soft); font-size: 0.875rem; margin-bottom: 12px">Cream · 8oz</p>
+                <div class="qty" style="width: 120px">
+                  <button type="button" data-qty-dec aria-label="Decrease">−</button>
+                  <input type="number" value="2" min="0" aria-label="Quantity">
+                  <button type="button" data-qty-inc aria-label="Increase">+</button>
+                </div>
+              </div>
+              <div style="text-align:right; font-weight:500">$84.00</div>
+            </li>
+          </ul>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:32px; padding-top:32px; border-top:1px solid var(--linen);">
+            <p style="font-size:0.875rem; color: var(--ink-soft); margin: 0">Shipping &amp; taxes calculated at checkout. You qualify for free U.S. shipping.</p>
+            <div style="text-align:right">
+              <span class="eyebrow" style="display:block; margin-bottom:6px">Subtotal</span>
+              <strong style="font-size:1.5rem">$232.00</strong>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:12px; margin-top:32px; flex-wrap:wrap; justify-content:flex-end">
+            <a class="btn btn--ghost" href="collection.html">Continue shopping</a>
+            <button type="submit" class="btn">Checkout</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <div class="site-footer__top">
+        <div><div class="site-footer__brand">Nest &amp; Den</div><p class="site-footer__brand-tagline">Designed for the calm of home.</p></div>
+        <div><h6>Shop</h6><ul><li><a href="collection.html">Cats</a></li><li><a href="collection.html">Dogs</a></li><li><a href="collection.html">The Daily</a></li><li><a href="#">Gift Cards</a></li></ul></div>
+        <div><h6>Help</h6><ul><li><a href="#">Shipping &amp; Returns</a></li><li><a href="#">FAQ</a></li><li><a href="#">Contact</a></li><li><a href="#">Care Guides</a></li></ul></div>
+        <div><h6>Company</h6><ul><li><a href="about.html">Our Story</a></li><li><a href="#">Press</a></li><li><a href="#">Stockists</a></li><li><a href="#">Sustainability</a></li></ul></div>
+        <div><h6>Connect</h6><ul><li><a href="#">Instagram</a></li><li><a href="#">Pinterest</a></li><li><a href="#">TikTok</a></li></ul></div>
+      </div>
+      <div class="site-footer__bottom">
+        <span>© 2026 Nest &amp; Den. All rights reserved.</span>
+        <div class="payment-icons" aria-label="Accepted payment methods">
+          <svg viewBox="0 0 60 24"><rect width="60" height="24" rx="2" fill="#fff" stroke="#DCD2BD"/><text x="30" y="15" text-anchor="middle" font-family="Helvetica" font-size="7" font-weight="700" fill="#1A1F71">VISA</text></svg>
+          <svg viewBox="0 0 60 24"><rect width="60" height="24" rx="2" fill="#fff" stroke="#DCD2BD"/><circle cx="25" cy="12" r="6.5" fill="#EB001B"/><circle cx="35" cy="12" r="6.5" fill="#F79E1B"/><path d="M30 6.8a6.5 6.5 0 0 1 0 10.4 6.5 6.5 0 0 1 0-10.4z" fill="#FF5F00"/></svg>
+          <svg viewBox="0 0 60 24"><rect width="60" height="24" rx="2" fill="#1F72CD"/><text x="30" y="15" text-anchor="middle" font-family="Helvetica" font-size="6" font-weight="700" fill="#fff">AMEX</text></svg>
+          <svg viewBox="0 0 60 24"><rect width="60" height="24" rx="2" fill="#fff" stroke="#DCD2BD"/><text x="30" y="15" text-anchor="middle" font-family="Helvetica" font-size="6" font-weight="700" fill="#003087">PayPal</text></svg>
+          <svg viewBox="0 0 60 24"><rect width="60" height="24" rx="2" fill="#000"/><text x="30" y="15" text-anchor="middle" font-family="Helvetica" font-size="6" font-weight="600" fill="#fff">Apple Pay</text></svg>
+          <svg viewBox="0 0 60 24"><rect width="60" height="24" rx="2" fill="#5A31F4"/><text x="30" y="15" text-anchor="middle" font-family="Helvetica" font-size="6" font-weight="700" fill="#fff">shop Pay</text></svg>
+          <svg viewBox="0 0 60 24"><rect width="60" height="24" rx="2" fill="#FFA8CD"/><text x="30" y="15" text-anchor="middle" font-family="Helvetica" font-size="7" font-weight="700" fill="#000">Klarna.</text></svg>
+        </div>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

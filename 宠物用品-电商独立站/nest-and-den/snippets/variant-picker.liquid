@@ -1,0 +1,47 @@
+{%- comment -%}
+  Renders variant pickers as visual swatches + size buttons.
+  Pairs with the standard Shopify product form (works with default variant_id input).
+{%- endcomment -%}
+
+{%- for option in product.options_with_values -%}
+  {%- assign opt_name = option.name | downcase -%}
+  {%- assign is_color = false -%}
+  {%- if opt_name == 'color' or opt_name == 'colour' -%}{%- assign is_color = true -%}{%- endif -%}
+
+  <div class="variant-group" data-variant-group="{{ option.position }}">
+    <div class="variant-group__head">
+      <span>{{ option.name }}</span>
+      <strong data-variant-label>{{ option.selected_value }}</strong>
+    </div>
+
+    {%- if is_color -%}
+      <div class="swatches" role="radiogroup" aria-label="{{ option.name }}">
+        {%- for value in option.values -%}
+          {%- assign vhandle = value | downcase | handle -%}
+          <button type="button"
+                  class="swatch-btn swatch--{{ vhandle }}"
+                  role="radio"
+                  aria-checked="{% if value == option.selected_value %}true{% else %}false{% endif %}"
+                  data-variant-option
+                  data-option-position="{{ option.position }}"
+                  data-option-value="{{ value | escape }}"
+                  title="{{ value | escape }}"></button>
+        {%- endfor -%}
+      </div>
+    {%- else -%}
+      <div class="size-options" role="radiogroup" aria-label="{{ option.name }}">
+        {%- for value in option.values -%}
+          <button type="button"
+                  class="size-btn"
+                  role="radio"
+                  aria-checked="{% if value == option.selected_value %}true{% else %}false{% endif %}"
+                  data-variant-option
+                  data-option-position="{{ option.position }}"
+                  data-option-value="{{ value | escape }}">
+            {{ value }}
+          </button>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+{%- endfor -%}

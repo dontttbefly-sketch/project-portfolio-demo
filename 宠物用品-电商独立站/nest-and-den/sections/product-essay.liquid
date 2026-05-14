@@ -1,0 +1,36 @@
+<section class="product-essay" data-reveal>
+  <div class="product-essay__inner">
+    <div class="product-essay__media">
+      {%- if section.settings.image != blank -%}
+        {{ section.settings.image | image_url: width: 1200 | image_tag:
+            widths: '500, 800, 1200',
+            sizes: '(min-width: 800px) 50vw, 100vw',
+            loading: 'lazy',
+            alt: section.settings.heading }}
+      {%- else -%}
+        <img src="https://images.unsplash.com/photo-1606214174585-fe31582dc6ee?auto=format&fit=crop&w=1200&q=80"
+             alt="Close-up of stitched linen and wooden detail"
+             loading="lazy">
+      {%- endif -%}
+    </div>
+    <div class="product-essay__copy">
+      <span class="eyebrow">{{ section.settings.eyebrow }}</span>
+      <h3>{{ section.settings.heading }}</h3>
+      {{ section.settings.body }}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Product essay",
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "Image" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "How it's made" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Stitched in North Carolina, washed before it ships." },
+    { "type": "richtext", "id": "body", "label": "Body",
+      "default": "<p>Each Daily Bed is cut from a single roll of flax-linen and sewn by a small workshop in High Point, North Carolina. We pre-wash every cover so the piece you receive feels as soft on day one as it will on day three hundred.</p>" }
+  ],
+  "presets": [{ "name": "Product essay" }]
+}
+{% endschema %}

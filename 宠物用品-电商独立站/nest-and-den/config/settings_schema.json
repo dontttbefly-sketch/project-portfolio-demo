@@ -1,0 +1,93 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Nest & Den",
+    "theme_version": "1.0.0",
+    "theme_author": "Nest & Den Studio",
+    "theme_documentation_url": "https://example.com",
+    "theme_support_url": "https://example.com/support"
+  },
+  {
+    "name": "Brand",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "logo",
+        "label": "Logo (optional, falls back to text)"
+      },
+      {
+        "type": "range",
+        "id": "logo_width",
+        "min": 60,
+        "max": 220,
+        "step": 10,
+        "unit": "px",
+        "label": "Logo width",
+        "default": 120
+      },
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "Favicon (32×32 PNG)"
+      }
+    ]
+  },
+  {
+    "name": "Colors",
+    "settings": [
+      { "type": "header", "content": "Surfaces" },
+      { "type": "color", "id": "bone",   "label": "Bone (background)", "default": "#F4EFE6" },
+      { "type": "color", "id": "cream",  "label": "Cream (alt surface)", "default": "#EDE5D6" },
+      { "type": "color", "id": "linen",  "label": "Linen (lines / hover)", "default": "#DCD2BD" },
+      { "type": "header", "content": "Text" },
+      { "type": "color", "id": "ink",      "label": "Ink (primary text & buttons)", "default": "#2A2724" },
+      { "type": "color", "id": "ink_soft", "label": "Ink-Soft (secondary text)", "default": "#5A554F" },
+      { "type": "header", "content": "Accents" },
+      { "type": "color", "id": "moss",   "label": "Moss (cat accent)", "default": "#3F4A3C" },
+      { "type": "color", "id": "russet", "label": "Russet (dog accent)", "default": "#9C5A3C" },
+      { "type": "color", "id": "bark",   "label": "Bark (link hover)", "default": "#6B4A38" }
+    ]
+  },
+  {
+    "name": "Typography",
+    "settings": [
+      {
+        "type": "font_picker",
+        "id": "font_display",
+        "label": "Display font",
+        "default": "cormorant_garamond_n4"
+      },
+      {
+        "type": "font_picker",
+        "id": "font_body",
+        "label": "Body font",
+        "default": "inter_n4"
+      }
+    ]
+  },
+  {
+    "name": "Announcement",
+    "settings": [
+      { "type": "checkbox", "id": "announcement_enabled", "label": "Show announcement bar", "default": true },
+      { "type": "text", "id": "announcement_text", "label": "Announcement text",
+        "default": "Complimentary U.S. shipping on orders over $75 · 60-day returns" },
+      { "type": "url", "id": "announcement_link", "label": "Announcement link" }
+    ]
+  },
+  {
+    "name": "Social",
+    "settings": [
+      { "type": "url", "id": "social_instagram", "label": "Instagram" },
+      { "type": "url", "id": "social_pinterest", "label": "Pinterest" },
+      { "type": "url", "id": "social_tiktok",    "label": "TikTok" },
+      { "type": "url", "id": "social_youtube",   "label": "YouTube" }
+    ]
+  },
+  {
+    "name": "Cart",
+    "settings": [
+      { "type": "text", "id": "cart_free_shipping_threshold",
+        "label": "Free shipping threshold (display only)", "default": "$75" }
+    ]
+  }
+]

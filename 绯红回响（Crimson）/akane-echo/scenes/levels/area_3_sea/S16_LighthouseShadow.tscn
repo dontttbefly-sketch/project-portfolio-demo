@@ -1,0 +1,34 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/RoomBase.gd" id="1_base"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/RoomDoor.tscn" id="2_door"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/SpawnPoint.tscn" id="3_spawn"]
+
+[node name="S16_LighthouseShadow" type="Node3D"]
+script = ExtResource("1_base")
+room_id = "S-16"
+room_width = 14.0
+room_depth = 12.0
+door_north = true
+door_south = true
+has_rain = false
+floor_color = Color(0.18, 0.24, 0.36, 1)
+wall_color = Color(0.04, 0.05, 0.10, 1)
+
+[node name="DoorToS15" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6.0)
+target_scene = "res://scenes/levels/area_3_sea/S15_BossPrep.tscn"
+target_spawn_id = "from_S16"
+
+[node name="DoorToS17" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6.0)
+target_scene = "res://scenes/levels/area_3_sea/S17_Lighthouse.tscn"
+target_spawn_id = "from_S16"
+
+[node name="SpawnFromS15" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4)
+spawn_id = "from_S15"
+
+[node name="SpawnFromS17" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4)
+spawn_id = "from_S17"

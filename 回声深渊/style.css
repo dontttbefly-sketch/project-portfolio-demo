@@ -1,0 +1,43 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: #050308;
+  overflow: hidden;
+  font-family: -apple-system, "Helvetica Neue", "PingFang SC", monospace;
+  color: #c8b8a0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+#game {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  width: min(95vw, calc(95vh * 384 / 216));
+  height: auto;
+  background: #000;
+  box-shadow: 0 0 40px rgba(110, 50, 140, 0.35), 0 0 4px rgba(0,0,0,0.9);
+  border: 1px solid #1a1024;
+  cursor: none;
+}
+
+#hint {
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  opacity: 0.45;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 95vw;
+  text-overflow: ellipsis;
+}

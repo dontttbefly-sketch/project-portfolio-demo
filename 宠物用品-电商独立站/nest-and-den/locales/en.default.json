@@ -1,0 +1,103 @@
+{
+  "general": {
+    "meta": {
+      "tags": "Tagged \"{{ tags }}\"",
+      "page": "Page {{ page }}"
+    },
+    "search": {
+      "placeholder": "Search the household…"
+    },
+    "newsletter": {
+      "heading": "Letters from home.",
+      "body": "Quiet dispatches: new arrivals, restocks, and the occasional household ritual. No spam.",
+      "placeholder": "Email address",
+      "submit": "Subscribe",
+      "fineprint": "By subscribing you agree to our Privacy Policy. Unsubscribe at any time."
+    },
+    "404": {
+      "title": "We couldn't find that.",
+      "subtitle": "Let's return to the household.",
+      "link": "Back to home"
+    }
+  },
+  "accessibility": {
+    "skip_to_text": "Skip to content",
+    "open_menu": "Open menu",
+    "close_menu": "Close menu",
+    "open_cart": "Open cart"
+  },
+  "header": {
+    "menu": {
+      "cats": "Cats",
+      "dogs": "Dogs",
+      "the_daily": "The Daily",
+      "journal": "Journal",
+      "about": "About"
+    },
+    "search": "Search",
+    "account": "Account",
+    "cart": "Cart"
+  },
+  "footer": {
+    "shop": "Shop",
+    "help": "Help",
+    "company": "Company",
+    "connect": "Connect",
+    "rights": "© {{ year }} Nest & Den. All rights reserved.",
+    "shipping": "Shipping & Returns",
+    "contact": "Contact",
+    "faq": "FAQ",
+    "care": "Care Guides",
+    "about": "Our Story",
+    "press": "Press",
+    "stockists": "Stockists",
+    "sustainability": "Sustainability"
+  },
+  "products": {
+    "product": {
+      "add_to_cart": "Add to cart",
+      "sold_out": "Sold out",
+      "unavailable": "Unavailable",
+      "from": "From",
+      "save": "Save",
+      "regular_price": "Regular price",
+      "sale_price": "Sale price",
+      "shipping_at_checkout": "Shipping calculated at checkout",
+      "subscribe_save": "Subscribe & save 15%",
+      "one_time": "One-time purchase",
+      "low_stock": "Only {{ count }} left",
+      "select_size": "Select size",
+      "select_color": "Select color",
+      "share": "Share"
+    }
+  },
+  "cart": {
+    "general": {
+      "title": "Your cart",
+      "empty": "Your cart is empty.",
+      "subtotal": "Subtotal",
+      "checkout": "Checkout",
+      "continue": "Continue shopping",
+      "shipping_note": "Shipping & taxes calculated at checkout",
+      "free_shipping_progress": "You're {{ amount }} away from free U.S. shipping."
+    }
+  },
+  "trust": {
+    "free_shipping": {
+      "title": "Free U.S. Shipping",
+      "body": "On orders over $75. Ships from Brooklyn within 2 business days."
+    },
+    "vet_reviewed": {
+      "title": "Vet-Reviewed",
+      "body": "Foods and supplements formulated with practicing veterinarians."
+    },
+    "heirloom": {
+      "title": "Heirloom Materials",
+      "body": "OEKO-TEX® linen, food-grade ceramic, vegetable-tanned leather."
+    },
+    "returns": {
+      "title": "60-Day Returns",
+      "body": "Wash it, sleep on it, walk on it. Return it within 60 days."
+    }
+  }
+}

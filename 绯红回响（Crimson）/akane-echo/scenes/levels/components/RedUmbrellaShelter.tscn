@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/RedUmbrellaShelter.gd" id="1_um"]
+[ext_resource type="Texture2D" path="res://assets/generated/props/red_umbrella_first_pass.png" id="2_tex"]
+
+[node name="RedUmbrellaShelter" type="Node3D"]
+script = ExtResource("1_um")
+
+[node name="Sprite" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+pixel_size = 0.10
+billboard = 1
+shaded = false
+texture_filter = 0
+texture = ExtResource("2_tex")
+modulate = Color(1, 1, 1, 0.9)

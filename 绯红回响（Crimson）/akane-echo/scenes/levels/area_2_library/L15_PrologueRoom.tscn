@@ -1,0 +1,40 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/RoomBase.gd" id="1_base"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/RoomDoor.tscn" id="2_door"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/SpawnPoint.tscn" id="3_spawn"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/EchoStele.tscn" id="4_stele"]
+
+[node name="L15_PrologueRoom" type="Node3D"]
+script = ExtResource("1_base")
+room_id = "L-15"
+room_width = 14.0
+room_depth = 12.0
+door_north = true
+door_south = true
+has_rain = false
+floor_color = Color(0.42, 0.36, 0.28, 1)
+wall_color = Color(0.18, 0.10, 0.05, 1)
+
+[node name="DoorToL14" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6.0)
+target_scene = "res://scenes/levels/area_2_library/L14_FadingScript.tscn"
+target_spawn_id = "from_L15"
+
+[node name="DoorToL16" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6.0)
+target_scene = "res://scenes/levels/area_2_library/L16_FinalPage.tscn"
+target_spawn_id = "from_L15"
+
+[node name="SpawnFromL14" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4)
+spawn_id = "from_L14"
+
+[node name="SpawnFromL16" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4)
+spawn_id = "from_L16"
+
+[node name="EchoStele" parent="." instance=ExtResource("4_stele")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+stele_id = "stele_L15"
+spawn_id_for_respawn = "from_L14"

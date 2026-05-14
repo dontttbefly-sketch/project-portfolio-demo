@@ -1,0 +1,3 @@
+/* Webfont stack — using Google Fonts CDN for prototype.
+   Replace with self-hosted woff2 + @font-face before going live. */
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&display=swap");

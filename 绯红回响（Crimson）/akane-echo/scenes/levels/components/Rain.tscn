@@ -1,0 +1,50 @@
+[gd_scene load_steps=5 format=3]
+
+[sub_resource type="ParticleProcessMaterial" id="rain_mat"]
+direction = Vector3(0, -1, 0)
+spread = 0.0
+gravity = Vector3(0, -25, 0)
+initial_velocity_min = 8.0
+initial_velocity_max = 12.0
+emission_shape = 3
+emission_box_extents = Vector3(20, 0.5, 20)
+scale_min = 0.4
+scale_max = 0.8
+color = Color(0.85, 0.92, 1, 0.45)
+
+[sub_resource type="StandardMaterial3D" id="rain_quad_mat"]
+shading_mode = 0
+transparency = 1
+albedo_color = Color(0.85, 0.92, 1, 0.55)
+billboard_mode = 3
+
+[sub_resource type="QuadMesh" id="rain_quad"]
+size = Vector2(0.04, 0.45)
+material = SubResource("rain_quad_mat")
+
+[sub_resource type="ParticleProcessMaterial" id="splash_mat"]
+direction = Vector3(0, 1, 0)
+spread = 90.0
+gravity = Vector3(0, -10, 0)
+initial_velocity_min = 0.5
+initial_velocity_max = 1.5
+emission_shape = 3
+emission_box_extents = Vector3(15, 0.05, 15)
+scale_min = 0.3
+scale_max = 0.6
+color = Color(0.85, 0.92, 1, 0.4)
+
+[node name="Rain" type="Node3D"]
+
+[node name="Drops" type="GPUParticles3D" parent="."]
+amount = 200
+lifetime = 1.0
+process_material = SubResource("rain_mat")
+draw_pass_1 = SubResource("rain_quad")
+
+[node name="Splashes" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7.5, 0)
+amount = 60
+lifetime = 0.4
+process_material = SubResource("splash_mat")
+draw_pass_1 = SubResource("rain_quad")

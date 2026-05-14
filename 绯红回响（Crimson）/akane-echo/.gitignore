@@ -1,0 +1,30 @@
+# Godot 4+ 引擎缓存与导入产物
+.godot/
+
+# 自动生成的翻译产物（CSV 编译产物）
+*.translation
+
+# Python 脚本缓存
+__pycache__
+__pycache__/
+*.py[cod]
+
+# Mono / .NET（本项目用 GDScript，不会用到，但留作保险）
+.mono/
+data_*/
+mono_crash.*.json
+
+# macOS 系统垃圾文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows 系统垃圾（如果未来跨平台开发）
+ehthumbs.db
+Thumbs.db
+
+# 本地构建产物 / 导出版本
+exports/
+*.tmp

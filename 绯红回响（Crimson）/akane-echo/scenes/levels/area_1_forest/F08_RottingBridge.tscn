@@ -1,0 +1,45 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/RoomBase.gd" id="1_base"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/RoomDoor.tscn" id="2_door"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/SpawnPoint.tscn" id="3_spawn"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/UmbrellaCarrier.tscn" id="4_uc"]
+
+[node name="F08_RottingBridge" type="Node3D"]
+script = ExtResource("1_base")
+room_id = "F-08"
+room_width = 18.0
+room_depth = 14.0
+door_west = true
+door_east = true
+door_south = true
+
+[node name="DoorToF04" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -9.0, 0, 0)
+target_scene = "res://scenes/levels/area_1_forest/F04_Crossroads.tscn"
+target_spawn_id = "from_F08"
+
+[node name="DoorToF10" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 9.0, 0, 0)
+target_scene = "res://scenes/levels/area_1_forest/F10_BrokenUmbrellaGround.tscn"
+target_spawn_id = "from_F08"
+
+[node name="DoorToF09" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 7.0)
+target_scene = "res://scenes/levels/area_1_forest/F09_OldGraveyard.tscn"
+target_spawn_id = "from_F08"
+
+[node name="SpawnFromF04" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, 0)
+spawn_id = "from_F04"
+
+[node name="SpawnFromF10" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, 0)
+spawn_id = "from_F10"
+
+[node name="SpawnFromF09" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
+spawn_id = "from_F09"
+
+[node name="UmbrellaCarrier1" parent="." instance=ExtResource("4_uc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)

@@ -1,0 +1,17 @@
+{
+  "name": "成长操作台",
+  "short_name": "成长",
+  "description": "本地优先的目标管理、今日行动和周复盘工具。",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f7f3",
+  "theme_color": "#0f766e",
+  "icons": [
+    {
+      "src": "/pwa-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

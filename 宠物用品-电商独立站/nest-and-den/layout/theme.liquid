@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}" class="no-js">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#F4EFE6">
+    <meta http-equiv="x-ua-compatible" content="IE=edge">
+
+    <link rel="canonical" href="{{ canonical_url }}">
+    <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
+
+    {%- if settings.favicon != blank -%}
+      <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
+    {%- endif -%}
+
+    <title>
+      {{ page_title }}
+      {%- if current_tags %} &mdash; {{ 'general.meta.tags' | t: tags: current_tags | join: ', ' }}{% endif -%}
+      {%- if current_page != 1 %} &mdash; {{ 'general.meta.page' | t: page: current_page }}{% endif -%}
+      {%- unless page_title contains shop.name %} &mdash; {{ shop.name }}{% endunless -%}
+    </title>
+
+    {% render 'meta' %}
+
+    {{ content_for_header }}
+
+    {{ 'theme.css' | asset_url | stylesheet_tag: preload: true }}
+    {{ 'fonts.css' | asset_url | stylesheet_tag: preload: true }}
+
+    <script>document.documentElement.classList.replace('no-js','js');</script>
+    <script src="{{ 'theme.js' | asset_url }}" defer></script>
+
+    {%- comment -%} Reviews / Email placeholders — wire your apps here {%- endcomment -%}
+    {%- comment -%} <script src="https://cdn.judge.me/loader.js" defer></script> {%- endcomment -%}
+    {%- comment -%} <script async src="https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=XXXX"></script> {%- endcomment -%}
+  </head>
+
+  <body class="template-{{ template | replace: '.', '-' | handle }}">
+    <a class="skip-link" href="#MainContent">{{ 'accessibility.skip_to_text' | t }}</a>
+
+    {% sections 'header-group' %}
+
+    <main id="MainContent" role="main" tabindex="-1">
+      {{ content_for_layout }}
+    </main>
+
+    {% sections 'footer-group' %}
+
+    <div id="cart-drawer" class="drawer" aria-hidden="true" data-cart-drawer></div>
+  </body>
+</html>

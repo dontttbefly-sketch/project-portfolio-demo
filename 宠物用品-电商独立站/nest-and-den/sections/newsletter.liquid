@@ -1,0 +1,33 @@
+<section class="section newsletter">
+  <div class="container">
+    <div class="newsletter__inner" data-reveal>
+      <span class="eyebrow">{{ section.settings.eyebrow }}</span>
+      <h3>{{ section.settings.heading }}</h3>
+      <p>{{ section.settings.body }}</p>
+      {% form 'customer', class: 'form-newsletter', novalidate: 'novalidate' %}
+        <input type="hidden" name="contact[tags]" value="newsletter">
+        <input type="email" name="contact[email]"
+               required
+               placeholder="{{ section.settings.placeholder | default: 'Email address' }}"
+               aria-label="Email address">
+        <button type="submit">{{ section.settings.submit | default: 'Subscribe' }}</button>
+      {% endform %}
+      <p class="newsletter__fineprint">{{ section.settings.fineprint }}</p>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Newsletter",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Letters from home" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Letters from home." },
+    { "type": "textarea", "id": "body", "label": "Body", "default": "Quiet dispatches: new arrivals, restocks, and the occasional household ritual. No spam, ever." },
+    { "type": "text", "id": "placeholder", "label": "Input placeholder", "default": "Email address" },
+    { "type": "text", "id": "submit", "label": "Submit label", "default": "Subscribe" },
+    { "type": "text", "id": "fineprint", "label": "Fine print", "default": "By subscribing you agree to our Privacy Policy. Unsubscribe at any time." }
+  ],
+  "presets": [{ "name": "Newsletter" }]
+}
+{% endschema %}

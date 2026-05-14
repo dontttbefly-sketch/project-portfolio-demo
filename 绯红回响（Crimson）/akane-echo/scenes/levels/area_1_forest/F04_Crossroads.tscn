@@ -1,0 +1,57 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/RoomBase.gd" id="1_base"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/RoomDoor.tscn" id="2_door"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/SpawnPoint.tscn" id="3_spawn"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/HighlightShard.tscn" id="4_hs"]
+
+[node name="F04_Crossroads" type="Node3D"]
+script = ExtResource("1_base")
+room_id = "F-04"
+room_width = 22.0
+room_depth = 22.0
+door_north = true
+door_south = true
+door_east = true
+door_west = true
+
+[node name="DoorToF03" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 11.0)
+target_scene = "res://scenes/levels/area_1_forest/F03_FallenLog.tscn"
+target_spawn_id = "from_F04"
+
+[node name="DoorToF05" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -11.0)
+target_scene = "res://scenes/levels/area_1_forest/F05_FoggyMarsh.tscn"
+target_spawn_id = "from_F04"
+
+[node name="DoorToF08" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 11.0, 0, 0)
+target_scene = "res://scenes/levels/area_1_forest/F08_RottingBridge.tscn"
+target_spawn_id = "from_F04"
+
+[node name="DoorToF11" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -11.0, 0, 0)
+target_scene = "res://scenes/levels/area_1_forest/F11_RainVeil.tscn"
+target_spawn_id = "from_F04"
+
+[node name="SpawnFromF03" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 9)
+spawn_id = "from_F03"
+
+[node name="SpawnFromF05" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -9)
+spawn_id = "from_F05"
+
+[node name="SpawnFromF08" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0, 0)
+spawn_id = "from_F08"
+
+[node name="SpawnFromF11" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 0, 0)
+spawn_id = "from_F11"
+
+[node name="HighlightShard" parent="." instance=ExtResource("4_hs")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+shard_id = "highlight_forest"
+fragment_text = "雨衣下的脸，从来不是我以为的那个。"

@@ -1,0 +1,35 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/RoomBase.gd" id="1_base"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/RoomDoor.tscn" id="2_door"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/SpawnPoint.tscn" id="3_spawn"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/ShadowDashUnlock.tscn" id="4_unlock"]
+
+[node name="F03_FallenLog" type="Node3D"]
+script = ExtResource("1_base")
+room_id = "F-03"
+room_width = 18.0
+room_depth = 16.0
+door_north = true
+door_south = true
+
+[node name="DoorToF02" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 8.0)
+target_scene = "res://scenes/levels/area_1_forest/F02_DripGrotto.tscn"
+target_spawn_id = "from_F03"
+
+[node name="DoorToF04" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -8.0)
+target_scene = "res://scenes/levels/area_1_forest/F04_Crossroads.tscn"
+target_spawn_id = "from_F03"
+
+[node name="SpawnFromF02" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
+spawn_id = "from_F02"
+
+[node name="SpawnFromF04" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6)
+spawn_id = "from_F04"
+
+[node name="ShadowDashUnlock" parent="." instance=ExtResource("4_unlock")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)

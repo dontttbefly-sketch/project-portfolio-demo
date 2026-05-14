@@ -1,0 +1,74 @@
+<section class="reviews" data-reveal>
+  <div class="reviews__inner">
+    <div class="reviews__head">
+      <div>
+        <span class="eyebrow">Reviews</span>
+        <div class="reviews__big-rating">{{ section.settings.rating | default: '4.9' }}</div>
+        <span class="stars" aria-hidden="true">{% render 'icon-star' %}{% render 'icon-star' %}{% render 'icon-star' %}{% render 'icon-star' %}{% render 'icon-star' %}</span>
+        <p style="color:var(--ink-soft); margin-top:8px">Based on {{ section.settings.review_count | default: '2,418' }} verified reviews.</p>
+      </div>
+      <div>
+        <h2>{{ section.settings.heading | default: "Selected by 2,400+ households." }}</h2>
+        <p class="lead">{{ section.settings.body | default: "We read every review. Here are the most recent." }}</p>
+      </div>
+    </div>
+
+    <div class="reviews__list">
+      {%- for block in section.blocks -%}
+        <article class="review" {{ block.shopify_attributes }}>
+          <span class="stars review__stars">
+            {% render 'icon-star' %}{% render 'icon-star' %}{% render 'icon-star' %}{% render 'icon-star' %}{% render 'icon-star' %}
+          </span>
+          <h4 class="review__title">{{ block.settings.title }}</h4>
+          <p class="review__body">{{ block.settings.body }}</p>
+          <div class="review__author">
+            <strong>{{ block.settings.author }}</strong>
+            {%- if block.settings.location != blank -%} · {{ block.settings.location }}{%- endif -%}
+            {%- if block.settings.verified -%} · <em>Verified buyer</em>{%- endif -%}
+          </div>
+        </article>
+      {%- endfor -%}
+    </div>
+
+    {%- comment -%}
+      Production hint: replace this section with a Judge.me / Yotpo / Loox embed.
+      <div id="judgeme_product_reviews" data-id="{{ product.id }}"></div>
+    {%- endcomment -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Reviews",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Selected by 2,400+ households." },
+    { "type": "textarea", "id": "body", "label": "Body", "default": "We read every review. Here are the most recent." },
+    { "type": "text", "id": "rating", "label": "Average rating", "default": "4.9" },
+    { "type": "text", "id": "review_count", "label": "Review count", "default": "2,418" }
+  ],
+  "blocks": [
+    {
+      "type": "review",
+      "name": "Review",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "Has lived in our living room for a year." },
+        { "type": "textarea", "id": "body", "label": "Body", "default": "I'm picky about how things look in our home, and this is the first pet bed that hasn't ruined a corner of a room. Both our cat and our dog claim it. The linen has only gotten softer." },
+        { "type": "text", "id": "author", "label": "Author", "default": "Maya R." },
+        { "type": "text", "id": "location", "label": "Location", "default": "Brooklyn, NY" },
+        { "type": "checkbox", "id": "verified", "label": "Verified buyer", "default": true }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [
+    {
+      "name": "Reviews",
+      "blocks": [
+        { "type": "review", "settings": { "title": "Has lived in our living room for a year.", "body": "I'm picky about how things look in our home, and this is the first pet bed that hasn't ruined a corner of a room. Both our cat and our dog claim it. The linen has only gotten softer.", "author": "Maya R.", "location": "Brooklyn, NY" } },
+        { "type": "review", "settings": { "title": "Worth the price. Fully.", "body": "We've gone through a half-dozen $50 beds in five years. This is the first one our terrier has not chewed. The cover comes off, the cushion is supportive, and it doesn't smell like plastic.", "author": "Daniel C.", "location": "Portland, OR" } },
+        { "type": "review", "settings": { "title": "Made for the way we live.", "body": "Bought a Daily Bowl for our cat, then ended up with two Daily Beds, a Lead, and a Coat. The whole house feels more considered.", "author": "Priya & Tom", "location": "Mill Valley, CA" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

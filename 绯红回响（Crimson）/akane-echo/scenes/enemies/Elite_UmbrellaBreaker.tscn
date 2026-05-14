@@ -1,0 +1,132 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/EliteUmbrellaBreaker.gd" id="1_e"]
+[ext_resource type="Script" path="res://scripts/enemies/Umbrella.gd" id="2_u"]
+[ext_resource type="Script" path="res://scripts/combat/HurtBox.gd" id="3_hb"]
+[ext_resource type="Script" path="res://scripts/combat/HitBox.gd" id="4_hi"]
+[ext_resource type="Texture2D" path="res://assets/generated/enemies/elite_umbrella_breaker_second_pass.png" id="5_etex"]
+[ext_resource type="Texture2D" path="res://assets/generated/props/red_umbrella_first_pass.png" id="6_utex"]
+
+[sub_resource type="CylinderShape3D" id="cyl_eb"]
+radius = 0.6
+height = 2.0
+
+[sub_resource type="CylinderShape3D" id="cyl_eh"]
+radius = 0.65
+height = 2.0
+
+[sub_resource type="SphereShape3D" id="sph_uh"]
+radius = 0.4
+
+[sub_resource type="BoxShape3D" id="box_atk"]
+size = Vector3(1.4, 1.2, 1.8)
+
+[node name="EliteUmbrellaBreaker" type="CharacterBody3D"]
+collision_layer = 16
+collision_mask = 1
+script = ExtResource("1_e")
+
+[node name="ModelHolder" type="Node3D" parent="."]
+
+[node name="Sprite" type="Sprite3D" parent="ModelHolder"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+pixel_size = 0.045
+billboard = 1
+shaded = false
+texture_filter = 0
+texture = ExtResource("5_etex")
+
+[node name="CollisionShape" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+shape = SubResource("cyl_eb")
+
+[node name="HurtBox" type="Area3D" parent="."]
+collision_layer = 32
+collision_mask = 0
+monitoring = false
+monitorable = true
+script = ExtResource("3_hb")
+
+[node name="HurtBoxShape" type="CollisionShape3D" parent="HurtBox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+shape = SubResource("cyl_eh")
+
+[node name="HitBox" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, -1.5)
+collision_layer = 0
+collision_mask = 4
+monitoring = false
+monitorable = false
+script = ExtResource("4_hi")
+damage = 25
+knockback_force = 6.0
+
+[node name="HitBoxShape" type="CollisionShape3D" parent="HitBox"]
+shape = SubResource("box_atk")
+disabled = true
+
+[node name="Umbrella1" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 1.6, 0)
+script = ExtResource("2_u")
+
+[node name="Sprite" type="Sprite3D" parent="Umbrella1"]
+pixel_size = 0.05
+billboard = 1
+shaded = false
+texture_filter = 0
+texture = ExtResource("6_utex")
+modulate = Color(1, 1, 1, 1)
+
+[node name="HurtBox" type="Area3D" parent="Umbrella1"]
+collision_layer = 32
+collision_mask = 0
+monitoring = false
+monitorable = true
+script = ExtResource("3_hb")
+
+[node name="Shape" type="CollisionShape3D" parent="Umbrella1/HurtBox"]
+shape = SubResource("sph_uh")
+
+[node name="Umbrella2" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 1.6, 1.0)
+script = ExtResource("2_u")
+
+[node name="Sprite" type="Sprite3D" parent="Umbrella2"]
+pixel_size = 0.05
+billboard = 1
+shaded = false
+texture_filter = 0
+texture = ExtResource("6_utex")
+modulate = Color(1, 1, 1, 1)
+
+[node name="HurtBox" type="Area3D" parent="Umbrella2"]
+collision_layer = 32
+collision_mask = 0
+monitoring = false
+monitorable = true
+script = ExtResource("3_hb")
+
+[node name="Shape" type="CollisionShape3D" parent="Umbrella2/HurtBox"]
+shape = SubResource("sph_uh")
+
+[node name="Umbrella3" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 1.6, -1.0)
+script = ExtResource("2_u")
+
+[node name="Sprite" type="Sprite3D" parent="Umbrella3"]
+pixel_size = 0.05
+billboard = 1
+shaded = false
+texture_filter = 0
+texture = ExtResource("6_utex")
+modulate = Color(1, 1, 1, 1)
+
+[node name="HurtBox" type="Area3D" parent="Umbrella3"]
+collision_layer = 32
+collision_mask = 0
+monitoring = false
+monitorable = true
+script = ExtResource("3_hb")
+
+[node name="Shape" type="CollisionShape3D" parent="Umbrella3/HurtBox"]
+shape = SubResource("sph_uh")

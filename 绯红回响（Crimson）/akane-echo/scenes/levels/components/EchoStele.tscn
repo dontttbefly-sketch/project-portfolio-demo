@@ -1,0 +1,35 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/EchoStele.gd" id="1_stele"]
+[ext_resource type="Texture2D" path="res://assets/generated/props/echo_stele_first_pass.png" id="2_tex"]
+
+[sub_resource type="BoxShape3D" id="shape_body"]
+size = Vector3(0.8, 1.6, 0.8)
+
+[sub_resource type="BoxShape3D" id="shape_prompt"]
+size = Vector3(3.0, 2.0, 3.0)
+
+[node name="EchoStele" type="StaticBody3D"]
+collision_layer = 1
+collision_mask = 1
+script = ExtResource("1_stele")
+
+[node name="Sprite" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+pixel_size = 0.04
+billboard = 1
+shaded = false
+texture_filter = 0
+texture = ExtResource("2_tex")
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+shape = SubResource("shape_body")
+
+[node name="PromptArea" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 2
+
+[node name="Shape" type="CollisionShape3D" parent="PromptArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("shape_prompt")

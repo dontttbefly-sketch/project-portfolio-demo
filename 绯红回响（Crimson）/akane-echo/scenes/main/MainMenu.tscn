@@ -1,0 +1,113 @@
+[gd_scene load_steps=3 format=3 uid="uid://co50lhfvsu6lr"]
+
+[ext_resource type="Script" uid="uid://dtm6q10ixq3fk" path="res://scripts/ui/main_menu.gd" id="1_menu"]
+[ext_resource type="Texture2D" path="res://assets/generated/ui/title_wangchuan_first_pass.png" id="2_title_bg"]
+
+[node name="MainMenu" type="Control" unique_id=1045659800]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_menu")
+
+[node name="Background" type="ColorRect" parent="." unique_id=313292797]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.0588, 0.0588, 0.0706, 1)
+
+[node name="ArtBackground" type="TextureRect" parent="." unique_id=896104418]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_title_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Title" type="Label" parent="." unique_id=2113814130]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -480.0
+offset_top = 180.0
+offset_right = 480.0
+offset_bottom = 320.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 72
+text = "茜响 / Akane's Echo"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Buttons" type="VBoxContainer" parent="." unique_id=792044717]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = -60.0
+offset_right = 160.0
+offset_bottom = 220.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 28
+alignment = 1
+
+[node name="StartButton" type="Button" parent="Buttons" unique_id=1962312382]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(0.7843, 0.0627, 0.1804, 1)
+theme_override_colors/font_pressed_color = Color(0.7843, 0.0627, 0.1804, 1)
+theme_override_colors/font_hover_color = Color(0.7843, 0.0627, 0.1804, 1)
+theme_override_font_sizes/font_size = 36
+text = "开始"
+flat = true
+
+[node name="NewGamePlusButton" type="Button" parent="Buttons" unique_id=435968268]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(0.7843, 0.0627, 0.1804, 1)
+theme_override_colors/font_pressed_color = Color(0.7843, 0.0627, 0.1804, 1)
+theme_override_colors/font_hover_color = Color(0.7843, 0.0627, 0.1804, 1)
+theme_override_font_sizes/font_size = 36
+text = "二周目"
+flat = true
+
+[node name="SettingsButton" type="Button" parent="Buttons" unique_id=26835032]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(0.7843, 0.0627, 0.1804, 1)
+theme_override_colors/font_pressed_color = Color(0.7843, 0.0627, 0.1804, 1)
+theme_override_colors/font_hover_color = Color(0.7843, 0.0627, 0.1804, 1)
+theme_override_font_sizes/font_size = 36
+text = "设置"
+flat = true
+
+[node name="QuitButton" type="Button" parent="Buttons" unique_id=1136697704]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(0.7843, 0.0627, 0.1804, 1)
+theme_override_colors/font_pressed_color = Color(0.7843, 0.0627, 0.1804, 1)
+theme_override_colors/font_hover_color = Color(0.7843, 0.0627, 0.1804, 1)
+theme_override_font_sizes/font_size = 36
+text = "退出"
+flat = true
+
+[connection signal="pressed" from="Buttons/StartButton" to="." method="_on_start_pressed"]
+[connection signal="pressed" from="Buttons/NewGamePlusButton" to="." method="_on_ng_plus_pressed"]
+[connection signal="pressed" from="Buttons/SettingsButton" to="." method="_on_settings_pressed"]
+[connection signal="pressed" from="Buttons/QuitButton" to="." method="_on_quit_pressed"]

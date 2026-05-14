@@ -1,0 +1,62 @@
+<section class="section section--cream">
+  <div class="container">
+    <div class="section-head text-center" data-reveal style="justify-content:center; flex-direction:column; align-items:center">
+      <span class="eyebrow">{{ section.settings.eyebrow | default: 'How we work' }}</span>
+      <h2>{{ section.settings.heading | default: 'Three things we won\'t cut corners on.' }}</h2>
+    </div>
+    <div class="values-grid">
+      {%- for block in section.blocks -%}
+        <div class="value-card" {{ block.shopify_attributes }} data-reveal>
+          {%- case block.settings.icon -%}
+            {%- when 'leaf' -%}{% render 'icon-leaf' %}
+            {%- when 'shield' -%}{% render 'icon-shield' %}
+            {%- when 'paw' -%}{% render 'icon-paw' %}
+            {%- when 'sparkle' -%}{% render 'icon-sparkle' %}
+            {%- else -%}{% render 'icon-leaf' %}
+          {%- endcase -%}
+          <h4>{{ block.settings.title }}</h4>
+          <p>{{ block.settings.body }}</p>
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "About values",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "How we work" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Three things we won't cut corners on." }
+  ],
+  "blocks": [
+    {
+      "type": "value",
+      "name": "Value",
+      "settings": [
+        { "type": "select", "id": "icon", "label": "Icon",
+          "options": [
+            { "value": "leaf", "label": "Leaf" },
+            { "value": "shield", "label": "Shield" },
+            { "value": "paw", "label": "Paw" },
+            { "value": "sparkle", "label": "Sparkle" }
+          ],
+          "default": "leaf" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Considered Materials" },
+        { "type": "textarea", "id": "body", "label": "Body", "default": "Every fiber, finish, and glaze is sourced for what it does over years, not what it costs over weeks." }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [
+    {
+      "name": "About values",
+      "blocks": [
+        { "type": "value", "settings": { "icon": "leaf",   "title": "Considered Materials", "body": "Every fiber, finish, and glaze is sourced for what it does over years, not what it costs over weeks." } },
+        { "type": "value", "settings": { "icon": "shield", "title": "Honest Pricing",       "body": "We list our cost-of-goods on every product page. No reference prices, no fake sales, no inflated MSRP." } },
+        { "type": "value", "settings": { "icon": "paw",    "title": "Tested in Households",  "body": "Two hundred volunteer homes test every Daily piece for at least 90 days before it ships." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

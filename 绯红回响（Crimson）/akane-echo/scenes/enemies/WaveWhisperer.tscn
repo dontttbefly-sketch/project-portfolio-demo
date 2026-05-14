@@ -1,0 +1,60 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/WaveWhisperer.gd" id="1_e"]
+[ext_resource type="Script" path="res://scripts/combat/HurtBox.gd" id="2_hb"]
+[ext_resource type="Script" path="res://scripts/combat/HitBox.gd" id="3_hi"]
+[ext_resource type="Texture2D" path="res://assets/generated/enemies/enemy_wave_whisperer_second_pass.png" id="4_tex"]
+
+[sub_resource type="SphereShape3D" id="sph_b"]
+radius = 0.35
+
+[sub_resource type="SphereShape3D" id="sph_h"]
+radius = 0.4
+
+[sub_resource type="BoxShape3D" id="box_a"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[node name="WaveWhisperer" type="CharacterBody3D"]
+collision_layer = 16
+collision_mask = 1
+script = ExtResource("1_e")
+
+[node name="ModelHolder" type="Node3D" parent="."]
+
+[node name="Sprite" type="Sprite3D" parent="ModelHolder"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+pixel_size = 0.045
+billboard = 1
+shaded = false
+texture_filter = 0
+texture = ExtResource("4_tex")
+modulate = Color(1, 1, 1, 0.85)
+
+[node name="CollisionShape" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+shape = SubResource("sph_b")
+
+[node name="HurtBox" type="Area3D" parent="."]
+collision_layer = 32
+collision_mask = 0
+monitoring = false
+monitorable = true
+script = ExtResource("2_hb")
+
+[node name="HurtBoxShape" type="CollisionShape3D" parent="HurtBox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+shape = SubResource("sph_h")
+
+[node name="HitBox" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, -0.8)
+collision_layer = 0
+collision_mask = 4
+monitoring = false
+monitorable = false
+script = ExtResource("3_hi")
+damage = 8
+knockback_force = 3.0
+
+[node name="HitBoxShape" type="CollisionShape3D" parent="HitBox"]
+shape = SubResource("box_a")
+disabled = true

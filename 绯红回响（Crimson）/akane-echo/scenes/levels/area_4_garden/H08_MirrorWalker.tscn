@@ -1,0 +1,38 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/RoomBase.gd" id="1_base"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/RoomDoor.tscn" id="2_door"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/SpawnPoint.tscn" id="3_spawn"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/MirrorWalker.tscn" id="4_mw"]
+
+[node name="H08_MirrorWalker" type="Node3D"]
+script = ExtResource("1_base")
+room_id = "H-08"
+room_width = 16.0
+room_depth = 14.0
+door_north = true
+door_south = true
+has_rain = false
+floor_color = Color(0.86, 0.88, 0.92, 1)
+wall_color = Color(0.62, 0.65, 0.72, 1)
+
+[node name="DoorToH07" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 7.0)
+target_scene = "res://scenes/levels/area_4_garden/H07_FlowerGathering.tscn"
+target_spawn_id = "from_H08"
+
+[node name="DoorToH09" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -7.0)
+target_scene = "res://scenes/levels/area_4_garden/H09_MemoryGarden3.tscn"
+target_spawn_id = "from_H08"
+
+[node name="SpawnFromH07" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
+spawn_id = "from_H07"
+
+[node name="SpawnFromH09" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)
+spawn_id = "from_H09"
+
+[node name="Mirror1" parent="." instance=ExtResource("4_mw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)

@@ -1,0 +1,71 @@
+<section class="section section--bone">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <div class="section-head__copy">
+        <span class="eyebrow">{{ section.settings.eyebrow }}</span>
+        <h2>{{ section.settings.heading }}</h2>
+        <p class="lead">{{ section.settings.body }}</p>
+      </div>
+      {%- if section.settings.handle != blank -%}
+        <a class="btn--text" href="{{ section.settings.handle_url }}">@{{ section.settings.handle }}</a>
+      {%- endif -%}
+    </div>
+
+    <div class="ugc">
+      {%- for block in section.blocks -%}
+        <a class="ugc__cell" href="{{ block.settings.link | default: '#' }}" {{ block.shopify_attributes }} data-reveal>
+          {%- if block.settings.image != blank -%}
+            {{ block.settings.image | image_url: width: 800 | image_tag:
+                widths: '300, 600, 800',
+                sizes: '(min-width: 800px) 25vw, 50vw',
+                loading: 'lazy',
+                alt: block.settings.handle }}
+          {%- else -%}
+            <img src="{{ block.settings.placeholder_url }}" alt="{{ block.settings.handle | escape }}" loading="lazy">
+          {%- endif -%}
+          {%- if block.settings.handle != blank -%}
+            <span class="ugc__handle">@{{ block.settings.handle }} · {{ block.settings.location }}</span>
+          {%- endif -%}
+        </a>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "UGC grid",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "From the household" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Lived in." },
+    { "type": "textarea", "id": "body", "label": "Body", "default": "Real homes, real companions. Tag #livedinwithND for a chance to be featured." },
+    { "type": "text", "id": "handle", "label": "Brand handle", "default": "nestandden" },
+    { "type": "url", "id": "handle_url", "label": "Handle URL" }
+  ],
+  "blocks": [
+    {
+      "type": "post",
+      "name": "Post",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "placeholder_url", "label": "Placeholder URL (dev)" },
+        { "type": "text", "id": "handle", "label": "Handle" },
+        { "type": "text", "id": "location", "label": "Location", "default": "Brooklyn" },
+        { "type": "url", "id": "link", "label": "Link" }
+      ]
+    }
+  ],
+  "max_blocks": 8,
+  "presets": [
+    {
+      "name": "UGC grid",
+      "blocks": [
+        { "type": "post", "settings": { "placeholder_url": "https://images.unsplash.com/photo-1574158622682-e40e69881006?auto=format&fit=crop&w=800&q=80", "handle": "marlow.thecat", "location": "Brooklyn" } },
+        { "type": "post", "settings": { "placeholder_url": "https://images.unsplash.com/photo-1583512603805-3cc6b41f3edb?auto=format&fit=crop&w=800&q=80", "handle": "june.and.archie", "location": "Portland" } },
+        { "type": "post", "settings": { "placeholder_url": "https://images.unsplash.com/photo-1494256997604-768d1f608cac?auto=format&fit=crop&w=800&q=80", "handle": "the.linen.house", "location": "Mill Valley" } },
+        { "type": "post", "settings": { "placeholder_url": "https://images.unsplash.com/photo-1583511666407-5f06533f2113?auto=format&fit=crop&w=800&q=80", "handle": "sundaymornings", "location": "Toronto" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

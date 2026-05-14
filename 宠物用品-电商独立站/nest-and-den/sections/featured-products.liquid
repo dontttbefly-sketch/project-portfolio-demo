@@ -1,0 +1,59 @@
+{%- liquid
+  assign collection = collections[section.settings.collection]
+  assign card_count = section.settings.product_count | default: 8
+-%}
+
+<section class="section section--bone">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <div class="section-head__copy">
+        <span class="eyebrow">{{ section.settings.eyebrow }}</span>
+        <h2>{{ section.settings.heading }}</h2>
+        {%- if section.settings.body != blank -%}
+          <p class="lead">{{ section.settings.body }}</p>
+        {%- endif -%}
+      </div>
+      {%- if section.settings.link_text != blank -%}
+        <a class="btn--text" href="{{ section.settings.link_url }}">
+          {{ section.settings.link_text }} {% render 'icon-arrow-right' %}
+        </a>
+      {%- endif -%}
+    </div>
+
+    <div class="grid grid--4">
+      {%- if collection != blank and collection.products.size > 0 -%}
+        {%- for product in collection.products limit: card_count -%}
+          {% render 'product-card', product: product %}
+        {%- endfor -%}
+      {%- else -%}
+        {%- comment -%} Design-time fallback so the homepage looks complete in dev stores {%- endcomment -%}
+        {%- assign demo_titles = 'The Daily Bed,The Daily Bowl,The Daily Lead,The Daily Coat,The Daily Tower,The Daily Knot,The Daily Mouse,The Daily Kibble' | split: ',' -%}
+        {%- assign demo_prices = '$148,$42,$88,$128,$245,$24,$28,$58' | split: ',' -%}
+        {%- assign demo_images = 'https://images.unsplash.com/photo-1583511655826-05700d52f4d9?auto=format&fit=crop&w=800&q=80,https://images.unsplash.com/photo-1602522953585-ba17a47f6cdf?auto=format&fit=crop&w=800&q=80,https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=800&q=80,https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=800&q=80,https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?auto=format&fit=crop&w=800&q=80,https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?auto=format&fit=crop&w=800&q=80,https://images.unsplash.com/photo-1606214174585-fe31582dc6ee?auto=format&fit=crop&w=800&q=80,https://images.unsplash.com/photo-1568640347023-a616a30bc3bd?auto=format&fit=crop&w=800&q=80' | split: ',' -%}
+        {%- assign demo_swatches = 'bone linen|cream russet|bark linen|moss bone|linen cream|russet bark|moss linen|cream bone' | split: '|' -%}
+        {%- for title in demo_titles limit: card_count -%}
+          {%- assign idx = forloop.index0 -%}
+          {%- capture fallback -%}{ "title": "{{ title }}", "price": "{{ demo_prices[idx] }}", "image": "{{ demo_images[idx] }}", "swatches": [{% assign sw = demo_swatches[idx] | split: ' ' %}{% for s in sw %}"{{ s }}"{% unless forloop.last %},{% endunless %}{% endfor %}] }{%- endcapture -%}
+          {%- assign fallback = fallback | parse_json -%}
+          {% render 'product-card', fallback: fallback %}
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Featured products",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "The Daily" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "The Daily, in stock now." },
+    { "type": "textarea", "id": "body", "label": "Body", "default": "Twelve everyday goods, in four heirloom tones — designed once, restocked always." },
+    { "type": "collection", "id": "collection", "label": "Collection" },
+    { "type": "range", "id": "product_count", "min": 4, "max": 12, "step": 4, "label": "Number of products", "default": 8 },
+    { "type": "text", "id": "link_text", "label": "Link text", "default": "Shop The Daily" },
+    { "type": "url", "id": "link_url", "label": "Link URL" }
+  ],
+  "presets": [{ "name": "Featured products" }]
+}
+{% endschema %}

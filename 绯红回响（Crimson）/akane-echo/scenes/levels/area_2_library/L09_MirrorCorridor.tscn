@@ -1,0 +1,56 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/RoomBase.gd" id="1_base"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/RoomDoor.tscn" id="2_door"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/SpawnPoint.tscn" id="3_spawn"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/EchoShard.tscn" id="4_shard"]
+[ext_resource type="Texture2D" path="res://assets/generated/characters/akane_actions/akane_echo_second_pass.png" id="5_mirror"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/HighlightShard.tscn" id="6_hs"]
+
+[node name="L09_MirrorCorridor" type="Node3D"]
+script = ExtResource("1_base")
+room_id = "L-09"
+room_width = 14.0
+room_depth = 18.0
+door_north = true
+door_south = true
+has_rain = false
+floor_color = Color(0.62, 0.58, 0.48, 1)
+wall_color = Color(0.15, 0.10, 0.07, 1)
+
+[node name="DoorToL08" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 9.0)
+target_scene = "res://scenes/levels/area_2_library/L08_CharacterSpiral.tscn"
+target_spawn_id = "from_L09"
+
+[node name="DoorToL10" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -9.0)
+target_scene = "res://scenes/levels/area_2_library/L10_LostChapter.tscn"
+target_spawn_id = "from_L09"
+
+[node name="SpawnFromL08" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 7)
+spawn_id = "from_L08"
+
+[node name="SpawnFromL10" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -7)
+spawn_id = "from_L10"
+
+[node name="MirrorReflection" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+pixel_size = 0.05
+billboard = 1
+shaded = false
+texture_filter = 0
+texture = ExtResource("5_mirror")
+modulate = Color(1.5, 0.5, 0.7, 0.55)
+
+[node name="Shard1" parent="." instance=ExtResource("4_shard")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 0)
+shard_id = "L09_mirror_shard"
+fragment_text = "镜中的不是我。是另一个还没忘记的人。"
+
+[node name="HighlightShard" parent="." instance=ExtResource("6_hs")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 5)
+shard_id = "highlight_library"
+fragment_text = "镜子也是会撒谎的。但它从不告诉你它撒了什么谎。"

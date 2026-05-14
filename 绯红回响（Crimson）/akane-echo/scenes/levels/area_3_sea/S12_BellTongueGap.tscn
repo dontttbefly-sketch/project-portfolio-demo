@@ -1,0 +1,34 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/RoomBase.gd" id="1_base"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/RoomDoor.tscn" id="2_door"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/SpawnPoint.tscn" id="3_spawn"]
+
+[node name="S12_BellTongueGap" type="Node3D"]
+script = ExtResource("1_base")
+room_id = "S-12"
+room_width = 18.0
+room_depth = 16.0
+door_north = true
+door_south = true
+has_rain = false
+floor_color = Color(0.20, 0.28, 0.42, 1)
+wall_color = Color(0.05, 0.06, 0.12, 1)
+
+[node name="DoorToS11" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 8.0)
+target_scene = "res://scenes/levels/area_3_sea/S11_FisherWaves.tscn"
+target_spawn_id = "from_S12"
+
+[node name="DoorToS13" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -8.0)
+target_scene = "res://scenes/levels/area_3_sea/S13_SunkenEcho.tscn"
+target_spawn_id = "from_S12"
+
+[node name="SpawnFromS11" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
+spawn_id = "from_S11"
+
+[node name="SpawnFromS13" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6)
+spawn_id = "from_S13"

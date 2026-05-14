@@ -1,0 +1,199 @@
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign rating = product.metafields.reviews.rating.value | default: 4.9
+  assign rating_count = product.metafields.reviews.rating_count | default: 248
+  assign placeholder_main = 'https://images.unsplash.com/photo-1583511655826-05700d52f4d9?auto=format&fit=crop&w=1600&q=80'
+  assign placeholder_thumbs = 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?auto=format&fit=crop&w=600&q=80,https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?auto=format&fit=crop&w=600&q=80,https://images.unsplash.com/photo-1604147706283-d7119b5b822c?auto=format&fit=crop&w=600&q=80,https://images.unsplash.com/photo-1518791841217-8f162f1e1131?auto=format&fit=crop&w=600&q=80'
+  assign thumb_arr = placeholder_thumbs | split: ','
+-%}
+
+<section class="product-page" data-gallery>
+  {%- comment -%} Gallery {%- endcomment -%}
+  <div class="product-gallery">
+    <div class="product-gallery__main" data-gallery-main>
+      {%- if product.featured_media -%}
+        {{ product.featured_media | image_url: width: 1600 | image_tag:
+            widths: '600, 1000, 1600, 2000',
+            sizes: '(min-width: 900px) 55vw, 100vw',
+            loading: 'eager',
+            fetchpriority: 'high',
+            alt: product.featured_media.alt | default: product.title }}
+      {%- else -%}
+        <img src="{{ placeholder_main }}" alt="{{ product.title | escape }}" width="1600" height="2000" fetchpriority="high">
+      {%- endif -%}
+    </div>
+    <div class="product-gallery__thumbs" data-gallery-thumbs>
+      {%- if product.media.size > 0 -%}
+        {%- for media in product.media limit: 6 -%}
+          <img src="{{ media | image_url: width: 200 }}"
+               data-full="{{ media | image_url: width: 1600 }}"
+               alt=""
+               loading="lazy"
+               aria-current="{% if forloop.first %}true{% else %}false{% endif %}">
+        {%- endfor -%}
+      {%- else -%}
+        {%- for url in thumb_arr -%}
+          <img src="{{ url | strip }}"
+               data-full="{{ url | strip }}"
+               alt=""
+               loading="lazy"
+               aria-current="{% if forloop.first %}true{% else %}false{% endif %}">
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+  </div>
+
+  {%- comment -%} Info {%- endcomment -%}
+  <div class="product-info" data-atc-trigger>
+    <span class="eyebrow">{{ product.metafields.brand.series | default: 'The Daily' }}</span>
+    <h1>{{ product.title | default: 'The Daily Bed' }}</h1>
+
+    <div class="product-info__rating">
+      {%- assign full_stars = rating | floor -%}
+      <span class="stars" aria-label="{{ rating }} out of 5">
+        {%- for i in (1..5) -%}{% render 'icon-star' %}{%- endfor -%}
+      </span>
+      <span>{{ rating }} ({{ rating_count }} reviews)</span>
+    </div>
+
+    <div class="product-info__price">
+      {%- if product -%}
+        {% render 'price', product: product %}
+      {%- else -%}
+        $148.00
+      {%- endif -%}
+    </div>
+    <p class="product-info__klarna">
+      or 4 interest-free payments of <strong>{% if current_variant %}{{ current_variant.price | divided_by: 4 | money }}{% else %}$37.00{% endif %}</strong> with <em>Klarna</em>.
+    </p>
+
+    <ul class="product-info__bullets">
+      {%- if product.metafields.bullets.list.value != blank -%}
+        {%- for b in product.metafields.bullets.list.value -%}
+          <li>{{ b }}</li>
+        {%- endfor -%}
+      {%- else -%}
+        <li>OEKO-TEX®–certified linen, woven in Lithuania.</li>
+        <li>Removable cover. Machine-washable, cold, line-dry.</li>
+        <li>Inner cushion filled with recycled PET fiber from U.S. plastic bottles.</li>
+        <li>Designed in Brooklyn. Sewn in North Carolina.</li>
+      {%- endif -%}
+    </ul>
+
+    {%- comment -%} Bundle hint {%- endcomment -%}
+    <div class="bundle-hint">
+      {% render 'icon-sparkle' %}
+      <span>Add a matching <a href="#">Daily Bowl</a> and save 15% on the pair.</span>
+    </div>
+
+    <form data-add-to-cart action="{{ routes.cart_add_url }}" method="post" enctype="multipart/form-data">
+      <input type="hidden" name="form_type" value="product">
+      <input type="hidden" name="utf8" value="✓">
+
+      {%- if product -%}
+        {% render 'variant-picker', product: product %}
+        <input type="hidden" name="id" value="{{ current_variant.id }}">
+      {%- else -%}
+        {%- comment -%} Design-time placeholder pickers {%- endcomment -%}
+        <div class="variant-group">
+          <div class="variant-group__head"><span>Color</span><strong data-variant-label>Bone</strong></div>
+          <div class="swatches" role="radiogroup">
+            <button type="button" class="swatch-btn swatch--bone"   role="radio" aria-checked="true"  data-variant-option data-option-value="Bone"></button>
+            <button type="button" class="swatch-btn swatch--linen"  role="radio" aria-checked="false" data-variant-option data-option-value="Linen"></button>
+            <button type="button" class="swatch-btn swatch--moss"   role="radio" aria-checked="false" data-variant-option data-option-value="Moss"></button>
+            <button type="button" class="swatch-btn swatch--russet" role="radio" aria-checked="false" data-variant-option data-option-value="Russet"></button>
+          </div>
+        </div>
+        <div class="variant-group">
+          <div class="variant-group__head"><span>Size</span><strong data-variant-label>Medium</strong></div>
+          <div class="size-options" role="radiogroup">
+            <button type="button" class="size-btn" role="radio" aria-checked="false" data-variant-option data-option-value="Small">Small</button>
+            <button type="button" class="size-btn" role="radio" aria-checked="true"  data-variant-option data-option-value="Medium">Medium</button>
+            <button type="button" class="size-btn" role="radio" aria-checked="false" data-variant-option data-option-value="Large">Large</button>
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} Subscribe & Save toggle (cosmetic — wire to Shopify Subscriptions/Recharge) {%- endcomment -%}
+      <fieldset class="purchase-mode" aria-label="Purchase mode">
+        <input type="radio" name="purchase_mode" id="pm-once" value="once" checked>
+        <label for="pm-once">One-time</label>
+        <input type="radio" name="purchase_mode" id="pm-sub" value="subscribe">
+        <label for="pm-sub">Subscribe <span class="purchase-mode__save">Save 15%</span></label>
+      </fieldset>
+
+      {%- if product.inventory_management != blank and current_variant.inventory_quantity > 0 and current_variant.inventory_quantity < 10 -%}
+        <p class="inventory-low">Only {{ current_variant.inventory_quantity }} left in {{ current_variant.title }}.</p>
+      {%- endif -%}
+
+      <div class="qty-row">
+        <div class="qty">
+          <button type="button" data-qty-dec aria-label="Decrease quantity">−</button>
+          <input type="number" name="quantity" min="1" max="10" value="1" aria-label="Quantity">
+          <button type="button" data-qty-inc aria-label="Increase quantity">+</button>
+        </div>
+        <button type="submit" class="btn btn--full" {% if current_variant.available == false %}disabled{% endif %}>
+          {%- if current_variant.available == false -%}
+            Sold out
+          {%- else -%}
+            Add to cart — {% if current_variant %}{{ current_variant.price | money }}{% else %}$148{% endif %}
+          {%- endif -%}
+        </button>
+      </div>
+
+      {%- if additional_checkout_buttons -%}
+        <div class="additional-checkout-buttons" style="margin-top:8px">{{ content_for_additional_checkout_buttons }}</div>
+      {%- endif -%}
+    </form>
+
+    <div class="pdp-trust">
+      <div class="pdp-trust__item">{% render 'icon-truck' %} <span>Free U.S. shipping over $75</span></div>
+      <div class="pdp-trust__item">{% render 'icon-return' %} <span>60-day no-questions returns</span></div>
+      <div class="pdp-trust__item">{% render 'icon-paw' %} <span>Made for cats &amp; dogs</span></div>
+    </div>
+
+    <div class="accordion">
+      <div class="accordion__item" data-open="true">
+        <button class="accordion__head" type="button" aria-expanded="true">Materials & Construction {% render 'icon-plus' %}</button>
+        <div class="accordion__body">
+          <p>Outer shell: 100% European flax linen, OEKO-TEX® Standard 100 certified. Inner cushion: 100% post-consumer recycled PET fiber, sourced from U.S. plastic bottles. All thread is 100% recycled polyester. Sewn in North Carolina.</p>
+        </div>
+      </div>
+      <div class="accordion__item">
+        <button class="accordion__head" type="button" aria-expanded="false">Care {% render 'icon-plus' %}</button>
+        <div class="accordion__body">
+          <p>Remove inner cushion. Machine-wash cover cold, gentle cycle. Tumble-dry low or line-dry. Avoid bleach. The linen will soften and develop a subtle patina with each wash.</p>
+        </div>
+      </div>
+      <div class="accordion__item">
+        <button class="accordion__head" type="button" aria-expanded="false">Dimensions {% render 'icon-plus' %}</button>
+        <div class="accordion__body">
+          <p>Small: 24" × 18" × 4". Suited to cats and dogs up to 25 lbs.<br>
+             Medium: 32" × 24" × 5". 25–55 lbs.<br>
+             Large: 40" × 30" × 6". 55–95 lbs.</p>
+        </div>
+      </div>
+      <div class="accordion__item">
+        <button class="accordion__head" type="button" aria-expanded="false">Shipping & Returns {% render 'icon-plus' %}</button>
+        <div class="accordion__body">
+          <p>Complimentary U.S. ground shipping on orders over $75. International rates calculated at checkout. 60-day returns: wash it, sleep on it, walk on it. If it doesn't fit your home, send it back.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sticky-atc" data-sticky-atc>
+  <div class="sticky-atc__info">
+    <div class="sticky-atc__title">{{ product.title | default: 'The Daily Bed' }}</div>
+    <div class="sticky-atc__price">{% if current_variant %}{{ current_variant.price | money }}{% else %}$148.00{% endif %}</div>
+  </div>
+  <button class="btn btn--small" type="button" onclick="document.querySelector('[data-add-to-cart] [type=submit]').click()">Add to cart</button>
+</div>
+
+{% schema %}
+{
+  "name": "Product detail",
+  "settings": []
+}
+{% endschema %}

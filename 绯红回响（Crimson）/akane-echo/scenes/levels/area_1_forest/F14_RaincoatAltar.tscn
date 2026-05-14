@@ -1,0 +1,26 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/RoomBase.gd" id="1_base"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/RoomDoor.tscn" id="2_door"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/SpawnPoint.tscn" id="3_spawn"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/BossUmbrellaMan.tscn" id="4_boss"]
+
+[node name="F14_RaincoatAltar" type="Node3D"]
+script = ExtResource("1_base")
+room_id = "F-14"
+room_width = 24.0
+room_depth = 22.0
+door_north = true
+floor_color = Color(0.30, 0.30, 0.36, 1)
+
+[node name="DoorToF13" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 11.0)
+target_scene = "res://scenes/levels/area_1_forest/F13_FathersFootsteps.tscn"
+target_spawn_id = "from_F14"
+
+[node name="SpawnFromF13" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 9)
+spawn_id = "from_F13"
+
+[node name="Boss" parent="." instance=ExtResource("4_boss")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)

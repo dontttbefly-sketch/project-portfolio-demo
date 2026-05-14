@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/GrapplePoint.gd" id="1_gp"]
+[ext_resource type="Texture2D" path="res://assets/generated/props/grapple_point_first_pass.png" id="2_tex"]
+
+[node name="GrapplePoint" type="Node3D"]
+script = ExtResource("1_gp")
+
+[node name="Sprite" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+pixel_size = 0.06
+billboard = 1
+shaded = false
+texture_filter = 0
+texture = ExtResource("2_tex")
+modulate = Color(1, 1, 1, 1)

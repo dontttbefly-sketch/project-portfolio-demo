@@ -1,0 +1,28 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/RoomBase.gd" id="1_base"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/RoomDoor.tscn" id="2_door"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/SpawnPoint.tscn" id="3_spawn"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/BossSwordMaiden.tscn" id="4_boss"]
+
+[node name="H18_FinalDuel" type="Node3D"]
+script = ExtResource("1_base")
+room_id = "H-18"
+room_width = 26.0
+room_depth = 24.0
+door_north = true
+has_rain = false
+floor_color = Color(0.96, 0.92, 0.94, 1)
+wall_color = Color(0.78, 0.72, 0.76, 1)
+
+[node name="DoorToH17" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 12.0)
+target_scene = "res://scenes/levels/area_4_garden/H17_BossPrep.tscn"
+target_spawn_id = "from_H18"
+
+[node name="SpawnFromH17" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 10)
+spawn_id = "from_H17"
+
+[node name="Boss" parent="." instance=ExtResource("4_boss")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6)

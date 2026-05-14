@@ -1,0 +1,26 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/EchoTrace.gd" id="1_trace"]
+[ext_resource type="Texture2D" path="res://assets/generated/props/echo_trace_first_pass.png" id="2_tex"]
+
+[sub_resource type="BoxShape3D" id="shape_trace"]
+size = Vector3(1.2, 1.4, 1.2)
+
+[node name="EchoTrace" type="Area3D"]
+collision_layer = 0
+collision_mask = 2
+monitoring = true
+script = ExtResource("1_trace")
+
+[node name="Sprite" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+pixel_size = 0.05
+billboard = 1
+shaded = false
+texture_filter = 0
+texture = ExtResource("2_tex")
+modulate = Color(1, 1, 1, 1)
+
+[node name="Shape" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+shape = SubResource("shape_trace")

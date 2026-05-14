@@ -1,0 +1,148 @@
+{
+  "sections": {
+    "hero": {
+      "type": "hero-editorial",
+      "settings": {
+        "eyebrow": "The Daily — Spring Edition",
+        "heading": "Goods for the household,\nand the ones in it.",
+        "body": "Considered linens, ceramics, and leather for cats, dogs, and the people who live with them. Made to be left out, not put away.",
+        "cta_text": "Discover The Daily",
+        "cta_link": "/collections/the-daily"
+      }
+    },
+    "trust": {
+      "type": "trust-strip",
+      "blocks": {
+        "shipping":  { "type": "item", "settings": { "icon": "truck",   "title": "Free U.S. Shipping", "body": "On orders over $75. Ships from Brooklyn in 2 business days." } },
+        "vet":       { "type": "item", "settings": { "icon": "shield",  "title": "Vet-Reviewed",      "body": "Foods and supplements formulated with practicing veterinarians." } },
+        "heirloom":  { "type": "item", "settings": { "icon": "sparkle", "title": "Heirloom Materials", "body": "OEKO-TEX® linen, food-grade ceramic, vegetable-tanned leather." } },
+        "returns":   { "type": "item", "settings": { "icon": "return",  "title": "60-Day Returns",     "body": "Wash it, sleep on it, walk on it. Return it within 60 days." } }
+      },
+      "block_order": ["shipping", "vet", "heirloom", "returns"]
+    },
+    "split": {
+      "type": "split-collections",
+      "blocks": {
+        "cats": {
+          "type": "card",
+          "settings": {
+            "tone": "cat",
+            "eyebrow": "For Cats",
+            "heading": "The quiet ones.",
+            "body": "Beds, towers, and toys made of felted wool, organic cotton, and untreated woods.",
+            "cta_text": "Shop Cats",
+            "link": "/collections/cats"
+          }
+        },
+        "dogs": {
+          "type": "card",
+          "settings": {
+            "tone": "dog",
+            "eyebrow": "For Dogs",
+            "heading": "The companions.",
+            "body": "Vegetable-tanned leashes, waxed-cotton coats, washable beds that hold up to a long life.",
+            "cta_text": "Shop Dogs",
+            "link": "/collections/dogs"
+          }
+        }
+      },
+      "block_order": ["cats", "dogs"]
+    },
+    "featured": {
+      "type": "featured-products",
+      "settings": {
+        "eyebrow": "The Daily",
+        "heading": "The Daily, in stock now.",
+        "body": "Twelve everyday goods, in four heirloom tones — designed once, restocked always.",
+        "product_count": 8,
+        "link_text": "Shop The Daily",
+        "link_url": "/collections/the-daily"
+      }
+    },
+    "essay": {
+      "type": "brand-essay",
+      "settings": {
+        "eyebrow": "Our Approach",
+        "heading": "We design for the way pets actually live.",
+        "body": "<p>Most pet goods are made for stores, not homes — bright, branded, and stacked on a shelf. We start the other way around: from a kitchen counter, a worn-in armchair, the linen sheet your dog has chosen as his own.</p><p>Every piece in The Daily is meant to be left out. To be folded into the rhythm of a household, not stowed in a closet between visits.</p>",
+        "signature": "— The studio, Brooklyn"
+      }
+    },
+    "materials": {
+      "type": "materials-craft",
+      "settings": {
+        "eyebrow": "Considered Materials",
+        "heading": "Built to live with you for a long time."
+      },
+      "blocks": {
+        "linen": {
+          "type": "material",
+          "settings": {
+            "placeholder_url": "https://images.unsplash.com/photo-1604147706283-d7119b5b822c?auto=format&fit=crop&w=800&q=80",
+            "eyebrow": "01 / Linen",
+            "title": "OEKO-TEX® Linen",
+            "body": "Woven in Lithuania from European flax. Softens with every wash. Naturally hypoallergenic and machine-washable at home."
+          }
+        },
+        "ceramic": {
+          "type": "material",
+          "settings": {
+            "placeholder_url": "https://images.unsplash.com/photo-1610701596061-2ecf227e85b2?auto=format&fit=crop&w=800&q=80",
+            "eyebrow": "02 / Ceramic",
+            "title": "Food-Grade Ceramic",
+            "body": "Wheel-thrown stoneware finished with a lead-free, FDA-approved glaze. Heavier on the floor; gentler on whiskers."
+          }
+        },
+        "leather": {
+          "type": "material",
+          "settings": {
+            "placeholder_url": "https://images.unsplash.com/photo-1543465077-db45d34b88a5?auto=format&fit=crop&w=800&q=80",
+            "eyebrow": "03 / Leather",
+            "title": "Vegetable-Tanned Leather",
+            "body": "Full-grain hides tanned with chestnut bark in Tuscany. No chrome, no shortcuts. Patinas like a pair of well-loved boots."
+          }
+        }
+      },
+      "block_order": ["linen", "ceramic", "leather"]
+    },
+    "press": {
+      "type": "press-logos",
+      "settings": { "eyebrow": "As seen in" },
+      "blocks": {
+        "ad":   { "type": "logo", "settings": { "name": "Architectural Digest" } },
+        "dom":  { "type": "logo", "settings": { "name": "Domino" } },
+        "cut":  { "type": "logo", "settings": { "name": "The Cut" } },
+        "at":   { "type": "logo", "settings": { "name": "Apartment Therapy" } },
+        "wire": { "type": "logo", "settings": { "name": "Wirecutter" } }
+      },
+      "block_order": ["ad", "dom", "cut", "at", "wire"]
+    },
+    "ugc": {
+      "type": "ugc-grid",
+      "settings": {
+        "eyebrow": "From the household",
+        "heading": "Lived in.",
+        "body": "Real homes, real companions. Tag #livedinwithND for a chance to be featured.",
+        "handle": "nestandden",
+        "handle_url": "https://instagram.com/nestandden"
+      },
+      "blocks": {
+        "u1": { "type": "post", "settings": { "placeholder_url": "https://images.unsplash.com/photo-1574158622682-e40e69881006?auto=format&fit=crop&w=800&q=80", "handle": "marlow.thecat", "location": "Brooklyn" } },
+        "u2": { "type": "post", "settings": { "placeholder_url": "https://images.unsplash.com/photo-1583512603805-3cc6b41f3edb?auto=format&fit=crop&w=800&q=80", "handle": "june.and.archie", "location": "Portland" } },
+        "u3": { "type": "post", "settings": { "placeholder_url": "https://images.unsplash.com/photo-1494256997604-768d1f608cac?auto=format&fit=crop&w=800&q=80", "handle": "the.linen.house", "location": "Mill Valley" } },
+        "u4": { "type": "post", "settings": { "placeholder_url": "https://images.unsplash.com/photo-1583511666407-5f06533f2113?auto=format&fit=crop&w=800&q=80", "handle": "sundaymornings", "location": "Toronto" } }
+      },
+      "block_order": ["u1", "u2", "u3", "u4"]
+    }
+  },
+  "order": [
+    "hero",
+    "trust",
+    "split",
+    "featured",
+    "essay",
+    "materials",
+    "press",
+    "ugc"
+  ]
+}

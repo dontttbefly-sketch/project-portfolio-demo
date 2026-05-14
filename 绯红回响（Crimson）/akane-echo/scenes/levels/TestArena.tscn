@@ -1,0 +1,187 @@
+[gd_scene load_steps=24 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/player/Player.tscn" id="1_player"]
+[ext_resource type="PackedScene" path="res://scenes/ui/DebugPanel.tscn" id="2_debug"]
+[ext_resource type="Texture2D" path="res://assets/generated/environment/floor_wet_stone_first_pass.png" id="3_floor_tex"]
+[ext_resource type="Texture2D" path="res://assets/generated/environment/wall_gray_wash_first_pass.png" id="4_wall_tex"]
+[ext_resource type="Texture2D" path="res://assets/generated/props/echo_stele_first_pass.png" id="5_stele_tex"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/TestDummy.tscn" id="6_dummy"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/FadedWall.tscn" id="7_fwall"]
+[ext_resource type="PackedScene" path="res://scenes/ui/EchoBar.tscn" id="8_echobar"]
+[ext_resource type="PackedScene" path="res://scenes/ui/DesatOverlay.tscn" id="9_desat"]
+
+[sub_resource type="StandardMaterial3D" id="mat_floor"]
+shading_mode = 0
+albedo_texture = ExtResource("3_floor_tex")
+texture_filter = 0
+uv1_scale = Vector3(15, 15, 1)
+
+[sub_resource type="PlaneMesh" id="mesh_floor"]
+size = Vector2(30, 30)
+material = SubResource("mat_floor")
+
+[sub_resource type="StandardMaterial3D" id="mat_wall"]
+shading_mode = 0
+albedo_texture = ExtResource("4_wall_tex")
+texture_filter = 0
+
+[sub_resource type="BoxMesh" id="mesh_wall_h"]
+size = Vector3(30, 2, 0.5)
+material = SubResource("mat_wall")
+
+[sub_resource type="BoxMesh" id="mesh_wall_v"]
+size = Vector3(0.5, 2, 30)
+material = SubResource("mat_wall")
+
+[sub_resource type="BoxShape3D" id="shape_wall_h"]
+size = Vector3(30, 2, 0.5)
+
+[sub_resource type="BoxShape3D" id="shape_wall_v"]
+size = Vector3(0.5, 2, 30)
+
+[sub_resource type="StandardMaterial3D" id="mat_pillar"]
+shading_mode = 0
+albedo_color = Color(0.78, 0.78, 0.82, 1)
+
+[sub_resource type="CylinderMesh" id="mesh_pillar"]
+top_radius = 0.4
+bottom_radius = 0.45
+height = 2.5
+material = SubResource("mat_pillar")
+
+[sub_resource type="StandardMaterial3D" id="mat_box_red"]
+shading_mode = 0
+albedo_color = Color(0.55, 0.10, 0.18, 1)
+
+[sub_resource type="BoxMesh" id="mesh_box_red"]
+size = Vector3(1.2, 0.8, 1.2)
+material = SubResource("mat_box_red")
+
+[sub_resource type="StandardMaterial3D" id="mat_platform"]
+shading_mode = 0
+albedo_color = Color(0.42, 0.46, 0.52, 1)
+
+[sub_resource type="CylinderMesh" id="mesh_platform"]
+top_radius = 1.5
+bottom_radius = 1.5
+height = 0.3
+material = SubResource("mat_platform")
+
+[node name="TestArena" type="Node3D"]
+
+[node name="Floor" type="MeshInstance3D" parent="."]
+mesh = SubResource("mesh_floor")
+
+[node name="Walls" type="Node3D" parent="."]
+
+[node name="WallNorth" type="StaticBody3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -15.25)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Mesh" type="MeshInstance3D" parent="Walls/WallNorth"]
+mesh = SubResource("mesh_wall_h")
+
+[node name="Collision" type="CollisionShape3D" parent="Walls/WallNorth"]
+shape = SubResource("shape_wall_h")
+
+[node name="WallSouth" type="StaticBody3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 15.25)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Mesh" type="MeshInstance3D" parent="Walls/WallSouth"]
+mesh = SubResource("mesh_wall_h")
+
+[node name="Collision" type="CollisionShape3D" parent="Walls/WallSouth"]
+shape = SubResource("shape_wall_h")
+
+[node name="WallEast" type="StaticBody3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.25, 1, 0)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Mesh" type="MeshInstance3D" parent="Walls/WallEast"]
+mesh = SubResource("mesh_wall_v")
+
+[node name="Collision" type="CollisionShape3D" parent="Walls/WallEast"]
+shape = SubResource("shape_wall_v")
+
+[node name="WallWest" type="StaticBody3D" parent="Walls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.25, 1, 0)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Mesh" type="MeshInstance3D" parent="Walls/WallWest"]
+mesh = SubResource("mesh_wall_v")
+
+[node name="Collision" type="CollisionShape3D" parent="Walls/WallWest"]
+shape = SubResource("shape_wall_v")
+
+[node name="EchoStele" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+pixel_size = 0.03125
+billboard = 1
+shaded = false
+texture_filter = 0
+texture = ExtResource("5_stele_tex")
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
+has_dash = true
+
+[node name="Dummies" type="Node3D" parent="."]
+
+[node name="TestDummy1" parent="Dummies" instance=ExtResource("6_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, -3)
+
+[node name="TestDummy2" parent="Dummies" instance=ExtResource("6_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, -3)
+
+[node name="TestDummy3" parent="Dummies" instance=ExtResource("6_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -8)
+
+[node name="TestDummy4" parent="Dummies" instance=ExtResource("6_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 1)
+
+[node name="TestDummy5" parent="Dummies" instance=ExtResource("6_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, 1)
+
+[node name="FadedWall" parent="." instance=ExtResource("7_fwall")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0, -8)
+
+[node name="Decorations" type="Node3D" parent="."]
+
+[node name="Pillar1" type="MeshInstance3D" parent="Decorations"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1.25, 12)
+mesh = SubResource("mesh_pillar")
+
+[node name="Pillar2" type="MeshInstance3D" parent="Decorations"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1.25, 12)
+mesh = SubResource("mesh_pillar")
+
+[node name="Pillar3" type="MeshInstance3D" parent="Decorations"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1.25, -12)
+mesh = SubResource("mesh_pillar")
+
+[node name="Pillar4" type="MeshInstance3D" parent="Decorations"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1.25, -12)
+mesh = SubResource("mesh_pillar")
+
+[node name="BoxRed1" type="MeshInstance3D" parent="Decorations"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.4, 7)
+mesh = SubResource("mesh_box_red")
+
+[node name="BoxRed2" type="MeshInstance3D" parent="Decorations"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0.4, 7)
+mesh = SubResource("mesh_box_red")
+
+[node name="Platform" type="MeshInstance3D" parent="Decorations"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, -4)
+mesh = SubResource("mesh_platform")
+
+[node name="DebugPanel" parent="." instance=ExtResource("2_debug")]
+
+[node name="EchoBar" parent="." instance=ExtResource("8_echobar")]
+
+[node name="DesatOverlay" parent="." instance=ExtResource("9_desat")]

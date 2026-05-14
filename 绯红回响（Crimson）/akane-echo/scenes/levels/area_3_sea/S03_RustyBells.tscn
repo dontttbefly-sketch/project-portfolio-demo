@@ -1,0 +1,38 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/RoomBase.gd" id="1_base"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/RoomDoor.tscn" id="2_door"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/SpawnPoint.tscn" id="3_spawn"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/RustyBellRinger.tscn" id="4_r"]
+
+[node name="S03_RustyBells" type="Node3D"]
+script = ExtResource("1_base")
+room_id = "S-03"
+room_width = 16.0
+room_depth = 14.0
+door_north = true
+door_south = true
+has_rain = false
+floor_color = Color(0.32, 0.40, 0.55, 1)
+wall_color = Color(0.08, 0.10, 0.18, 1)
+
+[node name="DoorToS02" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 7.0)
+target_scene = "res://scenes/levels/area_3_sea/S02_RustedDeck.tscn"
+target_spawn_id = "from_S03"
+
+[node name="DoorToS04" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -7.0)
+target_scene = "res://scenes/levels/area_3_sea/S04_Stelle1.tscn"
+target_spawn_id = "from_S03"
+
+[node name="SpawnFromS02" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
+spawn_id = "from_S02"
+
+[node name="SpawnFromS04" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)
+spawn_id = "from_S04"
+
+[node name="Rusty1" parent="." instance=ExtResource("4_r")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)

@@ -1,0 +1,45 @@
+{
+  "sections": {
+    "hero":   { "type": "about-hero",   "settings": {} },
+    "story":  { "type": "about-story",  "settings": {} },
+    "values": {
+      "type": "about-values",
+      "settings": {
+        "eyebrow": "How we work",
+        "heading": "Three things we won't cut corners on."
+      },
+      "blocks": {
+        "v1": { "type": "value", "settings": { "icon": "leaf",   "title": "Considered Materials", "body": "Every fiber, finish, and glaze is sourced for what it does over years, not what it costs over weeks." } },
+        "v2": { "type": "value", "settings": { "icon": "shield", "title": "Honest Pricing",       "body": "We list our cost-of-goods on every product page. No reference prices, no fake sales, no inflated MSRP." } },
+        "v3": { "type": "value", "settings": { "icon": "paw",    "title": "Tested in Households", "body": "Two hundred volunteer homes test every Daily piece for at least 90 days before it ships." } }
+      },
+      "block_order": ["v1", "v2", "v3"]
+    },
+    "materials": {
+      "type": "materials-craft",
+      "settings": {
+        "eyebrow": "Considered Materials",
+        "heading": "What we work with."
+      },
+      "blocks": {
+        "linen":   { "type": "material", "settings": { "placeholder_url": "https://images.unsplash.com/photo-1604147706283-d7119b5b822c?auto=format&fit=crop&w=800&q=80", "eyebrow": "01 / Linen",   "title": "OEKO-TEX® Linen",       "body": "Woven in Lithuania from European flax. Softens with every wash. Naturally hypoallergenic and machine-washable." } },
+        "ceramic": { "type": "material", "settings": { "placeholder_url": "https://images.unsplash.com/photo-1610701596061-2ecf227e85b2?auto=format&fit=crop&w=800&q=80", "eyebrow": "02 / Ceramic", "title": "Food-Grade Ceramic",   "body": "Wheel-thrown stoneware, lead-free FDA-approved glaze. Heavy on the floor, gentle on whiskers." } },
+        "leather": { "type": "material", "settings": { "placeholder_url": "https://images.unsplash.com/photo-1543465077-db45d34b88a5?auto=format&fit=crop&w=800&q=80", "eyebrow": "03 / Leather", "title": "Vegetable-Tanned Leather", "body": "Full-grain hides tanned with chestnut bark in Tuscany. No chrome, no shortcuts." } }
+      },
+      "block_order": ["linen", "ceramic", "leather"]
+    },
+    "press": {
+      "type": "press-logos",
+      "settings": { "eyebrow": "As seen in" },
+      "blocks": {
+        "ad":   { "type": "logo", "settings": { "name": "Architectural Digest" } },
+        "dom":  { "type": "logo", "settings": { "name": "Domino" } },
+        "cut":  { "type": "logo", "settings": { "name": "The Cut" } },
+        "at":   { "type": "logo", "settings": { "name": "Apartment Therapy" } },
+        "wire": { "type": "logo", "settings": { "name": "Wirecutter" } }
+      },
+      "block_order": ["ad", "dom", "cut", "at", "wire"]
+    }
+  },
+  "order": ["hero", "story", "values", "materials", "press"]
+}

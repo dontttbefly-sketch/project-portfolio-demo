@@ -1,0 +1,39 @@
+{%- comment -%}
+  SEO + Open Graph meta. Falls back gracefully when fields are missing.
+{%- endcomment -%}
+
+{%- if template contains 'product' and product -%}
+  {%- assign og_title = product.title -%}
+  {%- assign og_description = product.description | strip_html | truncate: 200 -%}
+  {%- assign og_image = product.featured_image | image_url: width: 1200 -%}
+  {%- assign og_type = 'product' -%}
+{%- elsif template contains 'collection' and collection -%}
+  {%- assign og_title = collection.title -%}
+  {%- assign og_description = collection.description | strip_html | truncate: 200 -%}
+  {%- assign og_image = collection.image | image_url: width: 1200 -%}
+  {%- assign og_type = 'website' -%}
+{%- elsif template contains 'page' and page -%}
+  {%- assign og_title = page.title -%}
+  {%- assign og_description = page.content | strip_html | truncate: 200 -%}
+  {%- assign og_type = 'website' -%}
+{%- else -%}
+  {%- assign og_title = shop.name -%}
+  {%- assign og_description = shop.description | default: 'Quiet goods for the household, designed for cats, dogs, and the people who live with them.' -%}
+  {%- assign og_type = 'website' -%}
+{%- endif -%}
+
+<meta name="description" content="{{ og_description | escape }}">
+<meta property="og:type" content="{{ og_type }}">
+<meta property="og:title" content="{{ og_title | escape }}">
+<meta property="og:description" content="{{ og_description | escape }}">
+<meta property="og:url" content="{{ canonical_url }}">
+<meta property="og:site_name" content="{{ shop.name }}">
+{%- if og_image -%}
+  <meta property="og:image" content="{{ og_image }}">
+{%- endif -%}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ og_title | escape }}">
+<meta name="twitter:description" content="{{ og_description | escape }}">
+{%- if og_image -%}
+  <meta name="twitter:image" content="{{ og_image }}">
+{%- endif -%}

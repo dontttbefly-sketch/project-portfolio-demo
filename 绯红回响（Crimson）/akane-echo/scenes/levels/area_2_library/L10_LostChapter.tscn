@@ -1,0 +1,47 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/RoomBase.gd" id="1_base"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/RoomDoor.tscn" id="2_door"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/SpawnPoint.tscn" id="3_spawn"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/PageFlipper.tscn" id="4_pf"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/EchoShard.tscn" id="5_shard"]
+
+[node name="L10_LostChapter" type="Node3D"]
+script = ExtResource("1_base")
+room_id = "L-10"
+room_width = 18.0
+room_depth = 14.0
+door_north = true
+door_south = true
+has_rain = false
+floor_color = Color(0.55, 0.50, 0.42, 1)
+wall_color = Color(0.20, 0.15, 0.10, 1)
+
+[node name="DoorToL09" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 7.0)
+target_scene = "res://scenes/levels/area_2_library/L09_MirrorCorridor.tscn"
+target_spawn_id = "from_L10"
+
+[node name="DoorToL11" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -7.0)
+target_scene = "res://scenes/levels/area_2_library/L11_BookBurner.tscn"
+target_spawn_id = "from_L10"
+
+[node name="SpawnFromL09" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
+spawn_id = "from_L09"
+
+[node name="SpawnFromL11" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)
+spawn_id = "from_L11"
+
+[node name="PF1" parent="." instance=ExtResource("4_pf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 0)
+
+[node name="PF2" parent="." instance=ExtResource("4_pf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, -2)
+
+[node name="Shard1" parent="." instance=ExtResource("5_shard")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1)
+shard_id = "L10_shard1"
+fragment_text = "失落的章节。原来不是丢了，是没人愿意写下去。"

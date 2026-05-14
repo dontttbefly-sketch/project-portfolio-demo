@@ -1,0 +1,47 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/main/Game.gd" id="1_game"]
+[ext_resource type="PackedScene" path="res://scenes/player/Player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/ui/DebugPanel.tscn" id="3_debug"]
+[ext_resource type="PackedScene" path="res://scenes/ui/EchoBar.tscn" id="4_echo"]
+[ext_resource type="PackedScene" path="res://scenes/ui/DesatOverlay.tscn" id="5_desat"]
+[ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="6_hud"]
+
+[sub_resource type="Environment" id="env_main"]
+background_mode = 1
+background_color = Color(0.06, 0.06, 0.08, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.55, 0.62, 0.75, 1)
+ambient_light_energy = 0.55
+tonemap_mode = 2
+tonemap_exposure = 1.0
+fog_enabled = true
+fog_light_color = Color(0.4, 0.48, 0.58, 1)
+fog_density = 0.008
+glow_enabled = true
+glow_intensity = 0.3
+glow_strength = 0.9
+glow_blend_mode = 1
+
+[node name="Game" type="Node3D"]
+script = ExtResource("1_game")
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+
+[node name="RoomContainer" type="Node3D" parent="."]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("env_main")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, 0.328703, -0.378522, 0, 0.755, 0.65557, 0.5, -0.5677, 0.654, 0, 5, 0)
+light_energy = 0.6
+shadow_enabled = false
+
+[node name="DebugPanel" parent="." instance=ExtResource("3_debug")]
+
+[node name="EchoBar" parent="." instance=ExtResource("4_echo")]
+
+[node name="DesatOverlay" parent="." instance=ExtResource("5_desat")]
+
+[node name="HUD" parent="." instance=ExtResource("6_hud")]

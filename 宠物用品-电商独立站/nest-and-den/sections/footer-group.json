@@ -1,0 +1,39 @@
+{
+  "type": "footer",
+  "name": "Footer group",
+  "sections": {
+    "newsletter": {
+      "type": "newsletter",
+      "settings": {}
+    },
+    "footer": {
+      "type": "footer",
+      "settings": {},
+      "blocks": {
+        "shop": {
+          "type": "menu",
+          "settings": {
+            "heading": "Shop",
+            "fallback_links": "Cats::/collections/cats|Dogs::/collections/dogs|The Daily::/collections/the-daily|Gift Cards::/products/gift-card"
+          }
+        },
+        "help": {
+          "type": "menu",
+          "settings": {
+            "heading": "Help",
+            "fallback_links": "Shipping & Returns::/policies/shipping-policy|FAQ::/pages/faq|Contact::/pages/contact|Care Guides::/pages/care"
+          }
+        },
+        "company": {
+          "type": "menu",
+          "settings": {
+            "heading": "Company",
+            "fallback_links": "Our Story::/pages/about|Press::/pages/press|Stockists::/pages/stockists|Sustainability::/pages/sustainability"
+          }
+        }
+      },
+      "block_order": ["shop", "help", "company"]
+    }
+  },
+  "order": ["newsletter", "footer"]
+}

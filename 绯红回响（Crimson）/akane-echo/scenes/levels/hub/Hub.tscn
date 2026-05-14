@@ -1,0 +1,114 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/RoomBase.gd" id="1_base"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/RoomDoor.tscn" id="2_door"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/SpawnPoint.tscn" id="3_spawn"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/EchoStele.tscn" id="4_stele"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/YongNPC.tscn" id="5_yong"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/Forge.tscn" id="6_forge"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/StelePortal.tscn" id="7_portal"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/SanctumPortal.tscn" id="8_sanctum"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/Boat.tscn" id="9_boat"]
+[ext_resource type="Script" path="res://scripts/levels/HubFinaleController.gd" id="10_hubctrl"]
+
+[node name="Hub" type="Node3D"]
+script = ExtResource("1_base")
+room_id = "Hub"
+room_width = 22.0
+room_depth = 18.0
+door_north = true
+door_south = true
+door_east = true
+door_west = true
+has_rain = false
+floor_color = Color(0.32, 0.34, 0.40, 1)
+wall_color = Color(0.06, 0.06, 0.10, 1)
+
+[node name="DoorToF01" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -8.0)
+target_scene = "res://scenes/levels/area_1_forest/F01_BridgeEdge.tscn"
+target_spawn_id = "from_hub"
+
+[node name="DoorToL01" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 11.0, 0, 0)
+target_scene = "res://scenes/levels/area_2_library/L01_Entrance.tscn"
+target_spawn_id = "from_hub"
+
+[node name="DoorToS01" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 9.0)
+target_scene = "res://scenes/levels/area_3_sea/S01_Coast.tscn"
+target_spawn_id = "from_hub"
+
+[node name="DoorToH01" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -11.0, 0, 0)
+target_scene = "res://scenes/levels/area_4_garden/H01_Entrance.tscn"
+target_spawn_id = "from_hub"
+
+[node name="SpawnDefault" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+spawn_id = "default"
+
+[node name="SpawnFromF01" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6)
+spawn_id = "from_F01"
+
+[node name="SpawnFromL01" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0, 0)
+spawn_id = "from_L01"
+
+[node name="SpawnFromS01" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 7)
+spawn_id = "from_S01"
+
+[node name="SpawnFromH01" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 0, 0)
+spawn_id = "from_H01"
+
+[node name="EchoStele" parent="." instance=ExtResource("4_stele")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3)
+stele_id = "stele_hub"
+spawn_id_for_respawn = "default"
+
+[node name="Yong" parent="." instance=ExtResource("5_yong")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, -3)
+
+[node name="ForgeAltar" parent="." instance=ExtResource("6_forge")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, -3)
+
+[node name="StelePortalForest" parent="." instance=ExtResource("7_portal")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.0, 0, 4)
+target_scene = "res://scenes/levels/area_1_forest/F12_EchoStele2.tscn"
+target_spawn_id = "from_F11"
+portal_name = "濡羽之森（Boss 战前）"
+required_boss = "boss_umbrella_man"
+
+[node name="StelePortalLibrary" parent="." instance=ExtResource("7_portal")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.0, 0, 4)
+target_scene = "res://scenes/levels/area_2_library/L15_PrologueRoom.tscn"
+target_spawn_id = "from_L14"
+portal_name = "燃尽书馆（Boss 战前）"
+required_boss = "boss_unwritten_one"
+
+[node name="StelePortalSea" parent="." instance=ExtResource("7_portal")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.0, 0, 4)
+target_scene = "res://scenes/levels/area_3_sea/S15_BossPrep.tscn"
+target_spawn_id = "from_S14"
+portal_name = "沉钟海（Boss 战前）"
+required_boss = "boss_lighthouse_keeper"
+
+[node name="StelePortalGarden" parent="." instance=ExtResource("7_portal")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.0, 0, 4)
+target_scene = "res://scenes/levels/area_4_garden/H16_Stelle3.tscn"
+target_spawn_id = "from_H15"
+portal_name = "白栀庭（Boss 战前）"
+required_boss = "boss_sword_maiden"
+
+[node name="SanctumPortal" parent="." instance=ExtResource("8_sanctum")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 7)
+
+[node name="Boat" parent="." instance=ExtResource("9_boat")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 7)
+visible = false
+
+[node name="FinaleController" type="Node" parent="."]
+script = ExtResource("10_hubctrl")

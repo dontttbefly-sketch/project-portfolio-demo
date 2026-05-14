@@ -1,0 +1,24 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/echo_bar.gd" id="1_echo"]
+
+[node name="EchoBar" type="CanvasLayer"]
+layer = 50
+
+[node name="Anchor" type="Control" parent="."]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -36.0
+offset_top = -120.0
+offset_right = 36.0
+offset_bottom = -48.0
+
+[node name="Bar" type="Control" parent="Anchor"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_echo")

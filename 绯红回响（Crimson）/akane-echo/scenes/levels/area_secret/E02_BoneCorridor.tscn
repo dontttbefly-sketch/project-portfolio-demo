@@ -1,0 +1,46 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/RoomBase.gd" id="1_base"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/RoomDoor.tscn" id="2_door"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/SpawnPoint.tscn" id="3_spawn"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/EchoStele.tscn" id="4_stele"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/EchoShard.tscn" id="5_shard"]
+
+[node name="E02_BoneCorridor" type="Node3D"]
+script = ExtResource("1_base")
+room_id = "E-02"
+room_width = 14.0
+room_depth = 16.0
+door_north = true
+door_south = true
+has_rain = false
+floor_color = Color(0.50, 0.48, 0.52, 1)
+wall_color = Color(0.10, 0.08, 0.10, 1)
+
+[node name="DoorToE01" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 8.0)
+target_scene = "res://scenes/levels/area_secret/E01_RiverBottom.tscn"
+target_spawn_id = "from_E02"
+
+[node name="DoorToE03" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -8.0)
+target_scene = "res://scenes/levels/area_secret/E03_FirstYong.tscn"
+target_spawn_id = "from_E02"
+
+[node name="SpawnFromE01" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
+spawn_id = "from_E01"
+
+[node name="SpawnFromE03" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6)
+spawn_id = "from_E03"
+
+[node name="EchoStele" parent="." instance=ExtResource("4_stele")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+stele_id = "stele_E02"
+spawn_id_for_respawn = "from_E01"
+
+[node name="Shard1" parent="." instance=ExtResource("5_shard")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, -3)
+shard_id = "E02_shard1"
+fragment_text = "残响的骨头。被遗忘者最坚硬的部分。"

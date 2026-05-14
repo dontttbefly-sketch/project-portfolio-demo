@@ -1,0 +1,84 @@
+{%- comment -%}
+  Product card. Accepts:
+    product   — Shopify product object (preferred)
+    fallback  — { title, price, image, handle, swatches:[] } for design-time placeholders
+    badge     — optional string (e.g. "New", "Bestseller")
+{%- endcomment -%}
+
+{%- liquid
+  if product
+    assign card_title = product.title
+    assign card_url   = product.url
+    assign card_image = product.featured_image
+    assign hover_image = product.images[1]
+  else
+    assign card_title = fallback.title
+    assign card_url   = fallback.url | default: '#'
+    assign card_image = fallback.image
+  endif
+-%}
+
+<a class="product-card" href="{{ card_url }}" data-reveal>
+  <div class="product-card__media">
+    {%- if badge -%}
+      <span class="product-card__badge">{{ badge }}</span>
+    {%- endif -%}
+    {%- if card_image -%}
+      {%- if product -%}
+        {{ card_image | image_url: width: 800 | image_tag:
+            widths: '300, 500, 800, 1000',
+            sizes: '(min-width: 900px) 25vw, 50vw',
+            loading: 'lazy',
+            alt: card_title }}
+        {%- if hover_image -%}
+          <img class="product-card__hover"
+               src="{{ hover_image | image_url: width: 800 }}"
+               alt=""
+               loading="lazy">
+        {%- endif -%}
+      {%- else -%}
+        <img src="{{ card_image }}" alt="{{ card_title | escape }}" loading="lazy">
+      {%- endif -%}
+    {%- else -%}
+      {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+    {%- endif -%}
+  </div>
+
+  <h3 class="product-card__title">{{ card_title }}</h3>
+  <div class="product-card__meta">
+    <span class="product-card__price">
+      {%- if product -%}
+        {%- render 'price', product: product -%}
+      {%- else -%}
+        {{ fallback.price }}
+      {%- endif -%}
+    </span>
+    {%- if product and product.metafields.reviews.rating.value -%}
+      <span class="product-card__rating">
+        {% render 'icon-star' %} {{ product.metafields.reviews.rating.value | round: 1 }}
+      </span>
+    {%- endif -%}
+  </div>
+
+  {%- if fallback.swatches -%}
+    <div class="product-card__swatches">
+      {%- for s in fallback.swatches -%}
+        <span class="product-card__swatch swatch--{{ s }}" aria-hidden="true"></span>
+      {%- endfor -%}
+    </div>
+  {%- elsif product -%}
+    {%- assign color_option = null -%}
+    {%- for opt in product.options_with_values -%}
+      {%- if opt.name == 'Color' or opt.name == 'Colour' -%}
+        {%- assign color_option = opt -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if color_option -%}
+      <div class="product-card__swatches">
+        {%- for v in color_option.values limit: 5 -%}
+          <span class="product-card__swatch swatch--{{ v | downcase | handle }}" title="{{ v }}"></span>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  {%- endif -%}
+</a>

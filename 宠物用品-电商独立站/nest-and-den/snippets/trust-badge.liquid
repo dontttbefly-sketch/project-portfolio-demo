@@ -1,0 +1,17 @@
+{%- comment -%}
+  Single trust strip item.
+  Params: icon (string, name w/o "icon-" prefix), title (string), body (string)
+{%- endcomment -%}
+<div class="trust-strip__item" data-reveal>
+  {%- case icon -%}
+    {%- when 'truck' -%}{% render 'icon-truck' %}
+    {%- when 'shield' -%}{% render 'icon-shield' %}
+    {%- when 'leaf' -%}{% render 'icon-leaf' %}
+    {%- when 'sparkle' -%}{% render 'icon-sparkle' %}
+    {%- when 'paw' -%}{% render 'icon-paw' %}
+    {%- when 'return' -%}{% render 'icon-return' %}
+    {%- else -%}{% render 'icon-paw' %}
+  {%- endcase -%}
+  <span class="eyebrow">{{ title }}</span>
+  <p>{{ body }}</p>
+</div>

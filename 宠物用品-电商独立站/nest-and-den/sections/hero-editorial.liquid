@@ -1,0 +1,70 @@
+{%- liquid
+  assign hero_image = section.settings.image
+  assign placeholder = 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?auto=format&fit=crop&w=2400&q=80'
+-%}
+
+<section class="hero" data-reveal>
+  <div class="hero__media">
+    {%- if hero_image != blank -%}
+      {{ hero_image | image_url: width: 2400 | image_tag:
+          widths: '600, 1000, 1600, 2000, 2400',
+          sizes: '100vw',
+          loading: 'eager',
+          fetchpriority: 'high',
+          alt: hero_image.alt | default: section.settings.heading }}
+    {%- else -%}
+      <img src="{{ placeholder }}"
+           alt="A cat and dog resting together on a linen-covered bed in soft morning light"
+           loading="eager"
+           fetchpriority="high"
+           width="2400" height="1600">
+    {%- endif -%}
+  </div>
+
+  <div class="hero__inner">
+    <div class="hero__copy">
+      {%- if section.settings.eyebrow != blank -%}
+        <span class="eyebrow">{{ section.settings.eyebrow }}</span>
+      {%- endif -%}
+      <h1>{{ section.settings.heading | newline_to_br }}</h1>
+      {%- if section.settings.body != blank -%}
+        <p>{{ section.settings.body }}</p>
+      {%- endif -%}
+      {%- if section.settings.cta_text != blank -%}
+        <a class="btn btn--ghost-light" href="{{ section.settings.cta_link }}">
+          {{ section.settings.cta_text }} {% render 'icon-arrow-right' %}
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Hero (editorial)",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Background image",
+      "info": "Use a 2400×1600 lifestyle shot. Falls back to a Unsplash placeholder."
+    },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "The Daily — Spring Edition" },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Headline",
+      "default": "Goods for the household,\nand the ones in it."
+    },
+    {
+      "type": "textarea",
+      "id": "body",
+      "label": "Body",
+      "default": "Considered linens, ceramics, and leather for cats, dogs, and the people who live with them. Made to be left out, not put away."
+    },
+    { "type": "text", "id": "cta_text", "label": "Button text", "default": "Discover The Daily" },
+    { "type": "url",  "id": "cta_link", "label": "Button link" }
+  ],
+  "presets": [{ "name": "Hero (editorial)" }]
+}
+{% endschema %}

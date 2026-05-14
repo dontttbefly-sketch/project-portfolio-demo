@@ -1,0 +1,22 @@
+{
+  "current": {
+    "logo_width": 120,
+    "bone": "#F4EFE6",
+    "cream": "#EDE5D6",
+    "linen": "#DCD2BD",
+    "ink": "#2A2724",
+    "ink_soft": "#5A554F",
+    "moss": "#3F4A3C",
+    "russet": "#9C5A3C",
+    "bark": "#6B4A38",
+    "announcement_enabled": true,
+    "announcement_text": "Complimentary U.S. shipping on orders over $75 · 60-day returns",
+    "cart_free_shipping_threshold": "$75"
+  },
+  "presets": {
+    "Default": {
+      "announcement_enabled": true,
+      "announcement_text": "Complimentary U.S. shipping on orders over $75 · 60-day returns"
+    }
+  }
+}

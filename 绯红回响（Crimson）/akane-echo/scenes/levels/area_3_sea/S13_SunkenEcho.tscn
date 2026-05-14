@@ -1,0 +1,50 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/RoomBase.gd" id="1_base"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/RoomDoor.tscn" id="2_door"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/SpawnPoint.tscn" id="3_spawn"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/WaveWhisperer.tscn" id="4_w"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/EchoShard.tscn" id="5_shard"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/HighlightShard.tscn" id="6_hs"]
+
+[node name="S13_SunkenEcho" type="Node3D"]
+script = ExtResource("1_base")
+room_id = "S-13"
+room_width = 14.0
+room_depth = 12.0
+door_north = true
+door_south = true
+has_rain = false
+floor_color = Color(0.32, 0.40, 0.55, 1)
+wall_color = Color(0.08, 0.10, 0.18, 1)
+
+[node name="DoorToS12" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6.0)
+target_scene = "res://scenes/levels/area_3_sea/S12_BellTongueGap.tscn"
+target_spawn_id = "from_S13"
+
+[node name="DoorToS14" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6.0)
+target_scene = "res://scenes/levels/area_3_sea/S14_RustyMutiny.tscn"
+target_spawn_id = "from_S13"
+
+[node name="SpawnFromS12" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4)
+spawn_id = "from_S12"
+
+[node name="SpawnFromS14" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4)
+spawn_id = "from_S14"
+
+[node name="Wave1" parent="." instance=ExtResource("4_w")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="Shard1" parent="." instance=ExtResource("5_shard")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, -3)
+shard_id = "S13_shard1"
+fragment_text = "回声里没有他，也没有我。但有海。海一直在。"
+
+[node name="HighlightShard" parent="." instance=ExtResource("6_hs")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 3)
+shard_id = "highlight_sea"
+fragment_text = "灯塔下，他对我说：「再见。」我以为是一句普通的话。"

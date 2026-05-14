@@ -1,0 +1,82 @@
+<section class="split-collections">
+  {%- for block in section.blocks -%}
+    {%- liquid
+      assign img = block.settings.image
+      assign placeholder = 'https://images.unsplash.com/photo-1543852786-1cf6624b9987?auto=format&fit=crop&w=1600&q=80'
+      if block.settings.tone == 'dog'
+        assign placeholder = 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=1600&q=80'
+      endif
+    -%}
+    <a class="split-card" href="{{ block.settings.link }}" {{ block.shopify_attributes }} data-reveal>
+      {%- if img != blank -%}
+        {{ img | image_url: width: 1600 | image_tag: widths: '600, 1000, 1400, 1800', sizes: '(min-width: 800px) 50vw, 100vw', loading: 'lazy', alt: block.settings.heading }}
+      {%- else -%}
+        <img src="{{ placeholder }}" alt="{{ block.settings.heading | escape }}" loading="lazy">
+      {%- endif -%}
+      <div class="split-card__inner">
+        <span class="eyebrow">{{ block.settings.eyebrow }}</span>
+        <h2>{{ block.settings.heading }}</h2>
+        <p>{{ block.settings.body }}</p>
+        <span class="btn btn--ghost-light btn--small">{{ block.settings.cta_text }} {% render 'icon-arrow-right' %}</span>
+      </div>
+    </a>
+  {%- endfor -%}
+</section>
+
+{% schema %}
+{
+  "name": "Split collections",
+  "max_blocks": 2,
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Card",
+      "settings": [
+        {
+          "type": "select",
+          "id": "tone",
+          "label": "Accent tone",
+          "options": [
+            { "value": "cat", "label": "Cat (moss)" },
+            { "value": "dog", "label": "Dog (russet)" }
+          ],
+          "default": "cat"
+        },
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "For Cats" },
+        { "type": "text", "id": "heading", "label": "Heading", "default": "The quiet ones." },
+        { "type": "textarea", "id": "body", "label": "Body", "default": "Beds, towers, and toys made of felted wool, organic cotton, and untreated woods." },
+        { "type": "text", "id": "cta_text", "label": "Button text", "default": "Shop Cats" },
+        { "type": "url",  "id": "link", "label": "Link" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Split collections",
+      "blocks": [
+        {
+          "type": "card",
+          "settings": {
+            "tone": "cat",
+            "eyebrow": "For Cats",
+            "heading": "The quiet ones.",
+            "body": "Beds, towers, and toys made of felted wool, organic cotton, and untreated woods.",
+            "cta_text": "Shop Cats"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "tone": "dog",
+            "eyebrow": "For Dogs",
+            "heading": "The companions.",
+            "body": "Vegetable-tanned leashes, waxed-cotton coats, washable beds that hold up to a long life.",
+            "cta_text": "Shop Dogs"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

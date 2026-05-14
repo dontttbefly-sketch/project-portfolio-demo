@@ -1,0 +1,56 @@
+<section class="section">
+  <div class="container" style="max-width: 980px">
+    <header style="margin-bottom: 48px">
+      <span class="eyebrow">{{ 'cart.general.title' | t }}</span>
+      <h1 style="margin-top: 8px">{{ cart.item_count | default: 0 }} {% if cart.item_count == 1 %}item{% else %}items{% endif %}</h1>
+    </header>
+
+    {%- if cart.item_count > 0 -%}
+      <form action="{{ routes.cart_url }}" method="post" novalidate>
+        <ul class="cart-lines" style="border-top:1px solid var(--linen);">
+          {%- for item in cart.items -%}
+            <li style="display:grid; grid-template-columns: 120px 1fr auto; gap:24px; padding:24px 0; border-bottom:1px solid var(--linen);">
+              <a href="{{ item.url }}" style="display:block">
+                {%- if item.image -%}
+                  {{ item.image | image_url: width: 240 | image_tag: alt: item.title }}
+                {%- endif -%}
+              </a>
+              <div>
+                <h4 style="margin-bottom: 8px">{{ item.product.title }}</h4>
+                <p style="color: var(--ink-soft); font-size: 0.875rem; margin-bottom: 12px">{{ item.variant.title }}</p>
+                <div class="qty" style="width: 120px">
+                  <button type="button" data-qty-dec aria-label="Decrease">−</button>
+                  <input type="number" name="updates[]" value="{{ item.quantity }}" min="0" aria-label="Quantity">
+                  <button type="button" data-qty-inc aria-label="Increase">+</button>
+                </div>
+              </div>
+              <div style="text-align:right; font-weight:500">{{ item.final_line_price | money }}</div>
+            </li>
+          {%- endfor -%}
+        </ul>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:32px; padding-top:32px; border-top:1px solid var(--linen);">
+          <div>
+            <p style="font-size:0.875rem; color: var(--ink-soft); margin: 0">{{ 'cart.general.shipping_note' | t }}</p>
+          </div>
+          <div style="text-align:right">
+            <span class="eyebrow" style="display:block; margin-bottom:6px">Subtotal</span>
+            <strong style="font-size:1.5rem">{{ cart.total_price | money }}</strong>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:12px; margin-top:32px; flex-wrap:wrap">
+          <button type="submit" name="update" class="btn btn--ghost">Update cart</button>
+          <button type="submit" name="checkout" class="btn">{{ 'cart.general.checkout' | t }}</button>
+        </div>
+      </form>
+    {%- else -%}
+      <p class="lead">{{ 'cart.general.empty' | t }}</p>
+      <a class="btn" href="{{ routes.collections_url }}/the-daily" style="margin-top: 24px">Shop The Daily</a>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{ "name": "Cart", "settings": [] }
+{% endschema %}

@@ -1,0 +1,41 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/RoomBase.gd" id="1_base"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/RoomDoor.tscn" id="2_door"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/SpawnPoint.tscn" id="3_spawn"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/FadedWall.tscn" id="4_wall"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/EchoShard.tscn" id="5_shard"]
+
+[node name="F13_FathersFootsteps" type="Node3D"]
+script = ExtResource("1_base")
+room_id = "F-13"
+room_width = 16.0
+room_depth = 16.0
+door_north = true
+door_south = true
+
+[node name="DoorToF12" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 8.0)
+target_scene = "res://scenes/levels/area_1_forest/F12_EchoStele2.tscn"
+target_spawn_id = "from_F13"
+
+[node name="SpawnFromF12" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
+spawn_id = "from_F12"
+
+[node name="SpawnFromF14" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6)
+spawn_id = "from_F14"
+
+[node name="FadedWall" parent="." instance=ExtResource("4_wall")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -7.5)
+
+[node name="DoorToF14" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -8.0)
+target_scene = "res://scenes/levels/area_1_forest/F14_RaincoatAltar.tscn"
+target_spawn_id = "from_F13"
+
+[node name="Shard1" parent="." instance=ExtResource("5_shard")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 0)
+shard_id = "F13_shard1"
+fragment_text = "他的脚步停在这里。前面，是他不再走的方向。"

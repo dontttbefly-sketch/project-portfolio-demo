@@ -1,0 +1,90 @@
+{%- if settings.announcement_enabled and settings.announcement_text != blank -%}
+  <div class="announcement" role="region" aria-label="Announcement">
+    {%- if settings.announcement_link != blank -%}
+      <a href="{{ settings.announcement_link }}">{{ settings.announcement_text }}</a>
+    {%- else -%}
+      {{ settings.announcement_text }}
+    {%- endif -%}
+  </div>
+{%- endif -%}
+
+<header class="site-header" data-scrolled="false">
+  <div class="container header-inner">
+    {%- comment -%} Left: nav (desktop) / burger (mobile) {%- endcomment -%}
+    <nav class="header-nav" aria-label="Primary">
+      {%- for link in section.settings.menu.links limit: 6 -%}
+        <a href="{{ link.url }}">{{ link.title }}</a>
+      {%- else -%}
+        <a href="{{ routes.collections_url }}/cats">{{ 'header.menu.cats' | t }}</a>
+        <a href="{{ routes.collections_url }}/dogs">{{ 'header.menu.dogs' | t }}</a>
+        <a href="{{ routes.collections_url }}/the-daily">{{ 'header.menu.the_daily' | t }}</a>
+        <a href="{{ routes.root_url }}pages/journal">{{ 'header.menu.journal' | t }}</a>
+        <a href="{{ routes.root_url }}pages/about">{{ 'header.menu.about' | t }}</a>
+      {%- endfor -%}
+    </nav>
+
+    <button class="header-burger" type="button" data-nav-toggle aria-label="{{ 'accessibility.open_menu' | t }}">
+      {% render 'icon-menu' %}
+    </button>
+
+    {%- comment -%} Center: logo {%- endcomment -%}
+    <a class="header-logo" href="{{ routes.root_url }}" aria-label="{{ shop.name }}">
+      {%- if settings.logo != blank -%}
+        <img src="{{ settings.logo | image_url: width: 400 }}"
+             width="{{ settings.logo_width }}"
+             alt="{{ shop.name }}"
+             style="width:{{ settings.logo_width }}px;">
+      {%- else -%}
+        Nest &amp; Den
+      {%- endif -%}
+    </a>
+
+    {%- comment -%} Right: utilities {%- endcomment -%}
+    <div class="header-utils">
+      <a href="{{ routes.search_url }}" aria-label="{{ 'header.search' | t }}">
+        {% render 'icon-search' %}
+        <span class="hide-on-mobile">{{ 'header.search' | t }}</span>
+      </a>
+      <a class="util-account" href="{{ routes.account_url }}" aria-label="{{ 'header.account' | t }}">
+        {% render 'icon-account' %}
+        <span class="hide-on-mobile">{{ 'header.account' | t }}</span>
+      </a>
+      <a href="{{ routes.cart_url }}" aria-label="{{ 'accessibility.open_cart' | t }}">
+        {% render 'icon-bag' %}
+        <span class="hide-on-mobile">{{ 'header.cart' | t }}</span>
+        <span class="cart-count">({{ cart.item_count | default: 0 }})</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<aside class="mobile-nav" data-open="false" aria-hidden="true">
+  <button class="mobile-nav__close" type="button" data-nav-close aria-label="{{ 'accessibility.close_menu' | t }}">
+    {% render 'icon-close' %}
+  </button>
+  <nav>
+    {%- for link in section.settings.menu.links -%}
+      <a href="{{ link.url }}">{{ link.title }}</a>
+    {%- else -%}
+      <a href="{{ routes.collections_url }}/cats">{{ 'header.menu.cats' | t }}</a>
+      <a href="{{ routes.collections_url }}/dogs">{{ 'header.menu.dogs' | t }}</a>
+      <a href="{{ routes.collections_url }}/the-daily">{{ 'header.menu.the_daily' | t }}</a>
+      <a href="{{ routes.root_url }}pages/journal">{{ 'header.menu.journal' | t }}</a>
+      <a href="{{ routes.root_url }}pages/about">{{ 'header.menu.about' | t }}</a>
+    {%- endfor -%}
+  </nav>
+</aside>
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Primary menu",
+      "default": "main-menu"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,55 @@
+{
+  "sections": {
+    "breadcrumb": { "type": "breadcrumb", "settings": {} },
+    "main":       { "type": "main-product", "settings": {} },
+    "essay":      {
+      "type": "product-essay",
+      "settings": {
+        "eyebrow": "How it's made",
+        "heading": "Stitched in North Carolina, washed before it ships.",
+        "body": "<p>Each Daily Bed is cut from a single roll of flax-linen and sewn by a small workshop in High Point, North Carolina. We pre-wash every cover so the piece you receive feels as soft on day one as it will on day three hundred.</p>"
+      }
+    },
+    "reviews": {
+      "type": "reviews",
+      "settings": {
+        "heading": "Selected by 2,400+ households.",
+        "body": "We read every review. Here are the most recent.",
+        "rating": "4.9",
+        "review_count": "2,418"
+      },
+      "blocks": {
+        "r1": { "type": "review", "settings": {
+          "title": "Has lived in our living room for a year.",
+          "body": "I'm picky about how things look in our home, and this is the first pet bed that hasn't ruined a corner of a room. Both our cat and our dog claim it. The linen has only gotten softer.",
+          "author": "Maya R.",
+          "location": "Brooklyn, NY",
+          "verified": true
+        }},
+        "r2": { "type": "review", "settings": {
+          "title": "Worth the price. Fully.",
+          "body": "We've gone through a half-dozen $50 beds in five years. This is the first one our terrier has not chewed. The cover comes off, the cushion is supportive, and it doesn't smell like plastic.",
+          "author": "Daniel C.",
+          "location": "Portland, OR",
+          "verified": true
+        }},
+        "r3": { "type": "review", "settings": {
+          "title": "Made for the way we live.",
+          "body": "Bought a Daily Bowl for our cat, then ended up with two Daily Beds, a Lead, and a Coat. The whole house feels more considered.",
+          "author": "Priya & Tom",
+          "location": "Mill Valley, CA",
+          "verified": true
+        }}
+      },
+      "block_order": ["r1", "r2", "r3"]
+    },
+    "recommendations": {
+      "type": "product-recommendations",
+      "settings": {
+        "eyebrow": "Pairs well",
+        "heading": "Pairs well with The Daily Bed."
+      }
+    }
+  },
+  "order": ["breadcrumb", "main", "essay", "reviews", "recommendations"]
+}

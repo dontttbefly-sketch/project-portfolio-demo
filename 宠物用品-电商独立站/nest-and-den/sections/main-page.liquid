@@ -1,0 +1,14 @@
+<article class="section" data-reveal>
+  <div class="container" style="max-width: 760px">
+    <header style="margin-bottom: 48px">
+      <h1>{{ page.title }}</h1>
+    </header>
+    <div class="rte" style="font-size: var(--fs-lead); color: var(--ink-soft);">
+      {{ page.content }}
+    </div>
+  </div>
+</article>
+
+{% schema %}
+{ "name": "Page content", "settings": [] }
+{% endschema %}

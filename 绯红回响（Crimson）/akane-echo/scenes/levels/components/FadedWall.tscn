@@ -1,0 +1,30 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/breakable_wall.gd" id="1_wall"]
+[ext_resource type="Texture2D" path="res://assets/generated/environment/faded_wall_first_pass.png" id="2_tex"]
+
+[sub_resource type="StandardMaterial3D" id="mat_faded"]
+shading_mode = 0
+albedo_color = Color(1.0, 0.45, 0.5, 1)
+albedo_texture = ExtResource("2_tex")
+texture_filter = 0
+
+[sub_resource type="BoxMesh" id="mesh_faded"]
+size = Vector3(3.0, 2.0, 0.5)
+material = SubResource("mat_faded")
+
+[sub_resource type="BoxShape3D" id="shape_faded"]
+size = Vector3(3.0, 2.0, 0.5)
+
+[node name="FadedWall" type="StaticBody3D"]
+collision_layer = 1
+collision_mask = 1
+script = ExtResource("1_wall")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("mesh_faded")
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("shape_faded")

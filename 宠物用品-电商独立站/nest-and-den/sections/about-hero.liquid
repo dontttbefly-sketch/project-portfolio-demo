@@ -1,0 +1,35 @@
+<section class="about-hero">
+  <div class="about-hero__media">
+    {%- if section.settings.image != blank -%}
+      {{ section.settings.image | image_url: width: 1600 | image_tag:
+          widths: '600, 1000, 1400, 1800',
+          sizes: '(min-width: 800px) 50vw, 100vw',
+          loading: 'eager',
+          fetchpriority: 'high',
+          alt: section.settings.heading }}
+    {%- else -%}
+      <img src="https://images.unsplash.com/photo-1518791841217-8f162f1e1131?auto=format&fit=crop&w=1600&q=80"
+           alt="A studio interior with morning light, a folded linen on a wooden table, and a cat in the doorway"
+           loading="eager" fetchpriority="high">
+    {%- endif -%}
+  </div>
+  <div class="about-hero__copy" data-reveal>
+    <span class="eyebrow">{{ section.settings.eyebrow | default: 'Our Story' }}</span>
+    <h1>{{ section.settings.heading | default: 'Quiet goods for the everyday.' }}</h1>
+    <p>{{ section.settings.body | default: "Nest & Den began in a Brooklyn studio in 2023 with a single observation: there is a meaningful difference between things that are made for pets and things that are made for the homes pets live in." }}</p>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "About hero",
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "Image" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Our Story" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Quiet goods for the everyday." },
+    { "type": "textarea", "id": "body", "label": "Body",
+      "default": "Nest & Den began in a Brooklyn studio in 2023 with a single observation: there is a meaningful difference between things that are made for pets and things that are made for the homes pets live in." }
+  ],
+  "presets": [{ "name": "About hero" }]
+}
+{% endschema %}

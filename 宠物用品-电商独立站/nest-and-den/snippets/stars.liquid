@@ -1,0 +1,10 @@
+{%- comment -%}
+  Renders 5 stars with given rating (0-5). Uses currentColor.
+  Param: rating (number)
+{%- endcomment -%}
+{%- assign full = rating | floor -%}
+<span class="stars" aria-label="{{ rating }} out of 5 stars">
+  {%- for i in (1..5) -%}
+    {% render 'icon-star' %}
+  {%- endfor -%}
+</span>

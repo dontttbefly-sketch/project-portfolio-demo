@@ -1,0 +1,29 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/SanctumPortal.gd" id="1_sp"]
+[ext_resource type="Texture2D" path="res://assets/generated/props/sanctum_portal_first_pass.png" id="2_tex"]
+
+[sub_resource type="BoxShape3D" id="shape_p"]
+size = Vector3(2.5, 2.5, 2.5)
+
+[node name="SanctumPortal" type="StaticBody3D"]
+collision_layer = 0
+collision_mask = 0
+script = ExtResource("1_sp")
+
+[node name="Sprite" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+pixel_size = 0.10
+billboard = 1
+shaded = false
+texture_filter = 0
+texture = ExtResource("2_tex")
+modulate = Color(1, 1, 1, 0.9)
+
+[node name="PromptArea" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 2
+
+[node name="Shape" type="CollisionShape3D" parent="PromptArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("shape_p")

@@ -1,0 +1,3217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>霓虹破壁 · Neon Breaker</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #000;
+    overflow: hidden;
+    font-family: "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+    -webkit-user-select: none; user-select: none;
+    height: 100%;
+    color: #fff;
+  }
+  #wrap {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  canvas {
+    background: #050010;
+    box-shadow:
+      0 0 40px rgba(120, 60, 200, 0.45),
+      0 0 120px rgba(60, 200, 220, 0.18);
+    border-radius: 6px;
+    cursor: none;
+    max-width: 100vw;
+    max-height: 100vh;
+  }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="game" width="960" height="720"></canvas>
+</div>
+<script>
+'use strict';
+
+/* ============================================================
+   霓虹破壁 · Neon Breaker
+   单文件原版 JS · Canvas · Web Audio
+   ============================================================ */
+
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+
+/* ---------------- Constants ---------------- */
+const PADDLE_W_BASE = 120;
+const PADDLE_H = 14;
+const PADDLE_Y = H - 60;
+const BALL_R = 8;
+const BALL_SPEED_BASE = 380;
+const BRICK_W = 70, BRICK_H = 24, BRICK_GAP = 4;
+const COLS = 12, ROWS = 8;
+const GRID_TOP = 90;
+const GRID_LEFT = (W - (COLS * (BRICK_W + BRICK_GAP) - BRICK_GAP)) / 2;
+
+const B = { NORMAL:0, STEEL:1, BOMB:2, MYSTERY:3, INDESTRUCTIBLE:4, MOVING:5, BOSS:6, CORE:7 };
+const TOTAL_STAGES = 12;
+const PU = { MULTI:0, LASER:1, WIDE:2, SLOW:3, PIERCE:4, LIFE:5 };
+const PU_COLORS = ['#39ffea', '#ff3df0', '#ffd400', '#7c5fff', '#74ff5e', '#ff5050'];
+const PU_LABELS = ['×3', 'L', 'W', 'S', 'P', '♥'];
+const PU_NAMES  = ['多球', '激光', '加长', '慢速', '穿透', '生命'];
+const GEM = { ENERGY:0, SCORE:1, COMBO:2 };
+const GEM_COLORS = ['#39ffea', '#ffd400', '#ff66ee'];
+const GEM_NAMES  = ['能量', '分数', '连击'];
+const LANCE_CD = 3.2;       // seconds — Quantum Lance cooldown
+const TARGET_LIFE = 6;      // seconds before target re-rolls
+const KEYBOARD_PADDLE_SPEED = 720; // px/s for A/D paddle control
+const STARTING_CARD_POOL = [
+  // Each starter card is a build seed
+  'turret',    // 激光流 起点
+  'split',     // 多球流 起点
+  'magnet',    // 接球辅助
+  'detonator', // 重击/核心爆破 起点
+  'static',    // ⚡ 雷电链 起点
+  'gtrack',    // 🕳 黑洞 起点
+  'echo',      // ⏳ 时间 起点
+  'hijack',    // 🦠 寄生 起点
+  'freeze',    // 时间控场起点
+];
+const NEON_COLORS = ['#39ffea', '#ff3df0', '#ffd400', '#74ff5e', '#7c5fff', '#ff5050'];
+const FONT = '"Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif';
+
+/* ---------------- Utils ---------------- */
+const rand = (a, b) => a + Math.random() * (b - a);
+const irand = (a, b) => Math.floor(rand(a, b + 1));
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+
+function rrect(x, y, w, h, r) {
+  r = Math.min(r, w/2, h/2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+/* ---------------- Audio ---------------- */
+let audioCtx = null;
+let audioMuted = false;
+function ensureAudio() {
+  if (!audioCtx) {
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch (e) {}
+  }
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+}
+function playSfx(type) {
+  if (audioMuted || !audioCtx) return;
+  const t = audioCtx.currentTime;
+  // ----- Custom multi-osc sounds -----
+  if (type === 'lance') {
+    try {
+      // High-pitch zap layer
+      const z = audioCtx.createOscillator();
+      const zg = audioCtx.createGain();
+      z.type = 'square';
+      z.frequency.setValueAtTime(2600, t);
+      z.frequency.exponentialRampToValueAtTime(220, t + 0.18);
+      zg.gain.setValueAtTime(0.001, t);
+      zg.gain.linearRampToValueAtTime(0.16, t + 0.01);
+      zg.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+      z.connect(zg).connect(audioCtx.destination);
+      z.start(t); z.stop(t + 0.24);
+      // Low-pitch boom layer
+      const b = audioCtx.createOscillator();
+      const bg = audioCtx.createGain();
+      b.type = 'sine';
+      b.frequency.setValueAtTime(440, t);
+      b.frequency.exponentialRampToValueAtTime(70, t + 0.30);
+      bg.gain.setValueAtTime(0.001, t);
+      bg.gain.linearRampToValueAtTime(0.10, t + 0.01);
+      bg.gain.exponentialRampToValueAtTime(0.001, t + 0.30);
+      b.connect(bg).connect(audioCtx.destination);
+      b.start(t); b.stop(t + 0.32);
+      // Sparkle layer (triangle high)
+      const s = audioCtx.createOscillator();
+      const sg = audioCtx.createGain();
+      s.type = 'triangle';
+      s.frequency.setValueAtTime(3200, t + 0.04);
+      s.frequency.exponentialRampToValueAtTime(800, t + 0.18);
+      sg.gain.setValueAtTime(0.001, t + 0.04);
+      sg.gain.linearRampToValueAtTime(0.06, t + 0.05);
+      sg.gain.exponentialRampToValueAtTime(0.001, t + 0.20);
+      s.connect(sg).connect(audioCtx.destination);
+      s.start(t + 0.04); s.stop(t + 0.22);
+    } catch (e) {}
+    return;
+  }
+  if (type === 'paddle') {
+    // Soft "boop" with slight pitch variance for melodic feel
+    try {
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = 'triangle';
+      const base = 360 + (Game.combo > 0 ? Math.min(Game.combo, 16) * 14 : 0);
+      o.frequency.setValueAtTime(base, t);
+      o.frequency.exponentialRampToValueAtTime(base * 0.7, t + 0.07);
+      g.gain.setValueAtTime(0.001, t);
+      g.gain.linearRampToValueAtTime(0.10, t + 0.005);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+      o.connect(g).connect(audioCtx.destination);
+      o.start(t); o.stop(t + 0.10);
+    } catch (e) {}
+    return;
+  }
+  // ----- Preset table (single-osc) -----
+  const presets = {
+    hit:     { f:1100, sw:760,  dur:0.06, type:'triangle', vol:0.06 },
+    bomb:    { f:200,  sw:50,   dur:0.40, type:'sawtooth', vol:0.18 },
+    powerup: { f:660,  sw:1320, dur:0.18, type:'triangle', vol:0.10 },
+    miss:    { f:280,  sw:60,   dur:0.45, type:'sawtooth', vol:0.16 },
+    wave:    { f:110,  sw:880,  dur:0.55, type:'sawtooth', vol:0.20 },
+    laser:   { f:1500, sw:800,  dur:0.05, type:'square',   vol:0.04 },
+    levelup: { f:440,  sw:880,  dur:0.30, type:'sine',     vol:0.13 },
+    steel:   { f:520,  sw:300,  dur:0.06, type:'square',   vol:0.05 },
+    deny:    { f:200,  sw:100,  dur:0.10, type:'square',   vol:0.07 },
+    combo:   { f:880,  sw:1760, dur:0.08, type:'sine',     vol:0.07 },
+  };
+  const p = presets[type];
+  if (!p) return;
+  try {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = p.type;
+    osc.frequency.setValueAtTime(p.f, t);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(20, p.sw), t + p.dur);
+    gain.gain.setValueAtTime(0.001, t);
+    gain.gain.linearRampToValueAtTime(p.vol, t + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + p.dur);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(t);
+    osc.stop(t + p.dur);
+  } catch (e) {}
+}
+
+/* ---------------- Game state ---------------- */
+const Game = {
+  state: 'menu',           // menu | playing | paused | levelclear | gameover
+  score: 0,
+  highScore: parseInt(localStorage.getItem('neonbreaker_high') || '0', 10) || 0,
+  lives: 3,
+  level: 1,
+  combo: 0,
+  comboTimer: 0,
+  energy: 0,
+  energyMax: 100,
+  shake: 0,
+  flash: 0,
+  flashColor: '#fff',
+  timeScale: 1,
+
+  slowTimer: 0,
+  pierceTimer: 0,
+  laserTimer: 0,
+  wideTimer: 0,
+  laserCD: 0,
+
+  paddle: null,
+  balls: [],
+  bricks: [],
+  particles: [],
+  powerUps: [],
+  lasers: [],
+  texts: [],
+  waves: [],
+
+  bricksBroken: 0,
+  maxCombo: 0,
+  maxChain: 0,
+  bossActive: false,
+
+  // New: keep wait time engaging
+  gems: [],
+  gemTimer: 0,
+  targetBrick: null,
+  targetTimer: 0,
+  dashCD: 0,
+  dashes: [],
+  gemsCaught: 0,
+  targetsHit: 0,
+
+  // Roguelike / Run system
+  run: null,        // { stageIndex, cards: [], passives: {}, cardsOffered: [...] }
+  beast: null,      // { name, code, hp, maxHp, behavior, age }
+  cardChoices: null,
+  cardSelectT: 0,
+  autoLaserCD: 0,
+  scaleCharged: false,
+  scaleCharges: 0,    // for shield card upgrade
+
+  // M2: Bullet hell
+  projectiles: [],
+  iframes: 0,
+
+  // Keyboard / card-select UX
+  keys: { a: false, d: false },
+  selectedCard: 1,
+
+  // Behavior cards (lightning / time / parasite)
+  arcs: [],          // visual arcs from 静电 / 导体
+  turrets: [],       // friendly turrets from 接管
+  freezeT: 0,        // 凝固: time remaining of ball freeze
+  freezeCharges: 0,  // per-stage charges
+
+  transitionT: 0,
+  startT: 0,
+};
+
+/* ---------------- Entities ---------------- */
+function makePaddle() {
+  return { x: W/2 - PADDLE_W_BASE/2, y: PADDLE_Y, w: PADDLE_W_BASE, h: PADDLE_H };
+}
+function makeBall(x, y, attached = false) {
+  return { x, y, vx: 0, vy: 0, r: BALL_R, attached, trail: [] };
+}
+function makeBrick(c, r, type) {
+  const x = GRID_LEFT + c * (BRICK_W + BRICK_GAP);
+  const y = GRID_TOP + r * (BRICK_H + BRICK_GAP);
+  const brick = {
+    type, x, y, w: BRICK_W, h: BRICK_H,
+    hp: 1, maxHp: 1,
+    color: NEON_COLORS[r % NEON_COLORS.length],
+    alive: true, flash: 0, age: Math.random() * Math.PI * 2,
+    vx: 0, boss: false,
+  };
+  if (type === B.STEEL) {
+    brick.hp = 3; brick.maxHp = 3;
+    brick.color = '#a0a8c0';
+  } else if (type === B.BOMB) {
+    brick.color = '#ff5a30';
+  } else if (type === B.MYSTERY) {
+    brick.color = '#ff66ee';
+  } else if (type === B.INDESTRUCTIBLE) {
+    brick.hp = Infinity; brick.maxHp = Infinity;
+    brick.color = '#3a3a4a';
+  } else if (type === B.MOVING) {
+    brick.hp = 2; brick.maxHp = 2;
+    brick.color = '#ffd400';
+    brick.vx = 60 * (Math.random() < 0.5 ? -1 : 1);
+  } else if (type === B.CORE) {
+    brick.hp = 5; brick.maxHp = 5;
+    brick.color = '#ffd700';
+    brick.isCore = true;
+  }
+  return brick;
+}
+function makeBoss(level) {
+  const tier = Math.floor(level / 5);
+  const w = BRICK_W * 6 + BRICK_GAP * 5;
+  const h = BRICK_H * 3 + BRICK_GAP * 2;
+  const hp = 30 + tier * 20;
+  return {
+    type: B.BOSS,
+    x: (W - w) / 2, y: GRID_TOP + 8,
+    w, h, hp, maxHp: hp,
+    color: '#ff3df0',
+    alive: true, flash: 0, age: 0,
+    vx: 100 + tier * 25,
+    boss: true,
+  };
+}
+function makePowerUp(x, y, type) {
+  return { x, y, w: 28, h: 28, vy: 110, type, age: 0, alive: true };
+}
+function makeLaser(x, y) { return { x, y, w: 4, h: 16, vx: 0, vy: -700, pierces: 0 }; }
+
+function makeGem(type) {
+  return {
+    x: rand(GRID_LEFT + 30, W - GRID_LEFT - 30),
+    y: -20,
+    vx: rand(-40, 40),
+    vy: rand(75, 110),
+    r: 10,
+    type,
+    age: 0,
+  };
+}
+
+function makeProjectile(x, y, vx, vy, color = '#ff3df0') {
+  return { x, y, vx, vy, w: 5, h: 12, color, age: 0, life: 6, friendly: false, trail: [] };
+}
+
+function makeArc(x1, y1, x2, y2, color = '#ffe066') {
+  return { x1, y1, x2, y2, color, life: 0.35, maxLife: 0.35 };
+}
+
+function makeTurret(x, y) {
+  return { x, y, life: 2.0, maxLife: 2.0, fireCD: 0.25, age: 0, alive: true };
+}
+
+/* ---------------- Cards (Roguelike protocols) ---------------- */
+const CARD_TYPE_COLORS = {
+  laser: '#ff3df0',
+  multi: '#39ffea',
+  heavy: '#ff5050',
+  support: '#74ff5e',
+};
+const CARD_TYPE_NAMES = {
+  laser:'激光',
+  multi:'多球',
+  heavy:'重击',
+  support:'支援',
+};
+
+const CARDS = [
+  // ----- 基础卡 (common) - 全部都改动词、有联动 -----
+  { id:'turret',    type:'laser',   rare:false, name:'电磁炮台', flavor:'挡板内置激光阵列',
+    desc:'每 1.5 秒自动射出 1 道激光' },
+  { id:'overload',  type:'laser',   rare:false, name:'过载',     flavor:'高压回路',
+    desc:'激光穿透，1 道击穿 3 砖' },
+  { id:'spray',     type:'laser',   rare:false, name:'散射',     flavor:'三联枪管',
+    desc:'激光改为 3 路扇形齐射' },
+  { id:'split',     type:'multi',   rare:false, name:'分裂核',   flavor:'弹道分形',
+    desc:'每关开始时一变三' },
+  { id:'swarm',     type:'multi',   rare:false, name:'蜂群',     flavor:'群体协议',
+    desc:'每关开局再 +2 颗副球' },
+  { id:'orbit',     type:'multi',   rare:false, name:'轨道炮',   flavor:'引力链接',
+    desc:'球间距 < 120px 时触发伤害光束' },
+  { id:'detonator', type:'heavy',   rare:false, name:'核爆者',   flavor:'核心引爆装置',
+    desc:'破核心时引爆 130px 范围' },
+  { id:'magnet',    type:'support', rare:false, name:'磁吸',     flavor:'电磁锁定',
+    desc:'球距挡板 ≤ 90px 时自动吸引' },
+  // ----- 创意机制卡 (behavior-changing) -----
+  { id:'static',    type:'laser',   rare:false, name:'静电',     flavor:'弧光放电',
+    desc:'球破砖时向最近 2 块砖发射电弧 (1 dmg)' },
+  { id:'conductor', type:'heavy',   rare:false, name:'导体',     flavor:'金属共振',
+    desc:'钢砖每次受击向相邻 4 块砖传导 1 dmg' },
+  { id:'implode',   type:'heavy',   rare:false, name:'塌陷',     flavor:'局部坍缩',
+    desc:'任何砖被破坏时 80px 内 1 块砖被吸来同毁' },
+  { id:'gtrack',    type:'support', rare:false, name:'引力轨',   flavor:'电磁锁定 II',
+    desc:'挡板 70px 内的球被吸向中心 (与磁吸叠加)' },
+  { id:'freeze',    type:'support', rare:false, name:'凝固',     flavor:'时空冻结',
+    desc:'按 Q 冻结所有球 0.5 秒 (每关 3 次充能)' },
+  { id:'echo',      type:'multi',   rare:false, name:'时空回响', flavor:'量子残影',
+    desc:'球反弹时多生 1 颗 0.7s 副球，反向角度扩散打击' },
+  { id:'hijack',    type:'multi',   rare:false, name:'接管',     flavor:'敌为我用',
+    desc:'击破普通砖 30% 几率生成 2 秒友军炮台' },
+  // ----- 稀有卡 (rare) -----
+  { id:'omega',     type:'heavy',   rare:true,  name:'欧米伽',   flavor:'灾难方程',
+    desc:'核心引爆范围 ×2 · 伤害 +1' },
+  { id:'genesis',   type:'support', rare:true,  name:'起源',     flavor:'守护协议',
+    desc:'每关开始投放 1 颗能量宝石' },
+  { id:'revenge',   type:'heavy',   rare:true,  name:'复仇',     flavor:'死亡反击',
+    desc:'失球时从挡板向上射出 1 道免费量子刺' },
+  { id:'shrapnel',  type:'multi',   rare:true,  name:'碎片球',   flavor:'弹片裂变',
+    desc:'球破砖瞬间向四方分裂 4 颗弹丸 (各 1 dmg)' },
+];
+
+/* ---------------- Beasts (named enemies) ---------------- */
+function addFirers(bricks, count, interval) {
+  const candidates = bricks.filter(b => b.type !== B.INDESTRUCTIBLE && !b.boss && !b.firesEvery);
+  for (let i = 0; i < Math.min(count, candidates.length); i++) {
+    const idx = Math.floor(Math.random() * candidates.length);
+    const b = candidates.splice(idx, 1)[0];
+    b.firesEvery = interval;
+    b.fireTimer = rand(0.6, interval);
+  }
+}
+
+function makeBeast(name, code, bricks, opts = {}) {
+  let hp = 0;
+  for (const b of bricks) {
+    if (b.type === B.INDESTRUCTIBLE) continue;
+    if (b.boss) hp += b.maxHp;
+    else hp += b.maxHp || 1;
+  }
+  return {
+    name, code,
+    hp, maxHp: hp,
+    behavior: opts.behavior || 'static',
+    age: 0,
+  };
+}
+
+function genSlime(tier) {
+  const bricks = [];
+  const startR = 1 + tier;
+  const w = (tier === 0) ? 4 : 4 + (tier >= 2 ? 1 : 0);
+  const h = (tier === 0) ? 2 : 3 + Math.min(tier - 1, 2);
+  const cx = Math.floor(COLS / 2) - Math.floor(w / 2);
+  for (let r = 0; r < h; r++) {
+    for (let c = 0; c < w; c++) {
+      let type = B.NORMAL;
+      if (tier >= 2 && (c === 0 || c === w-1) && r === 0) type = B.STEEL;
+      // Single core at exact center for tier 0; double-core for higher tiers
+      const isCenter = (tier === 0)
+        ? (r === Math.floor(h/2) && c === Math.floor(w/2) - 1)
+        : (r === Math.floor(h/2) && (c === Math.floor(w/2) || c === Math.floor(w/2) - 1));
+      if (isCenter) type = B.CORE;
+      bricks.push(makeBrick(cx + c, startR + r, type));
+    }
+  }
+  return { bricks, beast: makeBeast('像素史莱姆', '#001 · 入门体', bricks) };
+}
+
+function genNeedle(tier) {
+  const bricks = [];
+  const cols = tier >= 2 ? [1, 3, 5, 7, 9, 11] : [1, 3, 5, 7, 9];
+  const h = 4 + tier;
+  for (const c of cols) {
+    for (let r = 0; r < h; r++) {
+      let type = B.NORMAL;
+      if (r === 0) type = B.CORE;
+      else if (tier >= 2 && r === 1) type = B.STEEL;
+      else if (r === Math.floor(h/2) && tier >= 1) type = B.MOVING;
+      bricks.push(makeBrick(c, r, type));
+    }
+  }
+  addFirers(bricks, 1 + tier, 4);
+  return { bricks, beast: makeBeast('振动针', '#003 · 数据刺', bricks) };
+}
+
+function genHive(tier) {
+  const bricks = [];
+  const rows = 5 + (tier >= 2 ? 1 : 0);
+  for (let r = 0; r < rows; r++) {
+    const offset = r % 2;
+    const cells = 7 + (tier >= 2 ? 1 : 0);
+    for (let c = 0; c < cells; c++) {
+      const realC = 2 + c + offset;
+      if (realC >= COLS - 1) continue;
+      let type = B.NORMAL;
+      const isCenter = (r === Math.floor(rows/2)) && (c === Math.floor(cells/2) || c === Math.floor(cells/2)+1);
+      if (isCenter) type = B.CORE;
+      else if ((c + r * 2) % 5 === 0) type = B.BOMB;
+      else if (tier >= 2 && (c + r) % 7 === 0) type = B.STEEL;
+      bricks.push(makeBrick(realC, r, type));
+    }
+  }
+  addFirers(bricks, 2 + tier, 3);
+  return { bricks, beast: makeBeast('数据蜂巢', '#007 · 蜂群', bricks) };
+}
+
+function genMirror(tier) {
+  const bricks = [];
+  const half = Math.floor(COLS / 2);
+  const rows = 5 + tier;
+  const placed = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < half; c++) {
+      if ((r + c) % 2 !== 0) continue;
+      let type = B.NORMAL;
+      if ((r === 0 && c === 0) || (r === rows-1 && c === half-1)) type = B.CORE;
+      else if (tier >= 2 && r === Math.floor(rows/2) && c === Math.floor(half/2)) type = B.STEEL;
+      const left = makeBrick(c, r, type);
+      const right = makeBrick(COLS - 1 - c, r, type);
+      left.mirror = right; right.mirror = left;
+      bricks.push(left, right);
+    }
+  }
+  addFirers(bricks, 2 + tier, 3.2);
+  return { bricks, beast: makeBeast('镜像兽', '#012 · 双生', bricks, { behavior: 'mirror' }) };
+}
+
+function genGiant(tier) {
+  const bricks = [];
+  // Indestructible bars
+  for (let c = 1; c < COLS-1; c++) {
+    if (c % 2 === 0) bricks.push(makeBrick(c, 0, B.INDESTRUCTIBLE));
+  }
+  // Side steel walls
+  for (let r = 1; r < 6; r++) {
+    bricks.push(makeBrick(1, r, B.STEEL));
+    bricks.push(makeBrick(COLS-2, r, B.STEEL));
+  }
+  // Core cluster in middle
+  const mid = Math.floor(COLS/2);
+  bricks.push(makeBrick(mid-1, 3, B.CORE));
+  bricks.push(makeBrick(mid, 3, B.CORE));
+  bricks.push(makeBrick(mid+1, 3, B.CORE));
+  bricks.push(makeBrick(mid, 4, B.CORE));
+  // Surrounding regulars
+  for (let r = 2; r < 6; r++) {
+    for (let c = 3; c < COLS-3; c++) {
+      if (Math.abs(c - mid) > 1 || (r !== 3 && r !== 4)) {
+        if (Math.random() < 0.6) bricks.push(makeBrick(c, r, B.NORMAL));
+      }
+    }
+  }
+  // Cores fire — they're scary, but killing them stops the fire
+  for (const b of bricks) {
+    if (b.type === B.CORE) { b.firesEvery = 2.5; b.fireTimer = rand(0.5, 2.5); }
+  }
+  return { bricks, beast: makeBeast('巨人', '#018 · 守墙者', bricks) };
+}
+
+function genReader(tier) {
+  // Big boss + supporting bricks + 1 core inside the boss area
+  const bossLvl = 5 + tier * 5;
+  const boss = makeBoss(bossLvl);
+  const bricks = [boss];
+  // Side walls
+  for (let r = 4; r < 7; r++) {
+    bricks.push(makeBrick(0, r, B.STEEL));
+    bricks.push(makeBrick(COLS-1, r, B.STEEL));
+  }
+  // Floating cores below the boss
+  for (let i = 0; i < 2 + tier; i++) {
+    const c = 3 + i * 2;
+    if (c < COLS - 3) bricks.push(makeBrick(c, 5, B.CORE));
+  }
+  // Boss fires fan-shots; supports fire singles
+  boss.fanFires = true;
+  boss.fanTimer = 2.4;
+  addFirers(bricks, 2 + tier, 3);
+  return { bricks, beast: makeBeast('阅读者', '#B' + (tier + 1) + ' · 中央节点', bricks) };
+}
+
+const STAGE_PLAN = [
+  { gen: genSlime,  tier: 0, rare: false },  // 1
+  { gen: genNeedle, tier: 0, rare: false },  // 2
+  { gen: genHive,   tier: 0, rare: false },  // 3
+  { gen: genMirror, tier: 0, rare: false },  // 4
+  { gen: genReader, tier: 0, rare: true  },  // 5  (boss → rare card)
+  { gen: genSlime,  tier: 1, rare: false },  // 6
+  { gen: genNeedle, tier: 1, rare: false },  // 7
+  { gen: genHive,   tier: 1, rare: false },  // 8
+  { gen: genGiant,  tier: 0, rare: false },  // 9
+  { gen: genReader, tier: 1, rare: true  },  // 10 (boss)
+  { gen: genMirror, tier: 2, rare: false },  // 11
+  { gen: genReader, tier: 2, rare: true  },  // 12 (final)
+];
+
+function spawnParticles(x, y, color, count = 12, speedRange = [80, 240]) {
+  for (let i = 0; i < count; i++) {
+    const ang = Math.random() * Math.PI * 2;
+    const sp = rand(speedRange[0], speedRange[1]);
+    Game.particles.push({
+      x, y,
+      vx: Math.cos(ang) * sp,
+      vy: Math.sin(ang) * sp,
+      life: rand(0.45, 0.95),
+      maxLife: 0.95,
+      color,
+      size: rand(2, 4.2),
+    });
+  }
+}
+function floatText(x, y, text, color = '#fff', size = 18) {
+  Game.texts.push({ x, y, text, color, size, vy: -60, life: 1.0, maxLife: 1.0 });
+}
+
+/* ---------------- Level generation ---------------- */
+function generateLevel(level) {
+  Game.bossActive = false;
+  if (level > 0 && level % 5 === 0) {
+    Game.bossActive = true;
+    const bricks = [makeBoss(level)];
+    const tier = Math.floor(level / 5);
+    if (tier >= 2) {
+      for (let r = 4; r < 7; r++) {
+        bricks.push(makeBrick(0, r, B.STEEL));
+        bricks.push(makeBrick(COLS - 1, r, B.STEEL));
+      }
+    }
+    if (tier >= 3) {
+      for (let c = 3; c < COLS - 3; c += 2) {
+        bricks.push(makeBrick(c, 6, B.INDESTRUCTIBLE));
+      }
+    }
+    return bricks;
+  }
+  const bricks = [];
+  const patternIdx = (level - 1) % 5;
+  const grid = generatePattern(patternIdx, level);
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (!grid[r][c]) continue;
+      const type = pickBrickType(level, r, c);
+      bricks.push(makeBrick(c, r, type));
+    }
+  }
+  return bricks;
+}
+function generatePattern(idx, level) {
+  const g = Array.from({length: ROWS}, () => Array(COLS).fill(0));
+  const rowsToFill = Math.min(5 + Math.floor(level / 4), ROWS);
+  switch (idx) {
+    case 0:
+      for (let r = 0; r < rowsToFill; r++)
+        for (let c = 0; c < COLS; c++) g[r][c] = 1;
+      break;
+    case 1: {
+      const h = Math.min(6, ROWS);
+      for (let r = 0; r < h; r++) {
+        const startC = r;
+        const endC = COLS - r - 1;
+        for (let c = startC; c <= endC; c++) g[r][c] = 1;
+      }
+      break;
+    }
+    case 2:
+      for (let r = 0; r < Math.min(7, ROWS); r++)
+        for (let c = 0; c < COLS; c++)
+          if ((r + c) % 2 === 0) g[r][c] = 1;
+      break;
+    case 3:
+      for (let r = 0; r < 5; r++)
+        for (let c = 0; c < COLS; c++)
+          if (r === 0 || r === 4 || c === 0 || c === COLS-1) g[r][c] = 1;
+      for (let c = 0; c < COLS; c++) g[0][c] = 1;
+      break;
+    case 4:
+      for (let r = 0; r < Math.min(7, ROWS); r++)
+        for (let c = 0; c < COLS; c++)
+          if ((c + r) % 3 !== 0) g[r][c] = 1;
+      break;
+  }
+  return g;
+}
+function pickBrickType(level, r, c) {
+  const roll = Math.random();
+  const tier = Math.min(level / 12, 1);
+  if (level >= 3 && r === 0 && Math.random() < 0.10 + tier * 0.10) return B.INDESTRUCTIBLE;
+  if (level >= 2 && roll < 0.06 + tier * 0.04) return B.MYSTERY;
+  if (level >= 2 && roll < 0.16 + tier * 0.06) return B.BOMB;
+  if (level >= 4 && roll < 0.28 + tier * 0.08) return B.STEEL;
+  if (level >= 6 && roll < 0.36 + tier * 0.08) return B.MOVING;
+  return B.NORMAL;
+}
+
+/* ---------------- Collision ---------------- */
+function ballRectCollide(ball, rect) {
+  const cx = clamp(ball.x, rect.x, rect.x + rect.w);
+  const cy = clamp(ball.y, rect.y, rect.y + rect.h);
+  const dx = ball.x - cx;
+  const dy = ball.y - cy;
+  return (dx*dx + dy*dy <= ball.r * ball.r) ? { dx, dy } : null;
+}
+function reflectBall(ball, rect) {
+  const dx = ball.x - (rect.x + rect.w/2);
+  const dy = ball.y - (rect.y + rect.h/2);
+  const overlapX = (rect.w/2 + ball.r) - Math.abs(dx);
+  const overlapY = (rect.h/2 + ball.r) - Math.abs(dy);
+  if (overlapX < overlapY) {
+    ball.x = (dx > 0 ? rect.x + rect.w + ball.r : rect.x - ball.r);
+    ball.vx = -ball.vx;
+  } else {
+    ball.y = (dy > 0 ? rect.y + rect.h + ball.r : rect.y - ball.r);
+    ball.vy = -ball.vy;
+  }
+}
+
+/* ---------------- Game logic ---------------- */
+function newGame() {
+  Game.score = 0;
+  Game.lives = 3;
+  Game.level = 1;
+  Game.combo = 0; Game.comboTimer = 0;
+  Game.energy = 0;
+  Game.bricksBroken = 0;
+  Game.maxCombo = 0;
+  Game.maxChain = 0;
+  Game.gemsCaught = 0;
+  Game.targetsHit = 0;
+  Game.slowTimer = Game.pierceTimer = Game.laserTimer = Game.wideTimer = 0;
+  Game.timeScale = 1;
+  Game.particles = [];
+  Game.powerUps = [];
+  Game.lasers = [];
+  Game.texts = [];
+  Game.waves = [];
+  Game.gems = [];
+  Game.dashes = [];
+  Game.targetBrick = null;
+  Game.targetTimer = 0;
+  Game.dashCD = 0;
+  Game.gemTimer = 4;
+  Game.autoLaserCD = 0;
+  Game.scaleCharged = false;
+  Game.scaleCharges = 0;
+  Game.projectiles = [];
+  Game.iframes = 0;
+  Game.keys.a = false;
+  Game.keys.d = false;
+  Game.arcs = [];
+  Game.turrets = [];
+  Game.freezeT = 0;
+  Game.freezeCharges = 0;
+  Game.paddle = makePaddle();
+
+  // Begin a new Run with a starting-card pick (Run agency at second 0)
+  Game.run = {
+    stageIndex: -1,         // advanceStage from -1 -> 0 will start stage 1
+    cards: [],
+    passives: {},
+  };
+  Game.cardChoices = pickStartingCards();
+  Game.selectedCard = Math.min(1, Game.cardChoices.length - 1);
+  Game.cardSelectT = 0;
+  Game.state = 'card_select';
+}
+
+function pickStartingCards() {
+  const pool = CARDS.filter(c => STARTING_CARD_POOL.includes(c.id));
+  const a = pool.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a.slice(0, 3);
+}
+
+function startStage(idx) {
+  const plan = STAGE_PLAN[idx];
+  const { bricks, beast } = plan.gen(plan.tier);
+  Game.run.stageIndex = idx;
+  Game.level = idx + 1;          // legacy/HUD compat
+  Game.bossActive = (plan.gen === genReader);
+  Game.bricks = bricks;
+  Game.beast = beast;
+
+  Game.balls = [];
+  Game.particles = [];
+  Game.powerUps = [];
+  Game.lasers = [];
+  Game.combo = 0;
+  Game.slowTimer = Game.pierceTimer = Game.laserTimer = Game.wideTimer = 0;
+  Game.gems = [];
+  Game.dashes = [];
+  Game.targetBrick = null;
+  Game.targetTimer = 0;
+  Game.gemTimer = 4;
+  Game.autoLaserCD = 0;
+  Game.scaleCharged = false;          // 鳞片 per-stage charge resets
+  Game.scaleCharges = 0;
+  Game.projectiles = [];
+  Game.iframes = 0;
+  Game.arcs = [];
+  Game.turrets = [];
+  Game.freezeT = 0;
+  Game.freezeCharges = (Game.run && Game.run.passives.freeze) ? 3 : 0;
+  Game.paddle.w = PADDLE_W_BASE;
+  Game.paddle.x = clamp(Game.paddle.x, 0, W - Game.paddle.w);
+  spawnAttachedBall();
+  // 分裂核: spawn extra balls (will activate on first launch)
+  if (Game.run.passives.split) {
+    spawnAttachedBall();
+    spawnAttachedBall();
+  }
+  // 蜂群: +2 more
+  if (Game.run.passives.swarm) {
+    spawnAttachedBall();
+    spawnAttachedBall();
+  }
+  // 起源 (genesis): drop an energy gem at start
+  if (Game.run.passives.genesis) {
+    const g = makeGem(GEM.ENERGY);
+    g.y = 80;
+    Game.gems.push(g);
+  }
+  Game.state = 'playing';
+  Game.transitionT = 1.0;
+  floatText(W/2, H/2 - 80, '第 ' + (idx + 1) + ' / ' + TOTAL_STAGES + ' 关', '#7c5fff', 22);
+  floatText(W/2, H/2 - 40, beast.code + '  ' + beast.name, '#fff', 32);
+  if (Game.bossActive) floatText(W/2, H/2 + 4, '⚠ BOSS ⚠', '#ff3df0', 22);
+  playSfx('levelup');
+}
+
+function pickThreeCards(allRare) {
+  const owned = new Set(Game.run.cards.map(c => c.id));
+  const commons = CARDS.filter(c => !c.rare && !owned.has(c.id));
+  const rares   = CARDS.filter(c =>  c.rare && !owned.has(c.id));
+  const shuffle = a => {
+    a = a.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+  if (allRare) {
+    // BOSS clear: 3 rares (fall back to commons if pool depleted)
+    const r = shuffle(rares).slice(0, 3);
+    if (r.length < 3) r.push(...shuffle(commons).slice(0, 3 - r.length));
+    return r;
+  }
+  // Common stage: 2 commons + maybe 1 rare (50% chance if rares left)
+  const cs = shuffle(commons).slice(0, 3);
+  if (rares.length > 0 && Math.random() < 0.5) {
+    cs[2] = shuffle(rares)[0];
+  }
+  return cs.filter(Boolean);
+}
+
+function offerCardSelect() {
+  const plan = STAGE_PLAN[Game.run.stageIndex];
+  const choices = pickThreeCards(plan.rare);
+  if (choices.length === 0) {
+    // No cards left to pick — skip directly
+    advanceStage();
+    return;
+  }
+  Game.cardChoices = choices;
+  Game.cardSelectT = 0;
+  Game.selectedCard = Math.min(1, choices.length - 1);
+  Game.state = 'card_select';
+}
+
+function pickCard(idx) {
+  if (!Game.cardChoices) return;
+  const card = Game.cardChoices[idx];
+  if (!card) return;
+  Game.run.cards.push(card);
+  // Apply passive flags
+  Game.run.passives[card.id] = true;
+  spawnParticles(W/2, H/2, CARD_TYPE_COLORS[card.type], 30, [120, 320]);
+  floatText(W/2, H/2 + 80, '★ 协议植入: ' + card.name + ' ★', CARD_TYPE_COLORS[card.type], 22);
+  playSfx('powerup');
+  Game.cardChoices = null;
+  advanceStage();
+}
+
+function advanceStage() {
+  const next = Game.run.stageIndex + 1;
+  if (next >= TOTAL_STAGES) {
+    runVictory();
+  } else {
+    startStage(next);
+  }
+}
+
+function runVictory() {
+  Game.state = 'victory_run';
+  Game.transitionT = 0;
+  if (Game.score > Game.highScore) {
+    Game.highScore = Game.score;
+    try { localStorage.setItem('neonbreaker_high', String(Game.score)); } catch (e) {}
+  }
+}
+function spawnAttachedBall() {
+  const b = makeBall(Game.paddle.x + Game.paddle.w/2, Game.paddle.y - BALL_R - 2, true);
+  Game.balls.push(b);
+}
+function launchBall(ball) {
+  if (!ball.attached) return;
+  ball.attached = false;
+  const speed = currentBallSpeed();
+  const ang = -Math.PI/2 + rand(-0.3, 0.3);
+  ball.vx = Math.cos(ang) * speed;
+  ball.vy = Math.sin(ang) * speed;
+  playSfx('paddle');
+}
+function currentBallSpeed() {
+  return BALL_SPEED_BASE + (Game.level - 1) * 14 + Math.min(Game.bricksBroken, 60) * 0.6;
+}
+function onPaddleHit() {
+  if (Game.iframes > 0) return;
+  Game.iframes = 1.2;
+  Game.shake = 18;
+  Game.flash = 0.55;
+  Game.flashColor = '#ff5050';
+  spawnParticles(Game.paddle.x + Game.paddle.w/2, Game.paddle.y, '#ff5050', 24, [80, 240]);
+  floatText(Game.paddle.x + Game.paddle.w/2, Game.paddle.y - 24, '挡板受创!', '#ff5050', 16);
+  loseLife();
+}
+
+function loseLife() {
+  Game.lives--;
+  Game.combo = 0;
+  Game.shake = 14;
+  Game.flash = 0.45;
+  Game.flashColor = '#ff4055';
+  playSfx('miss');
+  // 复仇 — fire a free Quantum Lance from paddle column (actually destroys bricks)
+  if (Game.run && Game.run.passives.revenge) {
+    const cx = Game.paddle.x + Game.paddle.w/2;
+    Game.dashes.push({
+      type: 'lance',
+      x: cx,
+      yTop: 0,
+      yBottom: Game.paddle.y - 4,
+      life: 0.55,
+      maxLife: 0.55,
+    });
+    let hits = 0;
+    for (const b of Game.bricks) {
+      if (!b.alive) continue;
+      if (cx >= b.x && cx <= b.x + b.w) {
+        if (b.type === B.INDESTRUCTIBLE) {
+          spawnParticles(cx, b.y + b.h/2, '#ffffff', 6, [60, 220]);
+        } else {
+          damageBrick(b, null, true);
+          hits++;
+        }
+      }
+    }
+    Game.shake = Math.max(Game.shake, 22);
+    Game.flash = Math.max(Game.flash, 0.6);
+    Game.flashColor = '#ff5050';
+    spawnParticles(cx, Game.paddle.y, '#ff5050', 40, [120, 380]);
+    floatText(cx, Game.paddle.y - 28, '★ 死亡反击 — 量子刺 ×' + hits + ' ★', '#ff5050', 18);
+    playSfx('lance');
+  }
+  if (Game.lives <= 0) {
+    gameOver();
+  } else {
+    spawnAttachedBall();
+  }
+}
+function gameOver() {
+  Game.state = 'gameover';
+  if (Game.score > Game.highScore) {
+    Game.highScore = Game.score;
+    try { localStorage.setItem('neonbreaker_high', String(Game.score)); } catch (e) {}
+  }
+}
+function levelComplete() {
+  const bonus = 500 + Game.level * 100;
+  Game.score += bonus;
+  Game.state = 'levelclear';
+  Game.transitionT = 1.6;
+  if (Game.beast) {
+    floatText(W/2, H/2 - 30, '击败  ' + Game.beast.name, '#ffd400', 30);
+    floatText(W/2, H/2 + 12, '+' + bonus, '#fff', 22);
+  } else {
+    floatText(W/2, H/2, '关卡通关  +' + bonus, '#ffd400', 32);
+  }
+  playSfx('levelup');
+}
+
+function damageBrick(brick, fromBall, fromExplosion = false, chainDepth = 0) {
+  if (!brick.alive) return false;
+  if (brick.type === B.INDESTRUCTIBLE) {
+    brick.flash = 0.15;
+    if (!fromExplosion) playSfx('steel');
+    return false;
+  }
+  brick.flash = 0.18;
+
+  const dmg = 1;
+
+  if (Game.pierceTimer > 0 && fromBall && !fromExplosion) {
+    if (brick.boss) brick.hp -= dmg;
+    else brick.hp = 0;
+  } else {
+    brick.hp -= dmg;
+  }
+  // Beast HP tracking (only for direct ball hits / lasers — explosions count too)
+  if (Game.beast) {
+    Game.beast.hp = Math.max(0, Game.beast.hp - dmg);
+  }
+  // 导体 — steel hit (any source) conducts to 4 cardinal neighbors. chainDepth caps cascade.
+  if (Game.run && Game.run.passives.conductor && brick.type === B.STEEL &&
+      chainDepth < 3) {
+    const cx = brick.x + brick.w/2, cy = brick.y + brick.h/2;
+    const reach = (BRICK_W + BRICK_GAP) * 1.4;
+    const seen = new Set([brick]);
+    for (const b of Game.bricks) {
+      if (!b.alive || seen.has(b) || b.type === B.INDESTRUCTIBLE) continue;
+      const bx = b.x + b.w/2, by = b.y + b.h/2;
+      const dx = Math.abs(bx - cx), dy = Math.abs(by - cy);
+      // Cardinal-ish neighbors: small offset on the perpendicular axis
+      if ((dx < reach && dy < BRICK_H) || (dy < reach && dx < BRICK_W)) {
+        seen.add(b);
+        Game.arcs.push(makeArc(cx, cy, bx, by, '#a0a8c0'));
+        damageBrick(b, null, true, chainDepth + 1);
+      }
+    }
+  }
+
+  // Mirror beast: damage propagates to twin
+  if (brick.mirror && brick.mirror.alive && !fromExplosion) {
+    const m = brick.mirror;
+    m.hp -= dmg;
+    m.flash = 0.18;
+    if (m.hp <= 0 && m.alive) {
+      // Use breakBrick path so it triggers explosion / score normally
+      breakBrick(m, null, true, chainDepth);
+    } else if (m.type === B.STEEL) {
+      const r = m.hp / m.maxHp;
+      m.color = r > 0.66 ? '#a0a8c0' : (r > 0.33 ? '#d09060' : '#ff5050');
+    }
+  }
+
+  if (brick.boss && brick.hp > 0) {
+    Game.score += 5;
+    Game.energy = Math.min(Game.energyMax, Game.energy + 0.5);
+    if (!fromExplosion) {
+      Game.combo++;
+      if (Game.combo > Game.maxCombo) Game.maxCombo = Game.combo;
+      Game.comboTimer = 4;
+    }
+    spawnParticles(brick.x + brick.w/2, brick.y + brick.h/2, brick.color, 4, [40, 120]);
+    playSfx('hit');
+  }
+
+  if (brick.hp <= 0) {
+    breakBrick(brick, fromBall, fromExplosion, chainDepth);
+    return true;
+  } else {
+    if (brick.type === B.STEEL) {
+      const r = brick.hp / brick.maxHp;
+      brick.color = r > 0.66 ? '#a0a8c0' : (r > 0.33 ? '#d09060' : '#ff5050');
+    }
+    if (!brick.boss) playSfx(brick.type === B.STEEL ? 'steel' : 'hit');
+    return false;
+  }
+}
+
+function breakBrick(brick, fromBall, fromExplosion = false, chainDepth = 0) {
+  if (!brick.alive) return;
+  brick.alive = false;
+  Game.bricksBroken++;
+
+  // First brick of a Run = celebration (positive feedback in seconds 0-3)
+  if (Game.bricksBroken === 1) {
+    Game.shake = Math.max(Game.shake, 16);
+    Game.flash = Math.max(Game.flash, 0.4);
+    Game.flashColor = '#39ffea';
+    spawnParticles(brick.x + brick.w/2, brick.y + brick.h/2, '#fff', 30, [120, 360]);
+    floatText(brick.x + brick.w/2, brick.y - 28, '首  击!', '#ffd400', 32);
+    playSfx('combo');
+  }
+
+  let baseScore = 10;
+  if (brick.type === B.STEEL) baseScore = 30;
+  else if (brick.type === B.BOMB) baseScore = 25;
+  else if (brick.type === B.MYSTERY) baseScore = 50;
+  else if (brick.type === B.MOVING) baseScore = 40;
+  else if (brick.type === B.CORE) baseScore = 200;
+  if (brick.boss) baseScore = 1500;
+
+  if (!fromExplosion) {
+    Game.combo++;
+    if (Game.combo > Game.maxCombo) Game.maxCombo = Game.combo;
+    Game.comboTimer = 4.0;
+    if (Game.combo > 2 && Game.combo % 5 === 0) playSfx('combo');
+  }
+  const comboMul = 1 + Math.min(Game.combo / 10, 2);
+  let scoreGain = Math.floor(baseScore * comboMul);
+  Game.score += scoreGain;
+  Game.energy = Math.min(Game.energyMax, Game.energy + (brick.boss ? 30 : 1.5));
+
+  floatText(brick.x + brick.w/2, brick.y + brick.h/2,
+            '+' + scoreGain, brick.color, Game.combo > 5 ? 22 : 16);
+
+  if (brick.boss) {
+    spawnParticles(brick.x + brick.w/2, brick.y + brick.h/2, brick.color, 60, [120, 420]);
+    spawnParticles(brick.x + brick.w/2, brick.y + brick.h/2, '#ffffff', 30, [80, 220]);
+    Game.shake = 30;
+    Game.flash = 0.6;
+    Game.flashColor = brick.color;
+    playSfx('bomb');
+  } else {
+    spawnParticles(brick.x + brick.w/2, brick.y + brick.h/2, brick.color, 14);
+    playSfx(fromExplosion ? 'bomb' : (brick.type === B.BOMB ? 'bomb' : 'hit'));
+  }
+
+  if (brick.type === B.MYSTERY) {
+    spawnPowerUp(brick.x + brick.w/2 - 14, brick.y + brick.h/2 - 14);
+  } else if (Math.random() < 0.07) {
+    spawnPowerUp(brick.x + brick.w/2 - 14, brick.y + brick.h/2 - 14);
+  }
+
+  // Skill-shot bonus
+  if (brick === Game.targetBrick) {
+    Game.targetsHit++;
+    Game.targetBrick = null;
+    const bonus = 500 + Game.level * 50;
+    Game.score += bonus;
+    Game.energy = Math.min(Game.energyMax, Game.energy + 12);
+    Game.combo += 2;
+    if (Game.combo > Game.maxCombo) Game.maxCombo = Game.combo;
+    Game.comboTimer = 5;
+    Game.shake = Math.max(Game.shake, 10);
+    floatText(brick.x + brick.w/2, brick.y + brick.h/2 - 18,
+              '★ TARGET ★ +' + bonus, '#ffd400', 22);
+    spawnParticles(brick.x + brick.w/2, brick.y + brick.h/2, '#ffd400', 30, [120, 320]);
+    playSfx('combo');
+  }
+
+  if (brick.type === B.BOMB) {
+    chainExplode(brick, chainDepth + 1);
+  }
+
+  // 静电 — arc to 2 nearest alive bricks
+  if (Game.run && Game.run.passives.static && !fromExplosion && chainDepth < 3) {
+    const cx = brick.x + brick.w/2, cy = brick.y + brick.h/2;
+    const candidates = [];
+    for (const b of Game.bricks) {
+      if (!b.alive || b === brick || b.type === B.INDESTRUCTIBLE) continue;
+      const d = Math.hypot(b.x + b.w/2 - cx, b.y + b.h/2 - cy);
+      if (d < 240) candidates.push({ b, d });
+    }
+    candidates.sort((a, b) => a.d - b.d);
+    for (let i = 0; i < Math.min(2, candidates.length); i++) {
+      const tgt = candidates[i].b;
+      Game.arcs.push(makeArc(cx, cy, tgt.x + tgt.w/2, tgt.y + tgt.h/2));
+      damageBrick(tgt, null, true, chainDepth + 1);
+    }
+  }
+
+  // 塌陷 — pull a nearby brick to die alongside
+  if (Game.run && Game.run.passives.implode && !fromExplosion && chainDepth < 4) {
+    const cx = brick.x + brick.w/2, cy = brick.y + brick.h/2;
+    let nearest = null, ndist = Infinity;
+    for (const b of Game.bricks) {
+      if (!b.alive || b === brick || b.type === B.INDESTRUCTIBLE) continue;
+      const d = Math.hypot(b.x + b.w/2 - cx, b.y + b.h/2 - cy);
+      if (d < 80 && d < ndist) { nearest = b; ndist = d; }
+    }
+    if (nearest) {
+      // visual implosion particles
+      spawnParticles(cx, cy, '#7c5fff', 16, [60, 220]);
+      damageBrick(nearest, null, true, chainDepth + 1);
+    }
+  }
+
+  // 接管 — 30% chance to spawn friendly turret at this brick's location
+  if (Game.run && Game.run.passives.hijack && brick.type === B.NORMAL &&
+      !fromExplosion && Math.random() < 0.3) {
+    Game.turrets.push(makeTurret(brick.x + brick.w/2, brick.y + brick.h/2));
+    spawnParticles(brick.x + brick.w/2, brick.y + brick.h/2, '#74ff5e', 10, [40, 140]);
+  }
+
+  // 碎片球 — break spawns 4-direction friendly projectiles
+  if (Game.run && Game.run.passives.shrapnel && fromBall && !fromExplosion) {
+    const cx = brick.x + brick.w/2, cy = brick.y + brick.h/2;
+    const sp = 480;
+    for (const [vx, vy] of [[sp,0],[-sp,0],[0,sp],[0,-sp]]) {
+      const p = makeProjectile(cx, cy, vx, vy, '#39ffea');
+      p.friendly = true;
+      Game.projectiles.push(p);
+    }
+  }
+
+  // CORE break: extra fanfare; with detonator card, AOE explode
+  if (brick.type === B.CORE) {
+    spawnParticles(brick.x + brick.w/2, brick.y + brick.h/2, '#ffd700', 36, [120, 380]);
+    spawnParticles(brick.x + brick.w/2, brick.y + brick.h/2, '#fff', 16, [80, 200]);
+    Game.shake = Math.max(Game.shake, 14);
+    Game.flash = Math.max(Game.flash, 0.4);
+    Game.flashColor = '#ffd700';
+    floatText(brick.x + brick.w/2, brick.y - 8, '★ 核心破碎 ★', '#ffd700', 18);
+    if (Game.run && Game.run.passives.detonator) {
+      coreDetonate(brick, chainDepth + 1);
+    }
+  }
+}
+
+function coreDetonate(centerBrick, chainDepth) {
+  const omega = Game.run && Game.run.passives.omega;
+  Game.shake = Math.max(Game.shake, omega ? 28 : 22);
+  Game.flash = Math.max(Game.flash, 0.55);
+  Game.flashColor = '#ffd700';
+  spawnParticles(centerBrick.x + centerBrick.w/2,
+                 centerBrick.y + centerBrick.h/2,
+                 '#ffd700', omega ? 80 : 50, [150, 540]);
+  const cx = centerBrick.x + centerBrick.w/2;
+  const cy = centerBrick.y + centerBrick.h/2;
+  const radius = omega ? 260 : 130;
+  for (const b of Game.bricks) {
+    if (b === centerBrick || !b.alive) continue;
+    const bx = b.x + b.w/2, by = b.y + b.h/2;
+    if (Math.hypot(bx - cx, by - cy) < radius) {
+      damageBrick(b, null, true, chainDepth);
+      if (omega) damageBrick(b, null, true, chainDepth);  // +1 dmg
+    }
+  }
+  playSfx('bomb');
+}
+
+function chainExplode(centerBrick, chainDepth) {
+  if (chainDepth > Game.maxChain) Game.maxChain = chainDepth;
+  Game.shake = Math.max(Game.shake, 14);
+  Game.flash = Math.max(Game.flash, 0.32);
+  Game.flashColor = '#ff8000';
+  spawnParticles(centerBrick.x + centerBrick.w/2,
+                 centerBrick.y + centerBrick.h/2,
+                 '#ff8000', 28, [120, 360]);
+  const cx = centerBrick.x + centerBrick.w/2;
+  const cy = centerBrick.y + centerBrick.h/2;
+  const radius = (BRICK_W + BRICK_GAP) * 1.55;
+  for (const b of Game.bricks) {
+    if (b === centerBrick || !b.alive) continue;
+    const bx = b.x + b.w/2;
+    const by = b.y + b.h/2;
+    if (Math.abs(bx - cx) < radius && Math.abs(by - cy) < radius) {
+      damageBrick(b, null, true, chainDepth);
+    }
+  }
+}
+
+function spawnPowerUp(x, y) {
+  const type = irand(0, 5);
+  Game.powerUps.push(makePowerUp(x, y, type));
+}
+
+function applyPowerUp(type) {
+  const dur = 8;
+  switch (type) {
+    case PU.MULTI: multiBall(); break;
+    case PU.LASER: Game.laserTimer = dur; break;
+    case PU.WIDE:
+      Game.wideTimer = dur;
+      Game.paddle.w = PADDLE_W_BASE * 1.6;
+      Game.paddle.x = clamp(Game.paddle.x - PADDLE_W_BASE * 0.3, 0, W - Game.paddle.w);
+      break;
+    case PU.SLOW: Game.slowTimer = dur * 0.7; break;
+    case PU.PIERCE: Game.pierceTimer = dur * 0.7; break;
+    case PU.LIFE: Game.lives++; break;
+  }
+  playSfx('powerup');
+  floatText(W/2, H - 100, '★ ' + PU_NAMES[type] + ' ★', PU_COLORS[type], 24);
+}
+
+function catchGem(g) {
+  Game.gemsCaught++;
+  const color = GEM_COLORS[g.type];
+  let label = '';
+  if (g.type === GEM.ENERGY) {
+    Game.energy = Math.min(Game.energyMax, Game.energy + 18);
+    label = '+能量';
+  } else if (g.type === GEM.SCORE) {
+    const mul = 1 + Math.min(Game.combo / 10, 2);
+    const gain = Math.floor(200 * mul);
+    Game.score += gain;
+    label = '+' + gain;
+  } else if (g.type === GEM.COMBO) {
+    Game.combo += 3;
+    if (Game.combo > Game.maxCombo) Game.maxCombo = Game.combo;
+    Game.comboTimer = 5;
+    label = '连击 +3';
+  }
+  spawnParticles(g.x, g.y, color, 18, [80, 240]);
+  floatText(g.x, g.y - 16, '★ ' + label, color, 18);
+  playSfx('powerup');
+}
+
+function pickNewTarget() {
+  const candidates = [];
+  for (const b of Game.bricks) {
+    if (!b.alive) continue;
+    if (b.type === B.INDESTRUCTIBLE) continue;
+    if (b === Game.targetBrick) continue;
+    candidates.push(b);
+  }
+  if (candidates.length === 0) {
+    Game.targetBrick = null;
+    return;
+  }
+  Game.targetBrick = candidates[irand(0, candidates.length - 1)];
+  Game.targetTimer = TARGET_LIFE;
+}
+
+// 量子刺 (Quantum Lance) — 从挡板向上射穿一整列砖 + 摧毁/反向沿途弹幕
+function fireDash() {
+  if (Game.state !== 'playing') return;
+  if (Game.dashCD > 0) {
+    playSfx('deny');
+    return;
+  }
+  Game.dashCD = LANCE_CD;
+  const cx = Game.paddle.x + Game.paddle.w/2;
+  const cy = Game.paddle.y - 4;
+  // Visual lance entity (drawn as vertical beam)
+  Game.dashes.push({
+    type: 'lance',
+    x: cx,
+    yTop: 0,
+    yBottom: cy,
+    life: 0.45,
+    maxLife: 0.45,
+  });
+  // Damage every brick whose horizontal extent overlaps the lance column
+  let hits = 0;
+  for (const b of Game.bricks) {
+    if (!b.alive) continue;
+    if (cx >= b.x && cx <= b.x + b.w) {
+      if (b.type === B.INDESTRUCTIBLE) {
+        spawnParticles(cx, b.y + b.h/2, '#ffffff', 6, [60, 220]);
+      } else {
+        damageBrick(b, null, false);
+        hits++;
+      }
+    }
+  }
+  // Sweep enemy projectiles in lance column → convert to friendly shooting up
+  for (const p of Game.projectiles) {
+    if (!p.friendly && Math.abs(p.x - cx) < 14 && p.y < cy) {
+      p.friendly = true;
+      p.color = '#39ffea';
+      p.vx = 0;
+      p.vy = -800;
+      spawnParticles(p.x, p.y, '#39ffea', 6, [60, 200]);
+    }
+  }
+  // Big launch fanfare
+  spawnParticles(cx, cy, '#39ffea', 28, [120, 360]);
+  spawnParticles(cx, cy, '#ffffff', 14, [60, 200]);
+  Game.shake = Math.max(Game.shake, 10);
+  Game.flash = Math.max(Game.flash, 0.32);
+  Game.flashColor = '#39ffea';
+  playSfx('lance');
+  if (hits === 0) floatText(cx, cy - 30, '量子刺 · 空射', '#888', 14);
+  else floatText(cx, cy - 30, '量子刺 ×' + hits, '#39ffea', 14);
+}
+
+function multiBall() {
+  if (Game.balls.length === 0) return;
+  const ref = Game.balls.find(b => !b.attached) || Game.balls[0];
+  const speed = currentBallSpeed();
+  const baseAng = ref.attached ? -Math.PI/2 : Math.atan2(ref.vy, ref.vx);
+  for (let i = 0; i < 2; i++) {
+    const nb = makeBall(ref.x, ref.y, false);
+    const ang = baseAng + (i === 0 ? 0.5 : -0.5);
+    nb.vx = Math.cos(ang) * speed;
+    nb.vy = Math.sin(ang) * speed;
+    if (Math.abs(nb.vy) < speed * 0.3) nb.vy = -Math.abs(speed * 0.4);
+    Game.balls.push(nb);
+  }
+}
+
+function releaseWave() {
+  if (Game.energy < Game.energyMax) {
+    playSfx('deny');
+    floatText(Game.paddle.x + Game.paddle.w/2, Game.paddle.y - 30, '能量不足', '#ff5050', 14);
+    return;
+  }
+  Game.energy = 0;
+
+  let lowestY = -Infinity;
+  for (const b of Game.bricks) {
+    if (b.alive && b.type !== B.INDESTRUCTIBLE && !b.boss) {
+      lowestY = Math.max(lowestY, b.y);
+    }
+  }
+  const targets = [];
+  for (const b of Game.bricks) {
+    if (!b.alive) continue;
+    if (b.boss) {
+      b.hp -= 10;
+      b.flash = 0.4;
+      if (b.hp <= 0) targets.push(b);
+    } else if (b.type !== B.INDESTRUCTIBLE && lowestY > -Infinity) {
+      if (b.y >= lowestY - (BRICK_H + BRICK_GAP) - 2) targets.push(b);
+    }
+  }
+  if (lowestY > -Infinity) {
+    Game.waves.push({ y: lowestY + BRICK_H/2, life: 0.6, maxLife: 0.6 });
+    Game.waves.push({ y: lowestY - (BRICK_H + BRICK_GAP) + BRICK_H/2, life: 0.6, maxLife: 0.6 });
+  }
+  for (const b of targets) breakBrick(b);
+
+  Game.shake = 24;
+  Game.flash = 0.5;
+  Game.flashColor = '#39ffea';
+  playSfx('wave');
+  floatText(W/2, H/2, '霓虹波！', '#39ffea', 38);
+}
+
+/* ---------------- Update ---------------- */
+function update(dt) {
+  // Effect timers
+  if (Game.slowTimer > 0) Game.slowTimer -= dt;
+  if (Game.pierceTimer > 0) Game.pierceTimer -= dt;
+  if (Game.laserTimer > 0) Game.laserTimer -= dt;
+  if (Game.dashCD > 0) Game.dashCD = Math.max(0, Game.dashCD - dt);
+  if (Game.freezeT > 0) Game.freezeT = Math.max(0, Game.freezeT - dt);
+  // Auto-laser card (electromagnetic turret) + 散射 (spray)
+  if (Game.run && Game.run.passives.turret) {
+    Game.autoLaserCD -= dt;
+    if (Game.autoLaserCD <= 0) {
+      Game.autoLaserCD = 1.5;
+      Game.lasers.push(makeLaser(Game.paddle.x + 10, Game.paddle.y));
+      Game.lasers.push(makeLaser(Game.paddle.x + Game.paddle.w - 14, Game.paddle.y));
+      if (Game.run.passives.spray) {
+        // 3-way fan: tilt the side lasers
+        const cx = Game.paddle.x + Game.paddle.w/2;
+        const left = makeLaser(cx - 4, Game.paddle.y);
+        left.vx = -260; left.w = 4;
+        Game.lasers.push(left);
+        const right = makeLaser(cx, Game.paddle.y);
+        right.vx = 260; right.w = 4;
+        Game.lasers.push(right);
+      }
+      playSfx('laser');
+    }
+  }
+  // Magnet card: attract falling balls within 90px to paddle
+  if (Game.run && Game.run.passives.magnet) {
+    const px = Game.paddle.x + Game.paddle.w/2;
+    const py = Game.paddle.y;
+    for (const ball of Game.balls) {
+      if (ball.attached || ball.vy < 0) continue;
+      const dx = px - ball.x;
+      const dy = py - ball.y;
+      const d = Math.hypot(dx, dy);
+      if (d < 90 && d > 8) {
+        const pull = 480 * dt / Math.max(1, d / 60);
+        ball.vx += (dx / d) * pull;
+        const sp = Math.hypot(ball.vx, ball.vy);
+        const target = currentBallSpeed();
+        if (sp > target) { ball.vx *= target / sp; ball.vy *= target / sp; }
+      }
+    }
+  }
+  // 引力轨 (gtrack) — attracts in any direction within 70px (stacks with magnet)
+  if (Game.run && Game.run.passives.gtrack) {
+    const px = Game.paddle.x + Game.paddle.w/2;
+    const py = Game.paddle.y;
+    for (const ball of Game.balls) {
+      if (ball.attached) continue;
+      const dx = px - ball.x;
+      const dy = py - ball.y;
+      const d = Math.hypot(dx, dy);
+      if (d < 70 && d > 6) {
+        const pull = 700 * dt / Math.max(1, d / 50);
+        ball.vx += (dx / d) * pull;
+        ball.vy += (dy / d) * pull;
+        const sp = Math.hypot(ball.vx, ball.vy);
+        const target = currentBallSpeed();
+        if (sp > target) { ball.vx *= target / sp; ball.vy *= target / sp; }
+      }
+    }
+  }
+  // Orbit card: balls within 80px shoot a damaging line
+  if (Game.run && Game.run.passives.orbit && Game.balls.length >= 2) {
+    for (let i = 0; i < Game.balls.length; i++) {
+      for (let j = i+1; j < Game.balls.length; j++) {
+        const a = Game.balls[i], b = Game.balls[j];
+        if (a.attached || b.attached) continue;
+        if (Math.hypot(a.x - b.x, a.y - b.y) < 120) {
+          // Damage any brick on line segment a-b
+          for (const br of Game.bricks) {
+            if (!br.alive) continue;
+            // Sample points along the line
+            const steps = 6;
+            for (let s = 0; s < steps; s++) {
+              const t = s / steps;
+              const px = a.x + (b.x - a.x) * t;
+              const py = a.y + (b.y - a.y) * t;
+              if (px >= br.x && px <= br.x + br.w && py >= br.y && py <= br.y + br.h) {
+                if (br.type !== B.INDESTRUCTIBLE) {
+                  damageBrick(br, null, true);
+                  break;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  if (Game.wideTimer > 0) {
+    Game.wideTimer -= dt;
+    if (Game.wideTimer <= 0) {
+      const cx = Game.paddle.x + Game.paddle.w/2;
+      Game.paddle.w = PADDLE_W_BASE;
+      Game.paddle.x = clamp(cx - PADDLE_W_BASE/2, 0, W - PADDLE_W_BASE);
+    }
+  }
+
+  // Gems (only spawn while a ball is in flight — no clutter on attached state)
+  const ballInFlight = Game.balls.some(b => !b.attached);
+  if (ballInFlight) {
+    Game.gemTimer -= dt;
+    if (Game.gemTimer <= 0) {
+      Game.gemTimer = rand(5, 9);
+      Game.gems.push(makeGem(irand(0, 2)));
+    }
+  }
+  for (let i = Game.gems.length - 1; i >= 0; i--) {
+    const g = Game.gems[i];
+    g.x += g.vx * dt;
+    g.y += g.vy * dt;
+    g.age += dt;
+    if (g.x < 20) { g.x = 20; g.vx = -g.vx; }
+    if (g.x > W - 20) { g.x = W - 20; g.vx = -g.vx; }
+    // Auto-collect when reaching paddle Y line (no X-alignment needed)
+    if (g.y + g.r > Game.paddle.y) {
+      catchGem(g);
+      Game.gems.splice(i, 1);
+      continue;
+    }
+    if (g.y > H + 30) Game.gems.splice(i, 1);
+  }
+
+  // Skill-shot target rotation
+  if (ballInFlight) {
+    if (!Game.targetBrick || !Game.targetBrick.alive) {
+      pickNewTarget();
+    } else {
+      Game.targetTimer -= dt;
+      if (Game.targetTimer <= 0) pickNewTarget();
+    }
+  } else {
+    Game.targetBrick = null;
+  }
+
+  // Dash shockwaves
+  for (let i = Game.dashes.length - 1; i >= 0; i--) {
+    const d = Game.dashes[i];
+    d.life -= dt;
+    if (d.life <= 0) Game.dashes.splice(i, 1);
+  }
+
+  // Time scale
+  let target = 1;
+  if (Game.slowTimer > 0) target = 0.5;
+  for (const ball of Game.balls) {
+    if (!ball.attached && ball.vy > 0 &&
+        ball.y > Game.paddle.y - 80 && ball.y < Game.paddle.y + 30) {
+      target = Math.min(target, 0.55);
+    }
+  }
+  Game.timeScale = lerp(Game.timeScale, target, 0.18);
+
+  // Combo timer
+  if (Game.combo > 0) {
+    Game.comboTimer -= dt;
+    if (Game.comboTimer <= 0) Game.combo = 0;
+  }
+  if (Game.shake > 0) Game.shake = Math.max(0, Game.shake - dt * 60);
+  if (Game.flash > 0) Game.flash = Math.max(0, Game.flash - dt * 1.6);
+
+  // Bricks animation/movement + firing
+  for (const b of Game.bricks) {
+    if (!b.alive) continue;
+    b.age += dt;
+    if (b.flash > 0) b.flash = Math.max(0, b.flash - dt * 4);
+    if (b.type === B.MOVING) {
+      b.x += b.vx * dt;
+      if (b.x < GRID_LEFT) { b.x = GRID_LEFT; b.vx = -b.vx; }
+      if (b.x + b.w > W - GRID_LEFT) { b.x = W - GRID_LEFT - b.w; b.vx = -b.vx; }
+    } else if (b.boss) {
+      b.x += b.vx * dt;
+      if (b.x < 20) { b.x = 20; b.vx = -b.vx; }
+      if (b.x + b.w > W - 20) { b.x = W - 20 - b.w; b.vx = -b.vx; }
+    }
+    // Single-shot firing
+    if (b.firesEvery) {
+      b.fireTimer -= dt;
+      if (b.fireTimer <= 0) {
+        b.fireTimer = b.firesEvery;
+        Game.projectiles.push(makeProjectile(b.x + b.w/2, b.y + b.h + 4, 0, 240));
+        playSfx('steel');
+      }
+    }
+    // Boss fan-shot
+    if (b.boss && b.fanFires) {
+      b.fanTimer -= dt;
+      if (b.fanTimer <= 0) {
+        b.fanTimer = 2.4;
+        const cx = b.x + b.w/2, cy = b.y + b.h;
+        for (let s = -2; s <= 2; s++) {
+          const ang = Math.PI/2 + s * 0.18;
+          Game.projectiles.push(makeProjectile(cx, cy, Math.cos(ang) * 260, Math.sin(ang) * 260));
+        }
+        playSfx('laser');
+      }
+    }
+  }
+
+  // Projectiles
+  if (Game.iframes > 0) Game.iframes -= dt;
+  for (let i = Game.projectiles.length - 1; i >= 0; i--) {
+    const p = Game.projectiles[i];
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.age += dt;
+    p.trail.push({ x: p.x, y: p.y });
+    if (p.trail.length > 6) p.trail.shift();
+    // Hit paddle (enemy projectile only)
+    if (!p.friendly && p.vy > 0 &&
+        p.y + p.h > Game.paddle.y && p.y < Game.paddle.y + Game.paddle.h &&
+        p.x > Game.paddle.x && p.x < Game.paddle.x + Game.paddle.w) {
+      Game.projectiles.splice(i, 1);
+      onPaddleHit();
+      continue;
+    }
+    // Friendly projectile damages bricks
+    if (p.friendly) {
+      let hit = false;
+      for (const b of Game.bricks) {
+        if (!b.alive) continue;
+        if (p.x > b.x && p.x < b.x + b.w && p.y < b.y + b.h && p.y + p.h > b.y) {
+          if (b.type === B.INDESTRUCTIBLE) {
+            spawnParticles(p.x, p.y, '#fff', 4, [40, 120]);
+          } else {
+            damageBrick(b, null, false);
+          }
+          hit = true; break;
+        }
+      }
+      if (hit) { Game.projectiles.splice(i, 1); continue; }
+    }
+    if (p.y > H + 20 || p.y < -30 || p.x < -30 || p.x > W + 30 || p.age > p.life) {
+      Game.projectiles.splice(i, 1);
+    }
+  }
+
+  // A/D paddle physics (mouse still works in parallel)
+  let kbDir = 0;
+  if (Game.keys.a) kbDir -= 1;
+  if (Game.keys.d) kbDir += 1;
+  if (kbDir !== 0) {
+    Game.paddle.x = clamp(Game.paddle.x + kbDir * KEYBOARD_PADDLE_SPEED * dt,
+                          0, W - Game.paddle.w);
+  }
+
+  // Balls
+  for (let i = Game.balls.length - 1; i >= 0; i--) {
+    const ball = Game.balls[i];
+    if (ball.attached) {
+      ball.x = Game.paddle.x + Game.paddle.w/2;
+      ball.y = Game.paddle.y - ball.r - 2;
+      continue;
+    }
+    // 凝固 — completely skip ball update while frozen (no motion, no collisions)
+    if (Game.freezeT > 0) continue;
+    // Ghost ball lifetime (时空回响)
+    if (ball.ghost) {
+      ball.ghostLife -= dt;
+      if (ball.ghostLife <= 0) { Game.balls.splice(i, 1); continue; }
+    }
+    ball.x += ball.vx * dt;
+    ball.y += ball.vy * dt;
+    ball.trail.push({ x: ball.x, y: ball.y });
+    if (ball.trail.length > 14) ball.trail.shift();
+
+    if (ball.x - ball.r < 0) { ball.x = ball.r; ball.vx = -ball.vx; }
+    if (ball.x + ball.r > W) { ball.x = W - ball.r; ball.vx = -ball.vx; }
+    if (ball.y - ball.r < 0) { ball.y = ball.r; ball.vy = -ball.vy; }
+
+    if (ball.y - ball.r > H) {
+      Game.balls.splice(i, 1);
+      continue;
+    }
+
+    // Paddle collision
+    if (ball.vy > 0) {
+      const hit = ballRectCollide(ball, Game.paddle);
+      if (hit) {
+        const offset = (ball.x - (Game.paddle.x + Game.paddle.w/2)) / (Game.paddle.w/2);
+        const ang = clamp(offset, -0.95, 0.95) * (Math.PI / 2.6);
+        const speed = currentBallSpeed();
+        // 时空回响 — spawn ghost ball with POST-bounce velocity at a mirrored angle
+        if (Game.run && Game.run.passives.echo && !ball.ghost) {
+          const echo = makeBall(ball.x, ball.y - 2, false);
+          // Mirror the angle so ghost goes opposite spread (covers more bricks)
+          const echoAng = -ang * 0.7;
+          echo.vx = Math.sin(echoAng) * speed;
+          echo.vy = -Math.abs(Math.cos(echoAng) * speed);
+          echo.ghost = true;
+          echo.ghostLife = 0.7;
+          Game.balls.push(echo);
+        }
+        ball.vx = Math.sin(ang) * speed;
+        ball.vy = -Math.abs(Math.cos(ang) * speed);
+        ball.y = Game.paddle.y - ball.r - 0.5;
+        playSfx('paddle');
+        spawnParticles(ball.x, Game.paddle.y, '#39ffea', 6, [40, 120]);
+      }
+    }
+
+    // Brick collisions
+    let bounced = false;
+    for (const b of Game.bricks) {
+      if (!b.alive) continue;
+      const hit = ballRectCollide(ball, b);
+      if (!hit) continue;
+      const piercing = Game.pierceTimer > 0 && b.type !== B.INDESTRUCTIBLE && !b.boss;
+      if (!piercing) {
+        if (bounced) continue;
+        reflectBall(ball, b);
+        bounced = true;
+      }
+      damageBrick(b, ball, false);
+      if (!piercing) break;
+    }
+  }
+
+  // Ghost balls (from 时空回响) don't count as "alive"
+  const realBalls = Game.balls.filter(b => !b.ghost).length;
+  if (realBalls === 0 && Game.state === 'playing') loseLife();
+
+  // Power-ups (auto-collect — fall visibly, but apply when reaching paddle Y line)
+  for (let i = Game.powerUps.length - 1; i >= 0; i--) {
+    const p = Game.powerUps[i];
+    p.y += p.vy * dt;
+    p.age += dt;
+    if (p.y + p.h > Game.paddle.y) {
+      applyPowerUp(p.type);
+      Game.powerUps.splice(i, 1);
+      continue;
+    }
+    if (p.y > H) Game.powerUps.splice(i, 1);
+  }
+
+  // Lasers (fire when active)
+  if (Game.laserTimer > 0) {
+    Game.laserCD -= dt;
+    if (mouse.down && Game.laserCD <= 0) {
+      Game.laserCD = 0.18;
+      Game.lasers.push(makeLaser(Game.paddle.x + 10, Game.paddle.y));
+      Game.lasers.push(makeLaser(Game.paddle.x + Game.paddle.w - 14, Game.paddle.y));
+      playSfx('laser');
+    }
+  }
+  const overloadMax = (Game.run && Game.run.passives.overload) ? 3 : 1;
+  for (let i = Game.lasers.length - 1; i >= 0; i--) {
+    const l = Game.lasers[i];
+    if (l.vx) l.x += l.vx * dt;
+    l.y += l.vy * dt;
+    if (l.y < -20 || l.x < -20 || l.x > W + 20) { Game.lasers.splice(i, 1); continue; }
+    let hit = false;
+    for (const b of Game.bricks) {
+      if (!b.alive) continue;
+      if (l.x + l.w > b.x && l.x < b.x + b.w &&
+          l.y < b.y + b.h && l.y + l.h > b.y) {
+        if (b.type === B.INDESTRUCTIBLE) {
+          spawnParticles(l.x, l.y, '#fff', 4, [40, 120]);
+          playSfx('steel');
+          hit = true;
+        } else {
+          damageBrick(b, null, false);
+          l.pierces = (l.pierces || 0) + 1;
+          if (l.pierces >= overloadMax) hit = true;
+        }
+        break;
+      }
+    }
+    if (hit) Game.lasers.splice(i, 1);
+  }
+
+  // 接管 — friendly turrets shoot at nearest alive brick
+  for (let i = Game.turrets.length - 1; i >= 0; i--) {
+    const tr = Game.turrets[i];
+    tr.life -= dt;
+    tr.age += dt;
+    tr.fireCD -= dt;
+    if (tr.life <= 0) { Game.turrets.splice(i, 1); continue; }
+    if (tr.fireCD <= 0) {
+      tr.fireCD = 0.45;
+      // Find nearest alive brick within range
+      let target = null, td = Infinity;
+      for (const b of Game.bricks) {
+        if (!b.alive || b.type === B.INDESTRUCTIBLE) continue;
+        const bx = b.x + b.w/2, by = b.y + b.h/2;
+        const d = Math.hypot(bx - tr.x, by - tr.y);
+        if (d < td && d > 5) { target = b; td = d; }
+      }
+      if (target) {
+        const ang = Math.atan2(target.y + target.h/2 - tr.y, target.x + target.w/2 - tr.x);
+        const sp = 600;
+        const p = makeProjectile(tr.x, tr.y, Math.cos(ang) * sp, Math.sin(ang) * sp, '#74ff5e');
+        p.friendly = true;
+        Game.projectiles.push(p);
+        playSfx('laser');
+      }
+    }
+  }
+
+  // Arc fade
+  for (let i = Game.arcs.length - 1; i >= 0; i--) {
+    Game.arcs[i].life -= dt;
+    if (Game.arcs[i].life <= 0) Game.arcs.splice(i, 1);
+  }
+
+  // Particles
+  for (let i = Game.particles.length - 1; i >= 0; i--) {
+    const p = Game.particles[i];
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.vy += 220 * dt;
+    p.life -= dt;
+    if (p.life <= 0) Game.particles.splice(i, 1);
+  }
+
+  // Floating texts
+  for (let i = Game.texts.length - 1; i >= 0; i--) {
+    const t = Game.texts[i];
+    t.y += t.vy * dt;
+    t.life -= dt;
+    if (t.life <= 0) Game.texts.splice(i, 1);
+  }
+
+  // Waves
+  for (let i = Game.waves.length - 1; i >= 0; i--) {
+    const w = Game.waves[i];
+    w.life -= dt;
+    if (w.life <= 0) Game.waves.splice(i, 1);
+  }
+
+  // Stage complete: beast HP exhausted OR no destructibles left
+  let alive = 0;
+  for (const b of Game.bricks) {
+    if (b.alive && b.type !== B.INDESTRUCTIBLE) alive++;
+  }
+  const beastDead = Game.beast && Game.beast.hp <= 0;
+  if ((alive === 0 || beastDead) && Game.state === 'playing') {
+    levelComplete();
+  }
+}
+
+function updateLightOnly(dt) {
+  if (Game.shake > 0) Game.shake = Math.max(0, Game.shake - dt * 60);
+  if (Game.flash > 0) Game.flash = Math.max(0, Game.flash - dt * 1.6);
+  for (let i = Game.particles.length - 1; i >= 0; i--) {
+    const p = Game.particles[i];
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.vy += 220 * dt;
+    p.life -= dt;
+    if (p.life <= 0) Game.particles.splice(i, 1);
+  }
+  for (let i = Game.texts.length - 1; i >= 0; i--) {
+    const t = Game.texts[i];
+    t.y += t.vy * dt;
+    t.life -= dt;
+    if (t.life <= 0) Game.texts.splice(i, 1);
+  }
+  for (let i = Game.waves.length - 1; i >= 0; i--) {
+    const w = Game.waves[i];
+    w.life -= dt;
+    if (w.life <= 0) Game.waves.splice(i, 1);
+  }
+}
+
+/* ---------------- Render ---------------- */
+let bgT = 0;
+
+function render() {
+  ctx.save();
+  ctx.fillStyle = '#050010';
+  ctx.fillRect(0, 0, W, H);
+
+  // Only shake during active gameplay; never shake card-select or end screens
+  if (Game.shake > 0 && Game.state === 'playing') {
+    ctx.translate(rand(-Game.shake, Game.shake), rand(-Game.shake, Game.shake));
+  }
+
+  drawBackground();
+
+  if (Game.state === 'menu') {
+    drawMenu();
+  } else if (Game.state === 'gameover') {
+    drawSnapshot();
+    drawGameOver();
+  } else if (Game.state === 'victory_run') {
+    drawSnapshot();
+    drawRunVictory();
+  } else if (Game.state === 'card_select') {
+    drawSnapshot();
+    drawCardSelect();
+  } else {
+    drawGame();
+    if (Game.state === 'paused') drawPaused();
+    if (Game.state === 'levelclear') drawLevelClear();
+  }
+
+  if (Game.flash > 0) {
+    ctx.fillStyle = Game.flashColor;
+    ctx.globalAlpha = Game.flash * 0.4;
+    ctx.fillRect(-50, -50, W + 100, H + 100);
+    ctx.globalAlpha = 1;
+  }
+
+  ctx.restore();
+
+  if (Game.state === 'menu' || Game.state === 'gameover' ||
+      Game.state === 'card_select' || Game.state === 'victory_run') {
+    drawCursor();
+  }
+}
+
+function drawBackground() {
+  bgT += 1/60;
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, '#0a0024');
+  grad.addColorStop(0.55, '#080018');
+  grad.addColorStop(1, '#1a0028');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.save();
+  ctx.strokeStyle = 'rgba(120, 80, 200, 0.18)';
+  ctx.lineWidth = 1;
+  const gs = 40;
+  const ofx = (bgT * 28) % gs;
+  const ofy = (bgT * 18) % gs;
+  ctx.beginPath();
+  for (let x = -gs + ofx; x < W; x += gs) { ctx.moveTo(x, 0); ctx.lineTo(x, H); }
+  for (let y = -gs + ofy; y < H; y += gs) { ctx.moveTo(0, y); ctx.lineTo(W, y); }
+  ctx.stroke();
+  ctx.restore();
+
+  // Scanlines
+  ctx.save();
+  ctx.globalAlpha = 0.06;
+  ctx.fillStyle = '#fff';
+  for (let y = 0; y < H; y += 3) ctx.fillRect(0, y, W, 1);
+  ctx.restore();
+
+  // Vignette
+  const r = ctx.createRadialGradient(W/2, H/2, H * 0.4, W/2, H/2, H * 0.92);
+  r.addColorStop(0, 'rgba(0,0,0,0)');
+  r.addColorStop(1, 'rgba(0,0,0,0.65)');
+  ctx.fillStyle = r;
+  ctx.fillRect(0, 0, W, H);
+}
+
+function drawGame() {
+  drawWaves();
+  drawBricks();
+  drawTarget();
+  drawGems();
+  drawTurrets();
+  drawArcs();
+  drawProjectiles();
+  drawPowerUps();
+  drawLasers();
+  drawBalls();
+  drawDashes();
+  drawPaddle();
+  drawParticles();
+  drawTexts();
+  drawHUD();
+  if (Game.freezeT > 0) drawFreezeOverlay();
+}
+
+function drawArcs() {
+  for (const a of Game.arcs) {
+    const k = a.life / a.maxLife;
+    ctx.save();
+    ctx.shadowBlur = 18;
+    ctx.shadowColor = a.color;
+    ctx.strokeStyle = a.color;
+    ctx.globalAlpha = k;
+    ctx.lineWidth = 2 + k * 2;
+    // Jagged lightning effect via mid-perturbed segments
+    ctx.beginPath();
+    ctx.moveTo(a.x1, a.y1);
+    const segs = 5;
+    for (let i = 1; i <= segs; i++) {
+      const t = i / segs;
+      const mx = lerp(a.x1, a.x2, t);
+      const my = lerp(a.y1, a.y2, t);
+      const ox = (i < segs) ? rand(-8, 8) : 0;
+      const oy = (i < segs) ? rand(-8, 8) : 0;
+      ctx.lineTo(mx + ox, my + oy);
+    }
+    ctx.stroke();
+    // Inner bright core
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = k * 0.85;
+    ctx.strokeStyle = '#ffffff';
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+function drawTurrets() {
+  for (const tr of Game.turrets) {
+    const k = tr.life / tr.maxLife;
+    ctx.save();
+    ctx.translate(tr.x, tr.y);
+    ctx.rotate(tr.age * 3);
+    ctx.shadowBlur = 16;
+    ctx.shadowColor = '#74ff5e';
+    ctx.fillStyle = '#74ff5e';
+    ctx.globalAlpha = 0.5 + k * 0.5;
+    // Triangle
+    ctx.beginPath();
+    ctx.moveTo(0, -10);
+    ctx.lineTo(8, 6);
+    ctx.lineTo(-8, 6);
+    ctx.closePath();
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.arc(0, 0, 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+function drawFreezeOverlay() {
+  ctx.save();
+  ctx.globalAlpha = 0.18;
+  ctx.fillStyle = '#7c5fff';
+  ctx.fillRect(0, 0, W, H);
+  ctx.globalAlpha = 0.65;
+  ctx.strokeStyle = '#7c5fff';
+  ctx.lineWidth = 6;
+  ctx.shadowBlur = 24;
+  ctx.shadowColor = '#7c5fff';
+  ctx.strokeRect(8, 8, W - 16, H - 16);
+  ctx.restore();
+}
+
+function drawProjectiles() {
+  for (const p of Game.projectiles) {
+    // Trail
+    for (let i = 0; i < p.trail.length; i++) {
+      const t = p.trail[i];
+      const k = i / p.trail.length;
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = k * 0.4;
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, 2 + k, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    ctx.save();
+    ctx.shadowBlur = 14;
+    ctx.shadowColor = p.color;
+    ctx.fillStyle = p.color;
+    rrect(p.x - p.w/2, p.y - p.h/2, p.w, p.h, 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    rrect(p.x - p.w/4, p.y - p.h/2 + 2, p.w/2, p.h - 4, 1);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+function drawSnapshot() {
+  drawBricks();
+  drawPaddle();
+  drawParticles();
+  drawTexts();
+  ctx.fillStyle = 'rgba(0,0,0,0.6)';
+  ctx.fillRect(-50, -50, W + 100, H + 100);
+}
+
+function drawBricks() {
+  for (const b of Game.bricks) {
+    if (!b.alive) continue;
+    drawBrick(b);
+  }
+}
+function drawBrick(b) {
+  ctx.save();
+  let color = b.color;
+  let glow = 14;
+  if (b.boss) glow = 30;
+  if (b.type === B.BOMB) glow = 14 + Math.sin(b.age * 6) * 6;
+  if (b.type === B.CORE) glow = 18 + Math.sin(b.age * 4) * 8;
+  if (b.type === B.MYSTERY) {
+    const hue = (b.age * 80) % 360;
+    color = `hsl(${hue},100%,62%)`;
+  }
+  ctx.shadowBlur = glow;
+  ctx.shadowColor = color;
+  ctx.fillStyle = color;
+  rrect(b.x, b.y, b.w, b.h, 4);
+  ctx.fill();
+
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = 'rgba(255,255,255,0.20)';
+  rrect(b.x + 2, b.y + 2, b.w - 4, 3, 1);
+  ctx.fill();
+
+  if (b.type === B.STEEL) {
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    ctx.font = 'bold 12px ' + FONT;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(b.hp), b.x + b.w/2, b.y + b.h/2 + 1);
+  } else if (b.type === B.BOMB) {
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 14px ' + FONT;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('✦', b.x + b.w/2, b.y + b.h/2 + 1);
+  } else if (b.type === B.MYSTERY) {
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 16px ' + FONT;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('?', b.x + b.w/2, b.y + b.h/2 + 1);
+  } else if (b.type === B.INDESTRUCTIBLE) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(b.x + 5, b.y + 5); ctx.lineTo(b.x + b.w - 5, b.y + b.h - 5);
+    ctx.moveTo(b.x + b.w - 5, b.y + 5); ctx.lineTo(b.x + 5, b.y + b.h - 5);
+    ctx.stroke();
+  } else if (b.type === B.MOVING) {
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 12px ' + FONT;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(b.vx > 0 ? '►' : '◄', b.x + b.w/2, b.y + b.h/2 + 1);
+  } else if (b.type === B.CORE) {
+    // golden core: hp diamond + label
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    ctx.font = 'bold 11px ' + FONT;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('◈ ' + b.hp, b.x + b.w/2, b.y + b.h/2 + 1);
+  }
+
+  if (b.boss) {
+    ctx.shadowBlur = 0;
+    const barH = 6;
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fillRect(b.x + 8, b.y + b.h - 12, b.w - 16, barH);
+    ctx.fillStyle = '#39ffea';
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = '#39ffea';
+    ctx.fillRect(b.x + 8, b.y + b.h - 12, (b.w - 16) * Math.max(0, b.hp / b.maxHp), barH);
+
+    ctx.shadowBlur = 14;
+    ctx.shadowColor = '#fff';
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 26px ' + FONT;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('BOSS', b.x + b.w/2, b.y + b.h/2 - 6);
+    ctx.font = 'bold 11px ' + FONT;
+    ctx.fillText(b.hp + ' / ' + b.maxHp, b.x + b.w/2, b.y + b.h/2 + 14);
+  }
+
+  if (b.flash > 0) {
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = `rgba(255,255,255,${b.flash})`;
+    rrect(b.x, b.y, b.w, b.h, 4);
+    ctx.fill();
+  }
+  // Firing indicator: red pulsing dot at bottom-center
+  if (b.firesEvery && b.alive) {
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = '#ff3050';
+    ctx.fillStyle = '#ff3050';
+    const pulse = 0.6 + Math.sin(b.age * 8) * 0.4;
+    ctx.globalAlpha = pulse;
+    ctx.beginPath();
+    ctx.arc(b.x + b.w/2, b.y + b.h - 2, 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+  if (b.fanFires && b.alive) {
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = '#ff3050';
+    ctx.fillStyle = '#ff3050';
+    const pulse = 0.5 + Math.sin(b.age * 6) * 0.5;
+    ctx.globalAlpha = pulse;
+    for (let i = -2; i <= 2; i++) {
+      ctx.beginPath();
+      ctx.arc(b.x + b.w/2 + i * 8, b.y + b.h - 3, 1.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+  ctx.restore();
+}
+
+function drawBalls() {
+  for (const ball of Game.balls) {
+    const isGhost = !!ball.ghost;
+    ctx.save();
+    if (isGhost) ctx.globalAlpha = 0.55;
+    for (let i = 0; i < ball.trail.length; i++) {
+      const t = ball.trail[i];
+      const k = i / ball.trail.length;
+      ctx.fillStyle = isGhost
+        ? `rgba(255,212,0,${k * 0.5})`
+        : (Game.pierceTimer > 0
+            ? `rgba(124,95,255,${k * 0.5})`
+            : `rgba(255,255,255,${k * 0.4})`);
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, ball.r * k, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    const main = isGhost ? '#ffd400' : (Game.pierceTimer > 0 ? '#7c5fff' : '#ffffff');
+    ctx.shadowBlur = 24;
+    ctx.shadowColor = main;
+    ctx.fillStyle = main;
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(ball.x - 2, ball.y - 2, ball.r * 0.45, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+function drawPaddle() {
+  const p = Game.paddle;
+  ctx.save();
+  if (Game.iframes > 0) {
+    // Strobe red while invulnerable
+    if (Math.floor(Game.iframes * 16) % 2 === 0) { ctx.restore(); return; }
+  }
+  ctx.shadowBlur = 24;
+  ctx.shadowColor = Game.laserTimer > 0 ? '#ff3df0' : '#39ffea';
+  const grad = ctx.createLinearGradient(p.x, 0, p.x + p.w, 0);
+  grad.addColorStop(0, '#39ffea');
+  grad.addColorStop(0.5, '#ffffff');
+  grad.addColorStop(1, '#ff3df0');
+  ctx.fillStyle = grad;
+  rrect(p.x, p.y, p.w, p.h, 7);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  rrect(p.x + 4, p.y + 2, p.w - 8, 3, 2);
+  ctx.fill();
+  if (Game.laserTimer > 0) {
+    ctx.shadowBlur = 16;
+    ctx.shadowColor = '#ff3df0';
+    ctx.fillStyle = '#ff3df0';
+    rrect(p.x + 6, p.y - 6, 6, 8, 2); ctx.fill();
+    rrect(p.x + p.w - 12, p.y - 6, 6, 8, 2); ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawTarget() {
+  const tb = Game.targetBrick;
+  if (!tb || !tb.alive) return;
+  ctx.save();
+  const pulse = 0.55 + Math.sin(Game.startT * 9) * 0.45;
+  ctx.shadowBlur = 24 * pulse;
+  ctx.shadowColor = '#ffd400';
+  ctx.strokeStyle = '#ffd400';
+  ctx.lineWidth = 3;
+  rrect(tb.x - 3, tb.y - 3, tb.w + 6, tb.h + 6, 6);
+  ctx.stroke();
+
+  ctx.shadowBlur = 12;
+  ctx.fillStyle = '#ffd400';
+  ctx.font = 'bold 11px ' + FONT;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const ty = tb.y - 14 + Math.sin(Game.startT * 4) * 2;
+  ctx.fillText('★ TARGET ★', tb.x + tb.w/2, ty);
+
+  // remaining time bar
+  const ratio = clamp(Game.targetTimer / TARGET_LIFE, 0, 1);
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = 'rgba(255,212,0,0.25)';
+  ctx.fillRect(tb.x, tb.y + tb.h + 3, tb.w, 2);
+  ctx.fillStyle = '#ffd400';
+  ctx.fillRect(tb.x, tb.y + tb.h + 3, tb.w * ratio, 2);
+  ctx.restore();
+}
+
+function drawGems() {
+  for (const g of Game.gems) {
+    ctx.save();
+    const color = GEM_COLORS[g.type];
+    const pulse = 0.6 + Math.sin(g.age * 6) * 0.3;
+    ctx.shadowBlur = 22 * pulse;
+    ctx.shadowColor = color;
+    ctx.fillStyle = color;
+    ctx.translate(g.x, g.y);
+    ctx.rotate(g.age * 1.6);
+    // Diamond shape
+    ctx.beginPath();
+    ctx.moveTo(0, -g.r);
+    ctx.lineTo(g.r, 0);
+    ctx.lineTo(0, g.r);
+    ctx.lineTo(-g.r, 0);
+    ctx.closePath();
+    ctx.fill();
+    // inner highlight
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.beginPath();
+    ctx.moveTo(0, -g.r * 0.55);
+    ctx.lineTo(g.r * 0.55, 0);
+    ctx.lineTo(0, g.r * 0.55);
+    ctx.lineTo(-g.r * 0.55, 0);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+function drawDashes() {
+  for (const d of Game.dashes) {
+    const fade = d.life / d.maxLife;          // 1 → 0
+    const grow = 1 - fade;                    // 0 → 1
+    ctx.save();
+    ctx.shadowBlur = 24;
+    ctx.shadowColor = '#39ffea';
+    ctx.globalAlpha = fade;
+    // Outer halo (wide, soft)
+    const outerW = 18 + grow * 10;
+    ctx.fillStyle = '#39ffea';
+    ctx.globalAlpha = fade * 0.32;
+    ctx.fillRect(d.x - outerW/2, d.yTop, outerW, d.yBottom - d.yTop);
+    // Mid cyan beam
+    ctx.globalAlpha = fade * 0.85;
+    const midW = 8 + grow * 4;
+    ctx.fillRect(d.x - midW/2, d.yTop, midW, d.yBottom - d.yTop);
+    // Bright white core
+    ctx.globalAlpha = fade;
+    ctx.shadowBlur = 14;
+    ctx.shadowColor = '#ffffff';
+    ctx.fillStyle = '#ffffff';
+    const coreW = 3 + grow * 1.5;
+    ctx.fillRect(d.x - coreW/2, d.yTop, coreW, d.yBottom - d.yTop);
+    // Sparks at the bottom (paddle muzzle)
+    ctx.shadowBlur = 18;
+    ctx.shadowColor = '#39ffea';
+    ctx.globalAlpha = fade * 0.9;
+    ctx.fillStyle = '#39ffea';
+    for (let i = 0; i < 4; i++) {
+      const ang = (Math.PI * 1.4) + (Math.PI * 0.2) * i / 3;
+      const len = 18 + grow * 8;
+      ctx.fillRect(d.x - 1, d.yBottom - 4, 2, len * Math.sin(ang));
+    }
+    ctx.restore();
+  }
+}
+
+function drawPowerUps() {
+  for (const p of Game.powerUps) {
+    ctx.save();
+    const color = PU_COLORS[p.type];
+    const pulse = 0.55 + Math.sin(p.age * 8) * 0.25;
+    ctx.shadowBlur = 22 * pulse;
+    ctx.shadowColor = color;
+    ctx.fillStyle = color;
+    rrect(p.x, p.y, p.w, p.h, 6);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 14px ' + FONT;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(PU_LABELS[p.type], p.x + p.w/2, p.y + p.h/2 + 1);
+    ctx.restore();
+  }
+}
+
+function drawLasers() {
+  for (const l of Game.lasers) {
+    ctx.save();
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = '#ff3df0';
+    ctx.fillStyle = '#ff3df0';
+    ctx.fillRect(l.x, l.y, l.w, l.h);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(l.x + 1, l.y, l.w - 2, l.h);
+    ctx.restore();
+  }
+}
+
+function drawParticles() {
+  for (const p of Game.particles) {
+    const a = p.life / p.maxLife;
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = p.color;
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size * a, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+function drawTexts() {
+  for (const t of Game.texts) {
+    const a = t.life / t.maxLife;
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.fillStyle = t.color;
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = t.color;
+    ctx.font = `bold ${t.size}px ` + FONT;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(t.text, t.x, t.y);
+    ctx.restore();
+  }
+}
+
+function drawWaves() {
+  for (const w of Game.waves) {
+    const a = w.life / w.maxLife;
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.shadowBlur = 36;
+    ctx.shadowColor = '#39ffea';
+    ctx.fillStyle = '#39ffea';
+    ctx.fillRect(0, w.y - 6, W, 12);
+    ctx.globalAlpha = a * 0.4;
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, w.y - 2, W, 4);
+    ctx.restore();
+  }
+}
+
+function drawHUD() {
+  ctx.save();
+  ctx.textBaseline = 'middle';
+
+  // Score
+  ctx.font = 'bold 14px ' + FONT;
+  ctx.fillStyle = '#39ffea';
+  ctx.shadowBlur = 6; ctx.shadowColor = '#39ffea';
+  ctx.textAlign = 'left';
+  ctx.fillText('SCORE', 16, 22);
+  ctx.fillStyle = '#fff'; ctx.shadowColor = '#fff';
+  ctx.font = 'bold 24px ' + FONT;
+  ctx.fillText(String(Game.score).padStart(6, '0'), 16, 46);
+  ctx.font = 'bold 11px ' + FONT;
+  ctx.fillStyle = '#ffd400'; ctx.shadowColor = '#ffd400';
+  ctx.fillText('HI ' + String(Game.highScore).padStart(6, '0'), 16, 66);
+
+  // (Beast name + HP bar + stage dots are drawn separately below)
+
+  // Lives
+  ctx.textAlign = 'right';
+  ctx.fillStyle = '#ff5050'; ctx.shadowColor = '#ff5050';
+  ctx.font = 'bold 14px ' + FONT;
+  ctx.fillText('LIVES', W - 16, 22);
+  ctx.font = 'bold 22px ' + FONT;
+  ctx.fillStyle = '#fff'; ctx.shadowColor = '#fff';
+  let livesStr = '';
+  for (let i = 0; i < Math.min(Game.lives, 8); i++) livesStr += '♥ ';
+  if (Game.lives > 8) livesStr += '×' + Game.lives;
+  ctx.fillText(livesStr.trim(), W - 16, 48);
+
+  // Combo
+  if (Game.combo > 1) {
+    const k = 1 + Math.min(Game.combo / 30, 0.6);
+    ctx.font = `bold ${20 * k}px ` + FONT;
+    ctx.fillStyle = '#ffd400'; ctx.shadowColor = '#ffd400'; ctx.shadowBlur = 12;
+    ctx.fillText('×' + Game.combo, W - 16, 86);
+    ctx.font = 'bold 10px ' + FONT;
+    ctx.fillText('COMBO', W - 16, 106);
+  }
+
+  // Energy bar
+  const ebX = 20, ebW = W - 40, ebY = H - 20, ebH = 8;
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = 'rgba(255,255,255,0.10)';
+  rrect(ebX, ebY, ebW, ebH, 4); ctx.fill();
+  const ratio = Game.energy / Game.energyMax;
+  if (ratio > 0) {
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = ratio >= 1 ? '#39ffea' : '#7c5fff';
+    ctx.fillStyle = ratio >= 1 ? '#39ffea' : '#7c5fff';
+    rrect(ebX, ebY, ebW * ratio, ebH, 4); ctx.fill();
+  }
+  if (ratio >= 1) {
+    ctx.shadowBlur = 8;
+    ctx.fillStyle = '#39ffea'; ctx.shadowColor = '#39ffea';
+    ctx.font = 'bold 11px ' + FONT;
+    ctx.textAlign = 'center';
+    const blink = Math.sin(Game.startT * 6) > 0;
+    if (blink) ctx.fillText('能量已满  按 [空格] 释放霓虹波', W/2, ebY - 10);
+  }
+
+  // Active power-ups (bottom-left small chips)
+  ctx.shadowBlur = 0;
+  ctx.font = 'bold 11px ' + FONT;
+  ctx.textAlign = 'left';
+  let sy = H - 42;
+  const drawStat = (label, t, color) => {
+    if (t > 0) {
+      ctx.fillStyle = color; ctx.shadowColor = color; ctx.shadowBlur = 6;
+      ctx.fillText('★ ' + label + '  ' + t.toFixed(1) + 's', 20, sy);
+      sy -= 14;
+    }
+  };
+  drawStat('激光', Game.laserTimer, '#ff3df0');
+  drawStat('加长', Game.wideTimer, '#ffd400');
+  drawStat('慢速', Game.slowTimer, '#7c5fff');
+  drawStat('穿透', Game.pierceTimer, '#74ff5e');
+
+  // Dash cooldown chip (bottom-right)
+  ctx.textAlign = 'right';
+  ctx.font = 'bold 11px ' + FONT;
+  if (Game.dashCD > 0) {
+    ctx.fillStyle = '#7c5fff'; ctx.shadowColor = '#7c5fff'; ctx.shadowBlur = 6;
+    ctx.fillText('量子刺  ' + Game.dashCD.toFixed(1) + 's', W - 20, H - 42);
+  } else {
+    const blink = Math.sin(Game.startT * 5) > 0;
+    ctx.fillStyle = blink ? '#39ffea' : '#1f9d8d';
+    ctx.shadowColor = '#39ffea'; ctx.shadowBlur = 8;
+    ctx.fillText('★ 量子刺就绪  [右键 / Shift]', W - 20, H - 42);
+  }
+  // Freeze charges (凝固) — only show if card owned
+  if (Game.run && Game.run.passives.freeze) {
+    ctx.font = 'bold 11px ' + FONT;
+    if (Game.freezeT > 0) {
+      ctx.fillStyle = '#7c5fff'; ctx.shadowColor = '#7c5fff'; ctx.shadowBlur = 10;
+      ctx.fillText('★ 时间凝固中 ' + Game.freezeT.toFixed(2) + 's', W - 20, H - 58);
+    } else if (Game.freezeCharges > 0) {
+      const blink = Math.sin(Game.startT * 5) > 0;
+      ctx.fillStyle = blink ? '#7c5fff' : '#534091';
+      ctx.shadowColor = '#7c5fff'; ctx.shadowBlur = 6;
+      ctx.fillText('凝固 ' + '◆'.repeat(Game.freezeCharges) + '  [Q]', W - 20, H - 58);
+    } else {
+      ctx.fillStyle = '#444'; ctx.shadowBlur = 0;
+      ctx.fillText('凝固 ◇◇◇  本关已耗尽', W - 20, H - 58);
+    }
+  }
+
+  // Hint at start of level (only while a ball is still attached to paddle)
+  if (Game.balls.some(b => b.attached)) {
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#fff'; ctx.shadowColor = '#fff'; ctx.shadowBlur = 8;
+    ctx.font = 'bold 14px ' + FONT;
+    const blink = Math.sin(Game.startT * 5) > 0;
+    if (blink) ctx.fillText('Enter / 点击 发射小球    ·    A / D 控制挡板', W/2, Game.paddle.y + 38);
+  }
+
+  // === Beast HP bar + stage progress (replaces "LEVEL N" line) ===
+  drawBeastBar();
+  drawStageDots();
+  drawOwnedCardStrip();
+  ctx.restore();
+}
+
+function drawBeastBar() {
+  if (!Game.beast) return;
+  ctx.save();
+  const barW = 320, barH = 8;
+  const bx = (W - barW)/2, by = 30;
+  // backdrop
+  ctx.fillStyle = 'rgba(255,255,255,0.10)';
+  rrect(bx, by, barW, barH, 4); ctx.fill();
+  const ratio = clamp(Game.beast.hp / Game.beast.maxHp, 0, 1);
+  // gradient color (green > yellow > red)
+  let color;
+  if (ratio > 0.6) color = '#39ffea';
+  else if (ratio > 0.3) color = '#ffd400';
+  else color = '#ff5050';
+  ctx.shadowBlur = 14; ctx.shadowColor = color;
+  ctx.fillStyle = color;
+  rrect(bx, by, barW * ratio, barH, 4); ctx.fill();
+  // Name + HP
+  ctx.shadowBlur = 6; ctx.shadowColor = '#fff';
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 13px ' + FONT;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(Game.beast.code + '   ' + Game.beast.name, W/2, 14);
+  ctx.font = 'bold 10px ' + FONT;
+  ctx.fillStyle = '#aaa'; ctx.shadowColor = '#aaa';
+  ctx.fillText(Math.ceil(Game.beast.hp) + ' / ' + Game.beast.maxHp + '  HP', W/2, by + barH + 8);
+  ctx.restore();
+}
+
+function drawStageDots() {
+  if (!Game.run) return;
+  ctx.save();
+  const total = TOTAL_STAGES;
+  const segW = 14, gap = 4;
+  const totalW = total * segW + (total - 1) * gap;
+  const sx = (W - totalW) / 2;
+  const sy = 56;
+  for (let i = 0; i < total; i++) {
+    const x = sx + i * (segW + gap);
+    const isBoss = STAGE_PLAN[i] && STAGE_PLAN[i].gen === genReader;
+    const isCurrent = i === Game.run.stageIndex;
+    const isDone = i < Game.run.stageIndex;
+    let col, glow;
+    if (isCurrent) { col = '#fff';      glow = 12; }
+    else if (isDone) { col = '#39ffea'; glow = 6; }
+    else if (isBoss) { col = '#ff3df0'; glow = 4; }
+    else { col = '#444'; glow = 0; }
+    ctx.shadowBlur = glow; ctx.shadowColor = col;
+    ctx.fillStyle = col;
+    rrect(x, sy, segW, 4, 2); ctx.fill();
+    if (isBoss) {
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = isDone ? '#ff3df0' : (isCurrent ? '#fff' : '#7c5fff');
+      ctx.beginPath();
+      ctx.arc(x + segW/2, sy + 2, 1.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+
+function drawOwnedCardStrip() {
+  if (!Game.run || Game.run.cards.length === 0) return;
+  ctx.save();
+  const cards = Game.run.cards;
+  const cw = 22, ch = 28, gap = 4;
+  const totalW = cards.length * cw + (cards.length - 1) * gap;
+  const sx = (W - totalW) / 2;
+  const sy = 70;
+  for (let i = 0; i < cards.length; i++) {
+    const c = cards[i];
+    const x = sx + i * (cw + gap);
+    const col = CARD_TYPE_COLORS[c.type];
+    ctx.shadowBlur = 8; ctx.shadowColor = col;
+    ctx.fillStyle = col;
+    rrect(x, sy, cw, ch, 3); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 12px ' + FONT;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(c.name.charAt(0), x + cw/2, sy + ch/2 + 1);
+  }
+  ctx.restore();
+}
+
+// Card-select modal layout
+function cardSelectLayout() {
+  const cw = 220, ch = 320, gap = 30;
+  const n = Game.cardChoices ? Game.cardChoices.length : 3;
+  const totalW = n * cw + (n - 1) * gap;
+  const sx = (W - totalW) / 2;
+  const sy = (H - ch) / 2 + 20;
+  return Array.from({length: n}, (_, i) => ({
+    x: sx + i * (cw + gap), y: sy, w: cw, h: ch
+  }));
+}
+
+function drawCardSelect() {
+  ctx.save();
+  // dim
+  ctx.fillStyle = 'rgba(0,0,0,0.78)';
+  ctx.fillRect(-50, -50, W + 100, H + 100);
+  // title
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const t = Math.min(Game.cardSelectT, 1);
+  ctx.font = 'bold 36px ' + FONT;
+  ctx.fillStyle = '#39ffea'; ctx.shadowBlur = 18; ctx.shadowColor = '#39ffea';
+  ctx.fillText('选 1 张协议卡', W/2, 110);
+  ctx.font = 'bold 13px ' + FONT;
+  ctx.fillStyle = '#aaa'; ctx.shadowColor = '#aaa'; ctx.shadowBlur = 4;
+  ctx.fillText('永久叠加 · 塑造你的 build', W/2, 140);
+
+  if (!Game.cardChoices) { ctx.restore(); return; }
+  const layout = cardSelectLayout();
+  Game.selectedCard = clamp(Game.selectedCard, 0, Game.cardChoices.length - 1);
+  // Draw cards (focused card lifted/scaled)
+  for (let i = 0; i < Game.cardChoices.length; i++) {
+    const card = Game.cardChoices[i];
+    const r = layout[i];
+    const focused = i === Game.selectedCard;
+    const lift = focused ? -22 : 0;
+    drawSingleCard(card, r.x, r.y + lift, r.w, r.h, focused, t);
+  }
+  // "▶ 选定 ◀" indicator above the focused card
+  const focR = layout[Game.selectedCard];
+  if (focR) {
+    ctx.font = 'bold 16px ' + FONT;
+    ctx.fillStyle = '#ffd700'; ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 14;
+    const bob = Math.sin(Game.startT * 6) * 3;
+    ctx.fillText('▶ 选定 ◀', focR.x + focR.w/2, focR.y - 38 + bob);
+  }
+  // Hint
+  ctx.font = 'bold 12px ' + FONT;
+  ctx.fillStyle = '#aaa'; ctx.shadowColor = '#aaa'; ctx.shadowBlur = 4;
+  ctx.fillText('A / D 切换  ·  Enter 确认  ·  1 / 2 / 3 直接选  ·  点击也可', W/2, H - 40);
+  ctx.restore();
+}
+
+function drawSingleCard(card, x, y, w, h, focused, t) {
+  ctx.save();
+  const color = CARD_TYPE_COLORS[card.type];
+  // Backing
+  ctx.shadowBlur = focused ? 36 : (card.rare ? 22 : 14);
+  ctx.shadowColor = card.rare ? '#ffd700' : color;
+  // Reveal scale + focused puff
+  const scale = clamp(t, 0, 1) * (focused ? 1.05 : 1);
+  ctx.translate(x + w/2, y + h/2);
+  ctx.scale(scale, scale);
+  ctx.translate(-w/2, -h/2);
+  // Card body
+  const grad = ctx.createLinearGradient(0, 0, 0, h);
+  grad.addColorStop(0, '#0c0420');
+  grad.addColorStop(1, '#1a0830');
+  ctx.fillStyle = grad;
+  rrect(0, 0, w, h, 10); ctx.fill();
+  // Border
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = card.rare ? '#ffd700' : color;
+  ctx.lineWidth = focused ? 4 : 2;
+  rrect(0, 0, w, h, 10); ctx.stroke();
+  // Type chip
+  ctx.fillStyle = color;
+  rrect(14, 14, 64, 22, 4); ctx.fill();
+  ctx.fillStyle = '#000';
+  ctx.font = 'bold 12px ' + FONT;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(CARD_TYPE_NAMES[card.type], 14 + 32, 14 + 11);
+  // Rare badge
+  if (card.rare) {
+    ctx.fillStyle = '#ffd700';
+    ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 10;
+    rrect(w - 64 - 14, 14, 64, 22, 4); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#000';
+    ctx.fillText('★ 稀有', w - 14 - 32, 14 + 11);
+  }
+  // Name
+  ctx.fillStyle = '#fff'; ctx.shadowColor = color; ctx.shadowBlur = focused ? 12 : 4;
+  ctx.font = 'bold 26px ' + FONT;
+  ctx.textAlign = 'center';
+  ctx.fillText(card.name, w/2, 80);
+  // Big icon (color circle with letter)
+  ctx.shadowBlur = focused ? 22 : 12;
+  ctx.shadowColor = color;
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(w/2, 150, 36, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = '#000';
+  ctx.font = 'bold 30px ' + FONT;
+  ctx.fillText(card.name.charAt(0), w/2, 152);
+  // Description
+  ctx.fillStyle = '#fff'; ctx.shadowColor = '#fff'; ctx.shadowBlur = 2;
+  ctx.font = 'bold 13px ' + FONT;
+  wrapText(card.desc, w/2, 215, w - 32, 18);
+  // Flavor
+  ctx.fillStyle = '#888'; ctx.shadowColor = '#888'; ctx.shadowBlur = 0;
+  ctx.font = 'italic 11px ' + FONT;
+  ctx.fillText('"' + card.flavor + '"', w/2, h - 28);
+  ctx.restore();
+}
+
+// Word-wrap helper (simple, breaks on Chinese chars too)
+function wrapText(text, cx, cy, maxW, lineH) {
+  const lines = [];
+  let line = '';
+  for (const ch of text) {
+    const test = line + ch;
+    if (ctx.measureText(test).width > maxW && line.length > 0) {
+      lines.push(line);
+      line = ch;
+    } else {
+      line = test;
+    }
+  }
+  if (line) lines.push(line);
+  for (let i = 0; i < lines.length; i++) {
+    ctx.fillText(lines[i], cx, cy + i * lineH);
+  }
+}
+
+function drawRunVictory() {
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,0.78)';
+  ctx.fillRect(-50, -50, W + 100, H + 100);
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = 'bold 78px ' + FONT;
+  ctx.fillStyle = '#ffd400'; ctx.shadowBlur = 30; ctx.shadowColor = '#ffd400';
+  ctx.fillText('协议清除', W/2, H * 0.22);
+  ctx.font = 'bold 20px ' + FONT;
+  ctx.fillStyle = '#39ffea'; ctx.shadowColor = '#39ffea'; ctx.shadowBlur = 14;
+  ctx.fillText('你击败了全部 12 只霓虹兽', W/2, H * 0.32);
+  // Stats
+  ctx.font = 'bold 16px ' + FONT;
+  const stats = [
+    ['最终得分',   Game.score],
+    ['最高得分',   Game.highScore],
+    ['击破砖块',   Game.bricksBroken],
+    ['最大连击',   Game.maxCombo],
+    ['宝石拾取',   Game.gemsCaught],
+    ['TARGET 命中', Game.targetsHit],
+    ['获得协议卡',  Game.run ? Game.run.cards.length : 0],
+  ];
+  stats.forEach((s, i) => {
+    const y = H * 0.42 + i * 26;
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#7c5fff'; ctx.shadowColor = '#7c5fff'; ctx.shadowBlur = 6;
+    ctx.fillText(s[0], W/2 - 20, y);
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#fff'; ctx.shadowColor = '#fff';
+    ctx.fillText('  ' + s[1], W/2 + 20, y);
+  });
+  // Card list
+  if (Game.run && Game.run.cards.length > 0) {
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 13px ' + FONT;
+    const names = Game.run.cards.map(c => c.name).join(' · ');
+    ctx.fillStyle = '#aaa'; ctx.shadowColor = '#aaa'; ctx.shadowBlur = 2;
+    wrapText('协议组合: ' + names, W/2, H * 0.79, W - 80, 18);
+  }
+  if (Math.sin(Game.startT * 4) > 0) {
+    ctx.font = 'bold 18px ' + FONT;
+    ctx.fillStyle = '#39ffea'; ctx.shadowColor = '#39ffea'; ctx.shadowBlur = 14;
+    ctx.fillText('▶  点击 / 按 R 再来一局  ◀', W/2, H - 40);
+  }
+  ctx.restore();
+}
+
+function drawMenu() {
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const titleY = H * 0.30;
+  const t = Game.startT * 2;
+
+  ctx.font = 'bold 96px ' + FONT;
+  ctx.fillStyle = '#ff3df0'; ctx.shadowBlur = 30; ctx.shadowColor = '#ff3df0';
+  ctx.fillText('霓虹破壁', W/2 + Math.sin(t) * 4, titleY);
+  ctx.fillStyle = '#39ffea'; ctx.shadowColor = '#39ffea';
+  ctx.fillText('霓虹破壁', W/2 - Math.sin(t) * 4, titleY);
+  ctx.fillStyle = '#ffffff'; ctx.shadowBlur = 16; ctx.shadowColor = '#fff';
+  ctx.fillText('霓虹破壁', W/2, titleY);
+
+  ctx.font = 'bold 18px ' + FONT;
+  ctx.fillStyle = '#7c5fff'; ctx.shadowBlur = 8; ctx.shadowColor = '#7c5fff';
+  ctx.fillText('N E O N   B R E A K E R   ·   P R O T O C O L', W/2, titleY + 60);
+
+  ctx.font = 'bold 13px ' + FONT;
+  ctx.fillStyle = '#ffffff'; ctx.shadowBlur = 4; ctx.shadowColor = '#fff';
+  const lines = [
+    'A / D = 挡板  ·  Enter / 左键 = 发射  ·  右键 / Shift = 量子刺  ·  Q = 凝固',
+    '空格 = 霓虹波    ·    P = 暂停    ·    R = 重开    ·    M = 静音',
+    '',
+    '开局先选 1 张起手协议  ·  12 关肉鸽  ·  关间 3 选 1  ·  BOSS 关必出稀有卡',
+    '4 build 流派 (雷电链 · 黑洞 · 时间 · 寄生)  ·  19 张协议卡  ·  无废卡',
+  ];
+  lines.forEach((l, i) => ctx.fillText(l, W/2, H * 0.55 + i * 24));
+
+  // Brick legend
+  const legY = H * 0.70;
+  const legends = [
+    ['#39ffea', '普通'],
+    ['#a0a8c0', '钢'],
+    ['#ff5a30', '爆炸'],
+    ['#ff66ee', '神秘'],
+    ['#3a3a4a', '不灭'],
+    ['#ffd400', '移动'],
+  ];
+  const lw = 80;
+  const totalW = legends.length * lw;
+  ctx.font = 'bold 11px ' + FONT;
+  legends.forEach(([c, name], i) => {
+    const lx = W/2 - totalW/2 + i * lw + lw/2;
+    ctx.fillStyle = c; ctx.shadowColor = c; ctx.shadowBlur = 12;
+    rrect(lx - 22, legY - 8, 44, 16, 3); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#fff';
+    ctx.fillText(name, lx, legY + 18);
+  });
+
+  // Start prompt blink
+  if (Math.sin(Game.startT * 4) > 0) {
+    ctx.font = 'bold 24px ' + FONT;
+    ctx.fillStyle = '#ffd400'; ctx.shadowColor = '#ffd400'; ctx.shadowBlur = 16;
+    ctx.fillText('▶  点击开始  ◀', W/2, H * 0.86);
+  }
+
+  if (Game.highScore > 0) {
+    ctx.font = 'bold 13px ' + FONT;
+    ctx.fillStyle = '#ffd400'; ctx.shadowColor = '#ffd400'; ctx.shadowBlur = 6;
+    ctx.fillText('最高分  ' + Game.highScore, W/2, H - 28);
+  }
+  ctx.restore();
+}
+
+function drawPaused() {
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,0.62)';
+  ctx.fillRect(-50, -50, W + 100, H + 100);
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = 'bold 64px ' + FONT;
+  ctx.fillStyle = '#fff'; ctx.shadowBlur = 16; ctx.shadowColor = '#fff';
+  ctx.fillText('暂停', W/2, H/2 - 30);
+  ctx.font = 'bold 16px ' + FONT;
+  ctx.fillText('按 [P] 继续', W/2, H/2 + 30);
+  ctx.restore();
+}
+
+function drawLevelClear() {
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = 'bold 52px ' + FONT;
+  ctx.fillStyle = '#ffd400'; ctx.shadowBlur = 24; ctx.shadowColor = '#ffd400';
+  ctx.fillText('关卡 ' + Game.level + ' 通关', W/2, H/2);
+  ctx.font = 'bold 14px ' + FONT;
+  ctx.fillStyle = '#fff'; ctx.shadowColor = '#fff'; ctx.shadowBlur = 6;
+  ctx.fillText('准备进入下一关...', W/2, H/2 + 50);
+  ctx.restore();
+}
+
+function drawGameOver() {
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,0.72)';
+  ctx.fillRect(-50, -50, W + 100, H + 100);
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  ctx.font = 'bold 76px ' + FONT;
+  ctx.fillStyle = '#ff5050'; ctx.shadowBlur = 24; ctx.shadowColor = '#ff5050';
+  ctx.fillText('游戏结束', W/2, H * 0.22);
+
+  if (Game.score === Game.highScore && Game.score > 0) {
+    ctx.font = 'bold 22px ' + FONT;
+    ctx.fillStyle = '#ffd400'; ctx.shadowColor = '#ffd400'; ctx.shadowBlur = 14;
+    ctx.fillText('★  新   纪   录  ★', W/2, H * 0.34);
+  }
+
+  ctx.font = 'bold 16px ' + FONT;
+  ctx.shadowBlur = 8;
+  const stats = [
+    ['最终得分', Game.score],
+    ['最高得分', Game.highScore],
+    ['到达关卡', Game.level],
+    ['击破砖块', Game.bricksBroken],
+    ['最大连击', Game.maxCombo],
+    ['最长连锁爆炸', Game.maxChain],
+    ['宝石拾取', Game.gemsCaught],
+    ['TARGET 命中', Game.targetsHit],
+  ];
+  stats.forEach((s, i) => {
+    const y = H * 0.40 + i * 26;
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#7c5fff'; ctx.shadowColor = '#7c5fff';
+    ctx.fillText(s[0], W/2 - 16, y);
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#fff'; ctx.shadowColor = '#fff';
+    ctx.fillText('  ' + s[1], W/2 + 16, y);
+  });
+
+  if (Math.sin(Game.startT * 4) > 0) {
+    ctx.font = 'bold 20px ' + FONT;
+    ctx.fillStyle = '#39ffea'; ctx.shadowColor = '#39ffea'; ctx.shadowBlur = 14;
+    ctx.textAlign = 'center';
+    ctx.fillText('▶  点击 / 按 R 再来一次  ◀', W/2, H * 0.86);
+  }
+  ctx.restore();
+}
+
+function drawCursor() {
+  ctx.save();
+  ctx.shadowBlur = 8; ctx.shadowColor = '#fff';
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(mouse.x, mouse.y, 7, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(mouse.x - 12, mouse.y); ctx.lineTo(mouse.x - 4, mouse.y);
+  ctx.moveTo(mouse.x + 4, mouse.y); ctx.lineTo(mouse.x + 12, mouse.y);
+  ctx.moveTo(mouse.x, mouse.y - 12); ctx.lineTo(mouse.x, mouse.y - 4);
+  ctx.moveTo(mouse.x, mouse.y + 4); ctx.lineTo(mouse.x, mouse.y + 12);
+  ctx.stroke();
+  ctx.restore();
+}
+
+/* ---------------- Input ---------------- */
+const mouse = { x: W/2, y: H/2, down: false };
+function getMousePos(e) {
+  const rect = canvas.getBoundingClientRect();
+  const sx = canvas.width / rect.width;
+  const sy = canvas.height / rect.height;
+  return {
+    x: (e.clientX - rect.left) * sx,
+    y: (e.clientY - rect.top) * sy,
+  };
+}
+canvas.addEventListener('mousemove', (e) => {
+  const p = getMousePos(e);
+  const moved = (Math.abs(p.x - mouse.x) + Math.abs(p.y - mouse.y)) > 0.5;
+  mouse.x = p.x; mouse.y = p.y;
+  // Only sync card-select selection when the mouse actually moves
+  // (so keyboard A/D doesn't get overridden every frame)
+  if (moved && Game.state === 'card_select' && Game.cardChoices) {
+    const layout = cardSelectLayout();
+    for (let i = 0; i < layout.length; i++) {
+      const r = layout[i];
+      if (mouse.x >= r.x && mouse.x <= r.x + r.w &&
+          mouse.y >= r.y - 24 && mouse.y <= r.y + r.h) {
+        Game.selectedCard = i;
+        break;
+      }
+    }
+  }
+  // Mouse drives paddle (parallel to A/D, last to write each frame wins)
+  if (moved && Game.paddle && (Game.state === 'playing' || Game.state === 'paused')) {
+    Game.paddle.x = clamp(mouse.x - Game.paddle.w/2, 0, W - Game.paddle.w);
+  }
+});
+canvas.addEventListener('mousedown', () => {
+  ensureAudio();
+  mouse.down = true;
+  if (Game.state === 'menu') { newGame(); return; }
+  if (Game.state === 'gameover') { newGame(); return; }
+  if (Game.state === 'victory_run') { newGame(); return; }
+  if (Game.state === 'paused') { Game.state = 'playing'; return; }
+  if (Game.state === 'card_select') {
+    const layout = cardSelectLayout();
+    for (let i = 0; i < layout.length; i++) {
+      const r = layout[i];
+      if (mouse.x >= r.x && mouse.x <= r.x + r.w &&
+          mouse.y >= r.y - 20 && mouse.y <= r.y + r.h) {
+        pickCard(i);
+        return;
+      }
+    }
+    return;
+  }
+  if (Game.state === 'playing') {
+    for (const ball of Game.balls) if (ball.attached) launchBall(ball);
+  }
+});
+canvas.addEventListener('mouseup', () => { mouse.down = false; });
+canvas.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+  ensureAudio();
+  fireDash();
+});
+
+window.addEventListener('keydown', (e) => {
+  // ----- card_select: A/D nav, Enter pick, 1/2/3 direct -----
+  if (Game.state === 'card_select') {
+    if (e.key === '1' || e.key === '2' || e.key === '3') {
+      e.preventDefault();
+      pickCard(parseInt(e.key, 10) - 1);
+      return;
+    }
+    if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      Game.selectedCard = Math.max(0, Game.selectedCard - 1);
+      playSfx('hit');
+      return;
+    }
+    if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      Game.selectedCard = Math.min((Game.cardChoices || []).length - 1, Game.selectedCard + 1);
+      playSfx('hit');
+      return;
+    }
+    if (e.key === 'Enter' || e.key === ' ' || e.code === 'Space') {
+      e.preventDefault();
+      ensureAudio();
+      pickCard(Game.selectedCard);
+      return;
+    }
+  }
+
+  // ----- A/D paddle control during play -----
+  if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') {
+    if (Game.state === 'playing' || Game.state === 'paused') {
+      Game.keys.a = true;
+      e.preventDefault();
+      return;
+    }
+  }
+  if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') {
+    if (Game.state === 'playing' || Game.state === 'paused') {
+      Game.keys.d = true;
+      e.preventDefault();
+      return;
+    }
+  }
+
+  // ----- Other global keys -----
+  if (e.key === ' ' || e.code === 'Space') {
+    e.preventDefault();
+    ensureAudio();
+    if (Game.state === 'menu' || Game.state === 'gameover' || Game.state === 'victory_run') newGame();
+    else if (Game.state === 'playing') releaseWave();
+    else if (Game.state === 'paused') Game.state = 'playing';
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    ensureAudio();
+    if (Game.state === 'menu' || Game.state === 'gameover' || Game.state === 'victory_run') newGame();
+    else if (Game.state === 'playing') {
+      for (const ball of Game.balls) if (ball.attached) launchBall(ball);
+    }
+    else if (Game.state === 'paused') Game.state = 'playing';
+  } else if (e.key === 'p' || e.key === 'P') {
+    if (Game.state === 'playing') Game.state = 'paused';
+    else if (Game.state === 'paused') Game.state = 'playing';
+  } else if (e.key === 'r' || e.key === 'R') {
+    if (Game.state === 'gameover' || Game.state === 'paused' || Game.state === 'playing' || Game.state === 'victory_run')
+      newGame();
+  } else if (e.key === 'm' || e.key === 'M') {
+    audioMuted = !audioMuted;
+    floatText(W/2, 50, audioMuted ? '静音' : '开启声音', '#fff', 16);
+  } else if (e.key === 'Shift') {
+    if (Game.state === 'playing') fireDash();
+  } else if (e.key === 'q' || e.key === 'Q') {
+    if (Game.state === 'playing' && Game.run && Game.run.passives.freeze) {
+      if (Game.freezeCharges > 0 && Game.freezeT <= 0) {
+        Game.freezeCharges -= 1;
+        Game.freezeT = 0.5;
+        Game.flash = Math.max(Game.flash, 0.25);
+        Game.flashColor = '#7c5fff';
+        spawnParticles(Game.paddle.x + Game.paddle.w/2, Game.paddle.y - 30,
+                       '#7c5fff', 18, [40, 160]);
+        floatText(W/2, H/2, '★ 时间凝固 ★', '#7c5fff', 24);
+        playSfx('powerup');
+      } else {
+        playSfx('deny');
+      }
+    }
+  } else if (e.key === 'Escape') {
+    if (Game.state === 'playing' || Game.state === 'paused') {
+      Game.state = 'menu';
+      Game.paddle = makePaddle();
+      Game.balls = [];
+    }
+  }
+});
+
+window.addEventListener('keyup', (e) => {
+  if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft')  Game.keys.a = false;
+  if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') Game.keys.d = false;
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && Game.state === 'playing') Game.state = 'paused';
+});
+
+/* ---------------- Main loop ---------------- */
+let lastTime = performance.now();
+function loop(time) {
+  const realDt = Math.min((time - lastTime) / 1000, 1/30);
+  lastTime = time;
+  Game.startT += realDt;
+
+  if (Game.state === 'playing') {
+    update(realDt * Game.timeScale);
+  } else if (Game.state === 'levelclear') {
+    Game.transitionT -= realDt;
+    updateLightOnly(realDt);
+    if (Game.transitionT <= 0) offerCardSelect();
+  } else if (Game.state === 'card_select') {
+    Game.cardSelectT += realDt;
+    updateLightOnly(realDt);
+  } else {
+    updateLightOnly(realDt);
+  }
+
+  render();
+  requestAnimationFrame(loop);
+}
+
+// Boot
+Game.paddle = makePaddle();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

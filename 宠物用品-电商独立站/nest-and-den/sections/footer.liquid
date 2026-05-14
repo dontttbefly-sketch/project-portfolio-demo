@@ -1,0 +1,112 @@
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div class="site-footer__top">
+      <div>
+        <div class="site-footer__brand">{{ section.settings.brand_name | default: 'Nest & Den' }}</div>
+        <p class="site-footer__brand-tagline">{{ section.settings.brand_tagline | default: 'Designed for the calm of home.' }}</p>
+      </div>
+
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'menu' -%}
+          <div {{ block.shopify_attributes }}>
+            <h6>{{ block.settings.heading }}</h6>
+            <ul>
+              {%- if block.settings.menu != blank -%}
+                {%- for link in block.settings.menu.links -%}
+                  <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+                {%- endfor -%}
+              {%- else -%}
+                {%- assign fallback_links = block.settings.fallback_links | default: '' | split: '|' -%}
+                {%- for line in fallback_links -%}
+                  {%- assign parts = line | split: '::' -%}
+                  <li><a href="{{ parts[1] | default: '#' }}">{{ parts[0] }}</a></li>
+                {%- endfor -%}
+              {%- endif -%}
+            </ul>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+
+      <div>
+        <h6>{{ 'footer.connect' | t }}</h6>
+        <ul>
+          {%- if settings.social_instagram != blank -%}<li><a href="{{ settings.social_instagram }}" rel="noopener" target="_blank">Instagram</a></li>{%- endif -%}
+          {%- if settings.social_pinterest != blank -%}<li><a href="{{ settings.social_pinterest }}" rel="noopener" target="_blank">Pinterest</a></li>{%- endif -%}
+          {%- if settings.social_tiktok != blank -%}<li><a href="{{ settings.social_tiktok }}" rel="noopener" target="_blank">TikTok</a></li>{%- endif -%}
+          {%- if settings.social_youtube != blank -%}<li><a href="{{ settings.social_youtube }}" rel="noopener" target="_blank">YouTube</a></li>{%- endif -%}
+          {%- unless settings.social_instagram or settings.social_pinterest or settings.social_tiktok or settings.social_youtube -%}
+            <li><a href="#">Instagram</a></li>
+            <li><a href="#">Pinterest</a></li>
+            <li><a href="#">TikTok</a></li>
+          {%- endunless -%}
+        </ul>
+      </div>
+    </div>
+
+    <div class="site-footer__bottom">
+      <span>{{ 'footer.rights' | t: year: 'now' | date: '%Y' }}</span>
+      {% render 'payment-icons' %}
+    </div>
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer",
+  "settings": [
+    {
+      "type": "text",
+      "id": "brand_name",
+      "label": "Brand name",
+      "default": "Nest & Den"
+    },
+    {
+      "type": "text",
+      "id": "brand_tagline",
+      "label": "Brand tagline",
+      "default": "Designed for the calm of home."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "menu",
+      "name": "Menu column",
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Shop" },
+        { "type": "link_list", "id": "menu", "label": "Menu" },
+        { "type": "text", "id": "fallback_links", "label": "Fallback links (Title::URL pairs separated by |)",
+          "info": "Used only if no menu is selected. Example: Cats::/collections/cats|Dogs::/collections/dogs",
+          "default": "Cats::/collections/cats|Dogs::/collections/dogs|The Daily::/collections/the-daily|Gift Cards::/products/gift-card" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Footer",
+      "blocks": [
+        {
+          "type": "menu",
+          "settings": {
+            "heading": "Shop",
+            "fallback_links": "Cats::/collections/cats|Dogs::/collections/dogs|The Daily::/collections/the-daily|Gift Cards::/products/gift-card"
+          }
+        },
+        {
+          "type": "menu",
+          "settings": {
+            "heading": "Help",
+            "fallback_links": "Shipping & Returns::/policies/shipping-policy|FAQ::/pages/faq|Contact::/pages/contact|Care Guides::/pages/care"
+          }
+        },
+        {
+          "type": "menu",
+          "settings": {
+            "heading": "Company",
+            "fallback_links": "Our Story::/pages/about|Press::/pages/press|Stockists::/pages/stockists|Sustainability::/pages/sustainability"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

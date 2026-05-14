@@ -1,0 +1,18 @@
+<section class="about-story" data-reveal>
+  {{ section.settings.body }}
+</section>
+
+{% schema %}
+{
+  "name": "About story",
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "body",
+      "label": "Body",
+      "default": "<p>We started Nest & Den because we couldn't find a single pet bed we wanted to keep in our living room. Our cat had taken up residence on a folded linen throw; our dog had claimed a corner of an old wool rug. The pet store options — bright, branded, plastic — felt like a different kind of object entirely.</p><p>So we made the bed we wanted: linen on the outside, recycled fiber on the inside, sewn in a small workshop in North Carolina. We added a bowl, a leash, a coat. We tested everything in 200 households across the country before we sold a single one.</p><p>What we learned: the pieces that last are the ones designed for the slow rhythm of home — washed often, slept on, and folded away only when company is the kind that doesn't like animals.</p><p>Today Nest & Den is a small team in Brooklyn working with a network of family-owned mills and workshops across the U.S., Italy, and Lithuania. We restock a single tight collection — The Daily — instead of chasing seasonal drops. We're trying to make less, better, and to do it for a long time.</p>"
+    }
+  ],
+  "presets": [{ "name": "About story" }]
+}
+{% endschema %}

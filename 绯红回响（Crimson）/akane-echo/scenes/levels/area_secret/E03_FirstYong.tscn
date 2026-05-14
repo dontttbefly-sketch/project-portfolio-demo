@@ -1,0 +1,38 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/RoomBase.gd" id="1_base"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/RoomDoor.tscn" id="2_door"]
+[ext_resource type="PackedScene" path="res://scenes/levels/components/SpawnPoint.tscn" id="3_spawn"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/BossFirstYong.tscn" id="4_boss"]
+
+[node name="E03_FirstYong" type="Node3D"]
+script = ExtResource("1_base")
+room_id = "E-03"
+room_width = 22.0
+room_depth = 20.0
+door_north = true
+door_south = true
+has_rain = false
+floor_color = Color(0.55, 0.55, 0.62, 1)
+wall_color = Color(0.08, 0.08, 0.12, 1)
+
+[node name="DoorToE02" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 10.0)
+target_scene = "res://scenes/levels/area_secret/E02_BoneCorridor.tscn"
+target_spawn_id = "from_E03"
+
+[node name="DoorToE04" parent="." instance=ExtResource("2_door")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -10.0)
+target_scene = "res://scenes/levels/area_secret/E04_SilenceCorridor.tscn"
+target_spawn_id = "from_E03"
+
+[node name="SpawnFromE02" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 8)
+spawn_id = "from_E02"
+
+[node name="SpawnFromE04" parent="." instance=ExtResource("3_spawn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -8)
+spawn_id = "from_E04"
+
+[node name="Boss" parent="." instance=ExtResource("4_boss")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3)

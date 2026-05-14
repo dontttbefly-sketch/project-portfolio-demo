@@ -1,0 +1,71 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/player/Player.gd" id="1_player"]
+[ext_resource type="Script" path="res://scripts/player/PlayerStateMachine.gd" id="2_sm"]
+[ext_resource type="Script" path="res://scripts/player/PlayerCamera.gd" id="3_cam"]
+[ext_resource type="Texture2D" path="res://assets/generated/characters/akane_actions/akane_idle_second_pass.png" id="4_tex"]
+[ext_resource type="Script" path="res://scripts/combat/HitBox.gd" id="5_hitbox"]
+[ext_resource type="Script" path="res://scripts/combat/HurtBox.gd" id="6_hurtbox"]
+
+[sub_resource type="CylinderShape3D" id="cyl_body"]
+radius = 0.4
+height = 1.6
+
+[sub_resource type="CylinderShape3D" id="cyl_hurt"]
+radius = 0.45
+height = 1.6
+
+[sub_resource type="BoxShape3D" id="box_hit"]
+size = Vector3(1.0, 1.0, 1.5)
+
+[node name="Player" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 1
+script = ExtResource("1_player")
+
+[node name="ModelHolder" type="Node3D" parent="."]
+
+[node name="Sprite" type="Sprite3D" parent="ModelHolder"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.92, 0)
+pixel_size = 0.003
+billboard = 1
+shaded = false
+texture_filter = 3
+texture = ExtResource("4_tex")
+
+[node name="CollisionShape" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+shape = SubResource("cyl_body")
+
+[node name="HitBox" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, -1.0)
+collision_layer = 0
+collision_mask = 32
+monitoring = false
+monitorable = false
+script = ExtResource("5_hitbox")
+damage = 10
+knockback_force = 3.0
+
+[node name="HitBoxShape" type="CollisionShape3D" parent="HitBox"]
+shape = SubResource("box_hit")
+disabled = true
+
+[node name="HurtBox" type="Area3D" parent="."]
+collision_layer = 4
+collision_mask = 0
+monitoring = false
+monitorable = true
+script = ExtResource("6_hurtbox")
+
+[node name="HurtBoxShape" type="CollisionShape3D" parent="HurtBox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+shape = SubResource("cyl_hurt")
+
+[node name="Camera" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.5, -0.8660254, 0, 0.8660254, 0.5, 0, 14, 9)
+fov = 50.0
+script = ExtResource("3_cam")
+
+[node name="PlayerStateMachine" type="Node" parent="."]
+script = ExtResource("2_sm")

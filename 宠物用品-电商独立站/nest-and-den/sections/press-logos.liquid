@@ -1,0 +1,50 @@
+<section class="press">
+  <div class="container">
+    <span class="eyebrow">{{ section.settings.eyebrow }}</span>
+    <div class="press__logos">
+      {%- for block in section.blocks -%}
+        {%- if block.settings.image != blank -%}
+          <img src="{{ block.settings.image | image_url: width: 240 }}"
+               alt="{{ block.settings.name | escape }}"
+               loading="lazy"
+               style="height:24px;width:auto;opacity:.65"
+               {{ block.shopify_attributes }}>
+        {%- else -%}
+          <span {{ block.shopify_attributes }}>{{ block.settings.name }}</span>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Press logos",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "As seen in" }
+  ],
+  "blocks": [
+    {
+      "type": "logo",
+      "name": "Press logo",
+      "settings": [
+        { "type": "text", "id": "name", "label": "Publication name", "default": "Architectural Digest" },
+        { "type": "image_picker", "id": "image", "label": "Logo (optional)" }
+      ]
+    }
+  ],
+  "max_blocks": 8,
+  "presets": [
+    {
+      "name": "Press logos",
+      "blocks": [
+        { "type": "logo", "settings": { "name": "Architectural Digest" } },
+        { "type": "logo", "settings": { "name": "Domino" } },
+        { "type": "logo", "settings": { "name": "The Cut" } },
+        { "type": "logo", "settings": { "name": "Apartment Therapy" } },
+        { "type": "logo", "settings": { "name": "Wirecutter" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
