@@ -214,6 +214,40 @@
       letter-spacing: 0;
     }
 
+    .hero-name {
+      max-width: 100%;
+      margin: 18px 0 14px;
+      font-size: 136px;
+      line-height: 0.92;
+      letter-spacing: 0;
+    }
+
+    .hero-name span {
+      display: block;
+      background: linear-gradient(105deg, #ffffff 0%, #67e8f9 34%, #ffd166 66%, #fb7185 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 46px rgba(103, 232, 249, 0.2);
+    }
+
+    .hero-name small {
+      display: block;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 24px;
+      font-weight: 850;
+      line-height: 1.2;
+    }
+
+    .hero-titleline {
+      margin: 0 0 18px;
+      color: #eaf7ff;
+      font-size: 28px;
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
     .gradient-text {
       background: linear-gradient(100deg, #f7fbff 0%, #67e8f9 38%, #ffd166 68%, #fb7185 100%);
       -webkit-background-clip: text;
@@ -234,6 +268,26 @@
       flex-wrap: wrap;
       gap: 12px;
       margin-top: 30px;
+    }
+
+    .identity-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .identity-badges span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 0 12px;
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      border-radius: 999px;
+      color: #dce8fb;
+      background: rgba(255, 255, 255, 0.055);
+      font-size: 14px;
+      font-weight: 850;
     }
 
     .button {
@@ -394,6 +448,66 @@
       line-height: 1.7;
     }
 
+    .profile-card {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      right: 24px;
+      z-index: 2;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(9, 12, 22, 0.62);
+      backdrop-filter: blur(18px);
+    }
+
+    .profile-label {
+      margin: 0 0 14px;
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .profile-card strong {
+      display: block;
+      font-size: 46px;
+      line-height: 1;
+    }
+
+    .profile-card em {
+      display: block;
+      margin-top: 10px;
+      color: var(--muted);
+      font-style: normal;
+      font-weight: 800;
+    }
+
+    .profile-list {
+      display: grid;
+      gap: 10px;
+      margin: 20px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .profile-list li {
+      display: flex;
+      gap: 10px;
+      color: #d5def0;
+      line-height: 1.55;
+    }
+
+    .profile-list li::before {
+      content: "";
+      flex: 0 0 auto;
+      width: 7px;
+      height: 7px;
+      margin-top: 9px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 12px rgba(103, 232, 249, 0.55);
+    }
+
     .stats-strip {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -425,6 +539,56 @@
 
     .section {
       padding: 70px 0;
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr 0.9fr;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .about-card {
+      min-height: 220px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.035)),
+        rgba(18, 23, 38, 0.66);
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.16);
+    }
+
+    .about-card.featured {
+      background:
+        radial-gradient(circle at 20% 20%, rgba(103, 232, 249, 0.2), transparent 34%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.035)),
+        rgba(18, 23, 38, 0.76);
+    }
+
+    .about-card h3 {
+      margin: 0 0 12px;
+      font-size: 24px;
+      letter-spacing: 0;
+    }
+
+    .about-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.78;
+    }
+
+    .signature {
+      display: inline-flex;
+      align-items: center;
+      min-height: 40px;
+      margin-top: 22px;
+      padding: 0 14px;
+      border: 1px solid rgba(103, 232, 249, 0.24);
+      border-radius: 999px;
+      color: #d9fbff;
+      background: rgba(103, 232, 249, 0.08);
+      font-weight: 900;
     }
 
     .section-header {
@@ -845,7 +1009,21 @@
       }
 
       .hero-panel {
-        min-height: 420px;
+        min-height: auto;
+        padding: 18px;
+      }
+
+      .profile-card {
+        position: relative;
+        inset: auto;
+      }
+
+      .mission-card {
+        display: none;
+      }
+
+      .about-grid {
+        grid-template-columns: 1fr;
       }
 
       .project-grid {
@@ -885,19 +1063,44 @@
         line-height: 1.08;
       }
 
+      .hero-name {
+        font-size: 78px;
+        line-height: 0.96;
+      }
+
+      .hero-name small {
+        font-size: 18px;
+      }
+
+      .hero-titleline {
+        font-size: 22px;
+      }
+
       .lead {
         font-size: 17px;
         line-height: 1.76;
       }
 
       .hero-panel {
-        min-height: 390px;
+        min-height: auto;
+        padding: 12px;
       }
 
       .mission-card {
         left: 14px;
         right: 14px;
         bottom: 14px;
+      }
+
+      .profile-card {
+        left: auto;
+        right: auto;
+        top: auto;
+        padding: 18px;
+      }
+
+      .profile-card strong {
+        font-size: 34px;
       }
 
       .section {
@@ -955,9 +1158,10 @@
     <nav class="nav" aria-label="主导航">
       <a class="brand" href="#">
         <span class="brand-mark" aria-hidden="true"></span>
-        <span>空杯作品集</span>
+        <span>空杯 · Portfolio</span>
       </a>
       <div class="nav-links">
+        <a href="#about">关于空杯</a>
         <a href="#projects">精选项目</a>
         <a href="#directions">创作方向</a>
         <a href="#stack">技术栈</a>
@@ -969,14 +1173,22 @@
   <main>
     <section class="hero" aria-labelledby="hero-title">
       <div>
-        <div class="eyebrow"><span class="pulse" aria-hidden="true"></span>独立开发 · 创意前端 · 游戏化工具</div>
-        <h1 id="hero-title">把零散想法，做成能被打开的<span class="gradient-text">小宇宙</span></h1>
+        <div class="eyebrow"><span class="pulse" aria-hidden="true"></span>dontttbefly-sketch · 独立开发作品集</div>
+        <h1 class="hero-name" id="hero-title"><span>空杯</span><small>Independent Developer / Creative Builder</small></h1>
+        <p class="hero-titleline">把想法做成可运行、可展示、可继续迭代的作品。</p>
         <p class="lead">
-          我是空杯，正在把个人成长工具、3D 可视化、游戏原型、Shopify 主题和自动化 skill
-          整理成一套可访问的作品集。这里收录的不只是代码，也包括产品表达、交互体验和持续迭代的痕迹。
+          你好，我是空杯。这里是我的个人介绍和作品集入口：我正在用成长工具、3D 可视化、小游戏、Shopify 主题和自动化 skill，
+          练习把一个想法从概念推进到可以打开、可以体验、可以继续打磨的状态。
         </p>
+        <div class="identity-badges" aria-label="个人方向">
+          <span>个人成长工具</span>
+          <span>创意前端</span>
+          <span>游戏化体验</span>
+          <span>自动化工作流</span>
+        </div>
         <div class="hero-actions">
           <a class="button primary" href="#projects">查看精选项目</a>
+          <a class="button" href="#about">认识空杯</a>
           <a class="button" href="https://github.com/dontttbefly-sketch/project-portfolio-demo" target="_blank" rel="noreferrer">打开仓库</a>
         </div>
         <div class="stats-strip" aria-label="作品集概览">
@@ -988,6 +1200,16 @@
       </div>
 
       <aside class="hero-panel" aria-label="星图概念卡片">
+        <div class="profile-card">
+          <p class="profile-label">PROFILE</p>
+          <strong>空杯</strong>
+          <em>从想法、原型、页面到文档都自己推进的独立开发者</em>
+          <ul class="profile-list">
+            <li>关注成长系统、可视化学习、游戏反馈和工具自动化。</li>
+            <li>喜欢把项目做成能被别人直接打开的网页或演示。</li>
+            <li>正在把零散实验整理成更完整的个人作品星图。</li>
+          </ul>
+        </div>
         <span class="orbit one" aria-hidden="true"></span>
         <span class="orbit two" aria-hidden="true"></span>
         <span class="orbit three" aria-hidden="true"></span>
@@ -996,20 +1218,54 @@
         <span class="planet amber" aria-hidden="true"></span>
         <span class="planet rose" aria-hidden="true"></span>
         <div class="mission-card">
-          <h2>当前航线</h2>
-          <p>用可运行的作品验证想法：目标工具负责长期推进，交互可视化负责解释复杂事物，游戏原型负责探索反馈和循环，自动化 skill 负责让流程更省力。</p>
+          <h2>作品集关键词</h2>
+          <p>独立开发、产品表达、交互体验、可运行原型、持续迭代。</p>
         </div>
       </aside>
+    </section>
+
+    <section class="section" id="about" aria-labelledby="about-title">
+      <div class="section-header">
+        <div>
+          <p class="section-kicker">About Kongbei</p>
+          <h2 class="section-title" id="about-title">关于空杯</h2>
+        </div>
+        <p class="section-copy">
+          我把这个首页当成一张不断更新的个人名片：先介绍我是谁，再展示我正在做什么。
+        </p>
+      </div>
+      <div class="about-grid">
+        <article class="about-card featured">
+          <h3>我是谁</h3>
+          <p>
+            我是空杯，一个正在系统练习独立开发的人。我的目标不是只堆项目数量，而是把每个想法尽量做完整：
+            有清晰定位、有可用界面、有项目文档，也有能被访问的展示入口。
+          </p>
+          <span class="signature">空杯 / dontttbefly-sketch</span>
+        </article>
+        <article class="about-card">
+          <h3>我在做什么</h3>
+          <p>
+            我正在围绕目标管理、宇宙可视化、小游戏、电商主题和飞书自动化做作品，把成长工具、创意表达和工程实践连在一起。
+          </p>
+        </article>
+        <article class="about-card">
+          <h3>我看重什么</h3>
+          <p>
+            我看重可运行的结果、清楚的表达和持续打磨的痕迹。作品集里的每个项目都尽量让人能快速理解：它是什么、解决什么、用了什么技术。
+          </p>
+        </article>
+      </div>
     </section>
 
     <section class="section" id="projects" aria-labelledby="projects-title">
       <div class="section-header">
         <div>
-          <p class="section-kicker">Featured Projects</p>
-          <h2 class="section-title" id="projects-title">精选项目</h2>
+          <p class="section-kicker">Selected Works</p>
+          <h2 class="section-title" id="projects-title">空杯的精选作品</h2>
         </div>
         <p class="section-copy">
-          这些项目覆盖成长工具、真实数据可视化、小游戏、商业主题和自动化工作流。能静态访问的项目已提供在线预览。
+          从个人工具到 3D 可视化，从小游戏到电商主题，这些作品共同构成我现在的独立开发练习路径。
         </p>
       </div>
 
