@@ -9,6 +9,7 @@
     content="空杯的独立开发作品集，收录星图目标管理、真实宇宙 3D 探索、霓虹破壁、Shopify 主题和自动化 skill。"
   >
   <title>空杯 · 独立开发作品集</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Crect%20width=%2764%27%20height=%2764%27%20rx=%2718%27%20fill=%27%23030409%27/%3E%3Ccircle%20cx=%2732%27%20cy=%2732%27%20r=%2725%27%20fill=%27%23070812%27%20stroke=%27%23d9a7ba%27%20stroke-opacity=%270.35%27%20stroke-width=%272%27/%3E%3Cpath%20d=%27M20%2025h25v11c0%207-5%2012-12%2012h-1c-7%200-12-5-12-12V25Z%27%20fill=%27%23110b12%27%20stroke=%27%23d9a7ba%27%20stroke-width=%273%27%20stroke-linejoin=%27round%27/%3E%3Cpath%20d=%27M45%2029h4c4%200%206%202%206%205s-2%205-6%205h-4%27%20fill=%27none%27%20stroke=%27%23d9a7ba%27%20stroke-width=%273%27%20stroke-linecap=%27round%27/%3E%3Cpath%20d=%27M23%2050h20%27%20stroke=%27%23f0d1dc%27%20stroke-width=%273%27%20stroke-linecap=%27round%27/%3E%3Cpath%20d=%27M25%2029c4%202%2010%202%2016%200%27%20stroke=%27%23f0d1dc%27%20stroke-opacity=%270.65%27%20stroke-width=%272%27%20stroke-linecap=%27round%27/%3E%3Cpath%20d=%27M18%2018l1.8%203.8L24%2023.5l-4.2%201.7L18%2029l-1.8-3.8L12%2023.5l4.2-1.7L18%2018Z%27%20fill=%27%23d9a7ba%27/%3E%3Ccircle%20cx=%2747%27%20cy=%2717%27%20r=%272%27%20fill=%27%23f0d1dc%27/%3E%3Ccircle%20cx=%2751%27%20cy=%2747%27%20r=%271.6%27%20fill=%27%23d9a7ba%27%20opacity=%270.8%27/%3E%3C/svg%3E">
   <style>
     :root {
       color-scheme: dark;
@@ -36,6 +37,9 @@
       --cursor-x: 50vw;
       --cursor-y: 50vh;
       --pointer-active: 0;
+      --cursor-scale-x: 1;
+      --cursor-scale-y: 1;
+      --cursor-rotate: 0deg;
       --sun-shift-x: 0px;
       --sun-shift-y: 0px;
       font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
@@ -102,9 +106,9 @@
       filter: blur(6px);
       mix-blend-mode: screen;
       opacity: 0;
-      transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%) rotate(var(--cursor-rotate)) scale(var(--cursor-scale-x), var(--cursor-scale-y));
       transition: opacity 240ms ease;
-      will-change: left, top, opacity;
+      will-change: left, top, opacity, transform;
     }
 
     body.pointer-ready .cursor-glow {
@@ -365,11 +369,11 @@
       flex-wrap: wrap;
       gap: 12px;
       justify-content: center;
-      margin-top: 18px;
+      margin-top: 20px;
     }
 
     .hero-secondary-links {
-      opacity: 0.76;
+      opacity: 1;
     }
 
     .hero-secondary-links .button {
@@ -381,10 +385,39 @@
       font-weight: 800;
     }
 
+    .hero-secondary-links .button:first-child {
+      min-height: 42px;
+      padding: 0 20px;
+      border-color: rgba(217, 167, 186, 0.42);
+      color: #f6edf2;
+      background:
+        radial-gradient(circle at 22% 18%, rgba(255, 255, 255, 0.13), transparent 34%),
+        linear-gradient(135deg, rgba(217, 167, 186, 0.22), rgba(217, 167, 186, 0.09));
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        0 14px 38px rgba(217, 167, 186, 0.08);
+      font-size: 14px;
+    }
+
+    .hero-secondary-links .button + .button {
+      opacity: 0.68;
+    }
+
     .hero-secondary-links .button:hover,
     .hero-secondary-links .button:focus-visible {
       color: var(--text);
       opacity: 1;
+    }
+
+    .hero-secondary-links .button:first-child:hover,
+    .hero-secondary-links .button:first-child:focus-visible {
+      border-color: rgba(217, 167, 186, 0.62);
+      background:
+        radial-gradient(circle at 22% 18%, rgba(255, 255, 255, 0.16), transparent 34%),
+        linear-gradient(135deg, rgba(217, 167, 186, 0.3), rgba(217, 167, 186, 0.13));
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.16),
+        0 18px 46px rgba(217, 167, 186, 0.13);
     }
 
     .identity-badges {
@@ -443,13 +476,17 @@
       min-height: auto;
       margin-top: 34px;
       padding: 22px;
-      border: 1px solid var(--line);
+      border: 1px solid rgba(217, 167, 186, 0.12);
       border-radius: var(--radius);
       overflow: hidden;
       background:
-        radial-gradient(circle at 50% 0%, rgba(217, 167, 186, 0.09), transparent 48%),
-        rgba(3, 4, 9, 0.72);
-      box-shadow: var(--shadow);
+        radial-gradient(circle at 48% -12%, rgba(217, 167, 186, 0.13), transparent 46%),
+        linear-gradient(180deg, rgba(9, 10, 16, 0.84), rgba(3, 4, 9, 0.76));
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 30px 100px rgba(0, 0, 0, 0.56);
+      backdrop-filter: blur(26px) saturate(122%);
+      -webkit-backdrop-filter: blur(26px) saturate(122%);
     }
 
     .hero-panel::before {
@@ -460,7 +497,7 @@
       border-radius: 0;
       opacity: 0.8;
       background:
-        linear-gradient(90deg, transparent, rgba(217, 167, 186, 0.1), transparent),
+        linear-gradient(90deg, transparent, rgba(217, 167, 186, 0.08), transparent),
         linear-gradient(0deg, rgba(255, 255, 255, 0.012) 1px, transparent 1px);
       background-size: 100% 100%, 100% 34px;
       pointer-events: none;
@@ -555,10 +592,11 @@
       position: relative;
       z-index: 2;
       padding: 20px;
-      border: 1px solid var(--line);
+      border: 1px solid rgba(217, 167, 186, 0.13);
       border-radius: var(--radius);
-      background: rgba(3, 4, 9, 0.68);
-      backdrop-filter: blur(18px);
+      background: rgba(4, 5, 10, 0.78);
+      backdrop-filter: blur(22px) saturate(116%);
+      -webkit-backdrop-filter: blur(22px) saturate(116%);
       text-align: left;
       margin-top: 14px;
     }
@@ -579,10 +617,16 @@
       position: relative;
       z-index: 2;
       padding: 22px;
-      border: 1px solid var(--line);
+      border: 1px solid rgba(217, 167, 186, 0.14);
       border-radius: var(--radius);
-      background: rgba(3, 4, 9, 0.62);
-      backdrop-filter: blur(18px);
+      background:
+        radial-gradient(circle at 18% 0%, rgba(217, 167, 186, 0.08), transparent 46%),
+        rgba(4, 5, 10, 0.8);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 20px 70px rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(24px) saturate(118%);
+      -webkit-backdrop-filter: blur(24px) saturate(118%);
       text-align: left;
     }
 
@@ -681,13 +725,15 @@
       position: relative;
       min-height: 220px;
       padding: 22px;
-      border: 1px solid var(--line);
+      border: 1px solid rgba(217, 167, 186, 0.105);
       border-radius: var(--radius);
       overflow: hidden;
       background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.038), rgba(255, 255, 255, 0.018)),
-        rgba(7, 8, 14, 0.72);
-      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.26);
+        linear-gradient(180deg, rgba(255, 255, 255, 0.026), rgba(255, 255, 255, 0.012)),
+        rgba(5, 6, 11, 0.86);
+      box-shadow: 0 18px 54px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(18px) saturate(112%);
+      -webkit-backdrop-filter: blur(18px) saturate(112%);
       animation: about-float 8.5s ease-in-out infinite;
       transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
     }
@@ -698,7 +744,7 @@
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      background: radial-gradient(circle at var(--card-glow-x, 50%) var(--card-glow-y, 0%), rgba(217, 167, 186, 0.13), transparent 46%);
+      background: radial-gradient(circle at var(--card-glow-x, 50%) var(--card-glow-y, 0%), rgba(217, 167, 186, 0.1), transparent 48%);
       opacity: 0;
       transition: opacity 180ms ease;
     }
@@ -709,10 +755,10 @@
     }
 
     .about-card:hover {
-      border-color: var(--line-strong);
+      border-color: rgba(217, 167, 186, 0.2);
       background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.046), rgba(255, 255, 255, 0.02)),
-        rgba(9, 10, 17, 0.78);
+        linear-gradient(180deg, rgba(255, 255, 255, 0.032), rgba(255, 255, 255, 0.014)),
+        rgba(6, 7, 13, 0.9);
     }
 
     .about-card:hover::before {
@@ -740,9 +786,9 @@
       min-height: 458px;
       padding: 30px;
       background:
-        radial-gradient(circle at 20% 20%, rgba(217, 167, 186, 0.1), transparent 38%),
-        linear-gradient(180deg, rgba(255, 255, 255, 0.048), rgba(255, 255, 255, 0.02)),
-        rgba(7, 8, 14, 0.78);
+        radial-gradient(circle at 20% 20%, rgba(217, 167, 186, 0.08), transparent 38%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.032), rgba(255, 255, 255, 0.014)),
+        rgba(5, 6, 11, 0.88);
     }
 
     .about-card.featured .signature {
@@ -1492,21 +1538,24 @@
         <article class="about-card featured">
           <h3>我是谁</h3>
           <p>
-            我是空杯，一个正在系统练习独立开发的人。我的目标不是只堆项目数量，而是把每个想法尽量做完整：
-            有清晰定位、有可用界面、有项目文档，也有能被访问的展示入口。
+            我是空杯，正在系统地练习独立开发：从产品想法、交互设计、前端实现、工程组织，
+            到 README、截图、测试与发布说明，都尽量自己完整走一遍。
+            我更在意一个想法能不能被推进到有结构、有文档、有视觉表达，也有真实使用场景的状态。
           </p>
           <span class="signature">空杯 / dontttbefly-sketch</span>
         </article>
         <article class="about-card">
           <h3>我在做什么</h3>
           <p>
-            我正在围绕目标管理、宇宙可视化、小游戏、电商主题和飞书自动化做作品，把成长工具、创意表达和工程实践连在一起。
+            我现在围绕个人成长工具、交互式可视化、游戏化体验、自动化工作流和独立站产品做项目。
+            它们看起来方向不同，但都指向同一件事：把抽象想法变成可探索、可使用、可继续迭代的界面。
           </p>
         </article>
         <article class="about-card">
-          <h3>我看重什么</h3>
+          <h3>我想打磨什么</h3>
           <p>
-            我看重可运行的结果、清楚的表达和持续打磨的痕迹。作品集里的每个项目都尽量让人能快速理解：它是什么、解决什么、用了什么技术。
+            当前重点是星图目标管理、个人作品集和自动化工作流。长期来看，
+            我想把零散实验整理成更完整、更能被真实使用的独立产品，让作品集不只是陈列，而是持续长出新入口。
           </p>
         </article>
       </div>
@@ -1753,6 +1802,12 @@
       y: 0.28,
       targetX: 0.5,
       targetY: 0.28,
+      stretch: 1,
+      squash: 1,
+      angle: 0,
+      targetStretch: 1,
+      targetSquash: 1,
+      targetAngle: 0,
       active: false
     };
 
@@ -1796,8 +1851,14 @@
         return;
       }
 
-      pointer.x += (pointer.targetX - pointer.x) * 0.07;
-      pointer.y += (pointer.targetY - pointer.y) * 0.07;
+      pointer.x += (pointer.targetX - pointer.x) * 0.2;
+      pointer.y += (pointer.targetY - pointer.y) * 0.2;
+      pointer.stretch += (pointer.targetStretch - pointer.stretch) * 0.28;
+      pointer.squash += (pointer.targetSquash - pointer.squash) * 0.28;
+      const angleDelta = ((pointer.targetAngle - pointer.angle + 540) % 360) - 180;
+      pointer.angle += angleDelta * 0.22;
+      pointer.targetStretch += (1 - pointer.targetStretch) * 0.12;
+      pointer.targetSquash += (1 - pointer.targetSquash) * 0.12;
 
       const cursorX = Math.round(pointer.x * width);
       const cursorY = Math.round(pointer.y * height);
@@ -1809,6 +1870,9 @@
       root.style.setProperty("--sun-shift-x", `${sunShiftX}px`);
       root.style.setProperty("--sun-shift-y", `${sunShiftY}px`);
       root.style.setProperty("--pointer-active", pointer.active ? "1" : "0");
+      root.style.setProperty("--cursor-scale-x", pointer.stretch.toFixed(3));
+      root.style.setProperty("--cursor-scale-y", pointer.squash.toFixed(3));
+      root.style.setProperty("--cursor-rotate", `${pointer.angle.toFixed(2)}deg`);
     }
 
     function draw(time = 0) {
@@ -1864,6 +1928,7 @@
     if (!reduceMotion) {
       let pointerFrame = 0;
       let latestPointerEvent = null;
+      let lastPointerSample = null;
 
       const applyPointerTarget = () => {
         pointerFrame = 0;
@@ -1871,6 +1936,29 @@
           return;
         }
 
+        const now = latestPointerEvent.timeStamp || performance.now();
+        const sample = {
+          x: latestPointerEvent.clientX,
+          y: latestPointerEvent.clientY,
+          time: now
+        };
+
+        if (lastPointerSample) {
+          const dt = Math.max(16, now - lastPointerSample.time);
+          const dx = sample.x - lastPointerSample.x;
+          const dy = sample.y - lastPointerSample.y;
+          const distance = Math.hypot(dx, dy);
+          const pixelsPerFrame = distance / (dt / 16.67);
+          const intensity = Math.min(1, pixelsPerFrame / 46);
+
+          pointer.targetStretch = 1 + intensity * 0.42;
+          pointer.targetSquash = 1 - intensity * 0.12;
+          if (distance > 0.5) {
+            pointer.targetAngle = Math.atan2(dy, dx) * 180 / Math.PI;
+          }
+        }
+
+        lastPointerSample = sample;
         pointer.targetX = Math.min(1, Math.max(0, latestPointerEvent.clientX / width));
         pointer.targetY = Math.min(1, Math.max(0, latestPointerEvent.clientY / height));
         pointer.active = true;
@@ -1890,6 +1978,9 @@
 
       window.addEventListener("pointerleave", () => {
         pointer.active = false;
+        pointer.targetStretch = 1;
+        pointer.targetSquash = 1;
+        lastPointerSample = null;
       }, { passive: true });
 
       let cardFrame = 0;
