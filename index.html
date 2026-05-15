@@ -33,6 +33,11 @@
       --shadow: 0 26px 90px rgba(0, 0, 0, 0.5);
       --radius: 8px;
       --max: 1180px;
+      --cursor-x: 50vw;
+      --cursor-y: 50vh;
+      --pointer-active: 0;
+      --sun-shift-x: 0px;
+      --sun-shift-y: 0px;
       font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
     }
 
@@ -80,6 +85,30 @@
         linear-gradient(0deg, rgba(255, 255, 255, 0.014) 1px, transparent 1px);
       background-size: 112px 112px;
       mask-image: radial-gradient(circle at 50% 16%, black, transparent 68%);
+    }
+
+    .cursor-glow {
+      display: none;
+      position: fixed;
+      left: var(--cursor-x);
+      top: var(--cursor-y);
+      z-index: -1;
+      width: 360px;
+      height: 360px;
+      border-radius: 50%;
+      pointer-events: none;
+      background: radial-gradient(circle, rgba(217, 167, 186, 0.14), rgba(217, 167, 186, 0.045) 34%, transparent 68%);
+      filter: blur(6px);
+      opacity: var(--pointer-active);
+      transform: translate(-50%, -50%);
+      transition: opacity 240ms ease;
+      will-change: left, top, opacity;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .cursor-glow {
+        display: block;
+      }
     }
 
     .topbar {
@@ -258,6 +287,7 @@
         0 0 26px rgba(240, 220, 203, 0.3),
         0 0 68px rgba(217, 167, 186, 0.22);
       animation: sun-breathe 7s ease-in-out infinite;
+      will-change: transform, box-shadow;
     }
 
     .solar-anchor::before,
@@ -276,11 +306,11 @@
 
     @keyframes sun-breathe {
       0%, 100% {
-        transform: scale(1);
+        transform: translate3d(var(--sun-shift-x), var(--sun-shift-y), 0) scale(1);
         opacity: 0.9;
       }
       50% {
-        transform: scale(1.05);
+        transform: translate3d(var(--sun-shift-x), var(--sun-shift-y), 0) scale(1.05);
         opacity: 1;
       }
     }
@@ -722,6 +752,7 @@
     }
 
     .project-card {
+      position: relative;
       display: flex;
       flex-direction: column;
       min-height: 560px;
@@ -734,10 +765,30 @@
       transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, opacity 180ms ease;
     }
 
+    .project-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at var(--card-glow-x, 50%) var(--card-glow-y, 0%), rgba(217, 167, 186, 0.11), transparent 42%);
+      opacity: 0;
+      transition: opacity 180ms ease;
+    }
+
+    .project-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
     .project-card:hover {
       transform: translateY(-3px);
       border-color: var(--line-strong);
       background: var(--panel-strong);
+    }
+
+    .project-card:hover::before {
+      opacity: 1;
     }
 
     .project-card.is-hidden {
@@ -1133,6 +1184,10 @@
         padding: 56px 0 38px;
       }
 
+      .cursor-glow {
+        display: none !important;
+      }
+
       h1 {
         font-size: 42px;
         line-height: 1.08;
@@ -1231,12 +1286,17 @@
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
       }
+
+      .cursor-glow {
+        display: none !important;
+      }
     }
   </style>
 </head>
 <body>
   <canvas class="starfield" id="starfield" aria-hidden="true"></canvas>
   <div class="page-glow" aria-hidden="true"></div>
+  <div class="cursor-glow" aria-hidden="true"></div>
 
   <header class="topbar">
     <nav class="nav" aria-label="主导航">
@@ -1575,16 +1635,28 @@
 
   <script>
     const canvas = document.getElementById("starfield");
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas ? canvas.getContext("2d") : null;
+    const root = document.documentElement;
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     let width = 0;
     let height = 0;
     let stars = [];
+    const pointer = {
+      x: 0.5,
+      y: 0.28,
+      targetX: 0.5,
+      targetY: 0.28,
+      active: false
+    };
 
     function resize() {
       const scale = Math.min(window.devicePixelRatio || 1, 2);
       width = window.innerWidth;
       height = window.innerHeight;
+      if (!canvas || !ctx) {
+        return;
+      }
       canvas.width = Math.floor(width * scale);
       canvas.height = Math.floor(height * scale);
       canvas.style.width = width + "px";
@@ -1594,29 +1666,61 @@
     }
 
     function createStars() {
-      const count = Math.min(140, Math.max(58, Math.floor((width * height) / 18000)));
+      const count = Math.min(210, Math.max(92, Math.floor((width * height) / 12800)));
       stars = Array.from({ length: count }, (_, index) => ({
         x: Math.random() * width,
         y: Math.random() * height,
-        r: Math.random() * 1.1 + 0.18,
-        a: Math.random() * 0.42 + 0.14,
-        speed: Math.random() * 0.08 + 0.02,
+        r: Math.random() * 1.15 + 0.16,
+        a: Math.random() * 0.36 + 0.13,
+        speed: Math.random() * 0.12 + 0.024,
+        depth: Math.random() * 0.9 + 0.1,
+        drift: Math.random() * 5.5 + 0.8,
         hue: index % 11 === 0 ? 338 : index % 7 === 0 ? 38 : 0,
         saturation: index % 11 === 0 ? 34 : index % 7 === 0 ? 22 : 8,
         lightness: index % 11 === 0 ? 76 : 82
       }));
     }
 
+    function syncPointerStyles() {
+      if (!finePointer || reduceMotion) {
+        return;
+      }
+
+      pointer.x += (pointer.targetX - pointer.x) * 0.07;
+      pointer.y += (pointer.targetY - pointer.y) * 0.07;
+
+      const cursorX = Math.round(pointer.x * width);
+      const cursorY = Math.round(pointer.y * height);
+      const sunShiftX = ((pointer.x - 0.5) * 8).toFixed(2);
+      const sunShiftY = ((pointer.y - 0.5) * 6).toFixed(2);
+
+      root.style.setProperty("--cursor-x", `${cursorX}px`);
+      root.style.setProperty("--cursor-y", `${cursorY}px`);
+      root.style.setProperty("--sun-shift-x", `${sunShiftX}px`);
+      root.style.setProperty("--sun-shift-y", `${sunShiftY}px`);
+      root.style.setProperty("--pointer-active", pointer.active ? "1" : "0");
+    }
+
     function draw(time = 0) {
+      if (!ctx) {
+        return;
+      }
+
+      syncPointerStyles();
       ctx.clearRect(0, 0, width, height);
       ctx.fillStyle = "rgba(3, 4, 9, 0.74)";
       ctx.fillRect(0, 0, width, height);
+      const parallaxX = reduceMotion ? 0 : pointer.x - 0.5;
+      const parallaxY = reduceMotion ? 0 : pointer.y - 0.5;
 
       for (const star of stars) {
         const shimmer = reduceMotion ? 0 : Math.sin(time * 0.0007 * star.speed + star.x) * 0.16;
+        const driftX = reduceMotion ? 0 : Math.sin(time * 0.00022 * star.speed + star.y) * star.drift;
+        const drawX = star.x + driftX + parallaxX * star.depth * 22;
+        const drawY = star.y + parallaxY * star.depth * 14;
         ctx.beginPath();
         ctx.fillStyle = `hsla(${star.hue}, ${star.saturation}%, ${star.lightness}%, ${Math.max(0.08, star.a + shimmer)})`;
-        ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+        ctx.arc(drawX, drawY, star.r * (0.72 + star.depth * 0.6), 0, Math.PI * 2);
         ctx.fill();
       }
 
@@ -1624,12 +1728,16 @@
       for (let i = 0; i < stars.length; i += 13) {
         const a = stars[i];
         const b = stars[(i + 19) % stars.length];
-        const distance = Math.hypot(a.x - b.x, a.y - b.y);
+        const ax = a.x + parallaxX * a.depth * 22;
+        const ay = a.y + parallaxY * a.depth * 14;
+        const bx = b.x + parallaxX * b.depth * 22;
+        const by = b.y + parallaxY * b.depth * 14;
+        const distance = Math.hypot(ax - bx, ay - by);
         if (distance < 180) {
           ctx.strokeStyle = `rgba(217, 167, 186, ${0.05 * (1 - distance / 180)})`;
           ctx.beginPath();
-          ctx.moveTo(a.x, a.y);
-          ctx.lineTo(b.x, b.y);
+          ctx.moveTo(ax, ay);
+          ctx.lineTo(bx, by);
           ctx.stroke();
         }
       }
@@ -1641,6 +1749,69 @@
 
     const filters = Array.from(document.querySelectorAll(".filter"));
     const cards = Array.from(document.querySelectorAll(".project-card"));
+
+    if (finePointer && !reduceMotion) {
+      let pointerFrame = 0;
+      let latestPointerEvent = null;
+
+      const applyPointerTarget = () => {
+        pointerFrame = 0;
+        if (!latestPointerEvent || !width || !height) {
+          return;
+        }
+
+        pointer.targetX = Math.min(1, Math.max(0, latestPointerEvent.clientX / width));
+        pointer.targetY = Math.min(1, Math.max(0, latestPointerEvent.clientY / height));
+        pointer.active = true;
+      };
+
+      window.addEventListener("pointermove", (event) => {
+        latestPointerEvent = event;
+        if (!pointerFrame) {
+          pointerFrame = requestAnimationFrame(applyPointerTarget);
+        }
+      }, { passive: true });
+
+      window.addEventListener("pointerleave", () => {
+        pointer.active = false;
+      }, { passive: true });
+
+      let cardFrame = 0;
+      let activeCard = null;
+      let latestCardEvent = null;
+
+      const applyCardGlow = () => {
+        cardFrame = 0;
+        if (!activeCard || !latestCardEvent) {
+          return;
+        }
+
+        const rect = activeCard.getBoundingClientRect();
+        const x = ((latestCardEvent.clientX - rect.left) / rect.width) * 100;
+        const y = ((latestCardEvent.clientY - rect.top) / rect.height) * 100;
+        activeCard.style.setProperty("--card-glow-x", `${x.toFixed(2)}%`);
+        activeCard.style.setProperty("--card-glow-y", `${y.toFixed(2)}%`);
+      };
+
+      cards.forEach((card) => {
+        card.addEventListener("pointermove", (event) => {
+          activeCard = card;
+          latestCardEvent = event;
+          if (!cardFrame) {
+            cardFrame = requestAnimationFrame(applyCardGlow);
+          }
+        }, { passive: true });
+
+        card.addEventListener("pointerleave", () => {
+          card.style.removeProperty("--card-glow-x");
+          card.style.removeProperty("--card-glow-y");
+          if (activeCard === card) {
+            activeCard = null;
+            latestCardEvent = null;
+          }
+        }, { passive: true });
+      });
+    }
 
     filters.forEach((button) => {
       button.addEventListener("click", () => {
