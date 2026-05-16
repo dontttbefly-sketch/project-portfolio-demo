@@ -940,6 +940,59 @@
         radial-gradient(circle at 28% 24%, rgba(217, 167, 186, 0.11), transparent 32%),
         radial-gradient(circle at 76% 72%, rgba(255, 255, 255, 0.035), transparent 28%),
         #05060c;
+      isolation: isolate;
+    }
+
+    .project-visual.has-shot {
+      min-height: 190px;
+    }
+
+    .project-visual.has-shot::before,
+    .project-visual.has-shot::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .project-visual.has-shot::before {
+      z-index: 3;
+      background:
+        radial-gradient(circle at 30% 18%, rgba(217, 167, 186, 0.22), transparent 36%),
+        linear-gradient(135deg, rgba(217, 167, 186, 0.22), transparent 46%);
+      mix-blend-mode: screen;
+      opacity: 0.42;
+    }
+
+    .project-visual.has-shot::after {
+      z-index: 4;
+      background:
+        radial-gradient(ellipse at 50% 48%, transparent 36%, rgba(3, 4, 9, 0.68) 100%),
+        linear-gradient(180deg, rgba(3, 4, 9, 0.2), rgba(3, 4, 9, 0.72));
+    }
+
+    .project-shot {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      opacity: 0.9;
+      filter: saturate(0.54) brightness(0.56) contrast(1.08);
+      transform: scale(1.015);
+      transition: transform 360ms ease, filter 360ms ease, opacity 360ms ease;
+    }
+
+    .project-shot.is-tall {
+      object-position: center top;
+    }
+
+    .project-card:hover .project-shot {
+      opacity: 0.96;
+      filter: saturate(0.64) brightness(0.62) contrast(1.1);
+      transform: scale(1.045);
     }
 
     .visual-orbit,
@@ -1583,7 +1636,8 @@
 
       <div class="project-grid">
         <article class="project-card" data-category="commerce">
-          <div class="project-visual">
+          <div class="project-visual has-shot">
+            <img class="project-shot is-tall" src="./assets/project-thumbnails/pupkit-home-full.png" alt="PUPKIT 首页截图" loading="lazy" decoding="async">
             <div class="visual-shop" aria-hidden="true"></div>
           </div>
           <div class="project-body">
@@ -1607,7 +1661,8 @@
         </article>
 
         <article class="project-card" data-category="growth visual">
-          <div class="project-visual">
+          <div class="project-visual has-shot">
+            <img class="project-shot" src="./assets/project-thumbnails/xingtu-overview.png" alt="星图目标管理总览截图" loading="lazy" decoding="async">
             <div class="visual-orbit" aria-hidden="true"></div>
             <div class="visual-center" aria-hidden="true"></div>
           </div>
@@ -1631,7 +1686,8 @@
         </article>
 
         <article class="project-card" data-category="visual">
-          <div class="project-visual">
+          <div class="project-visual has-shot">
+            <img class="project-shot" src="./assets/project-thumbnails/milky-way-screenshot.png" alt="真实宇宙 3D 探索截图" loading="lazy" decoding="async">
             <div class="visual-lines" aria-hidden="true"></div>
           </div>
           <div class="project-body">
@@ -1654,7 +1710,8 @@
         </article>
 
         <article class="project-card" data-category="game">
-          <div class="project-visual">
+          <div class="project-visual has-shot">
+            <img class="project-shot" src="./assets/project-thumbnails/brick-breaker-screenshot.png" alt="霓虹破壁游戏截图" loading="lazy" decoding="async">
             <div class="visual-blocks" aria-hidden="true">
               <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
               <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
